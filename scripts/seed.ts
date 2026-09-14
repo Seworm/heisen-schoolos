@@ -1,7 +1,7 @@
 import dotenv from "dotenv";
 
 dotenv.config({ path: ".env.local" });
-import { db } from "@/db";
+
 import {
   schools,
   academicYears,
@@ -13,6 +13,9 @@ import {
 import { eq, and } from "drizzle-orm";
 
 async function seed() {
+  // Load the database only after .env.local has been loaded.
+  const { db } = await import("@/db");
+
   console.log("🌱 Starting Heisen SchoolOS seed...");
 
   // ============================================================
@@ -125,6 +128,8 @@ async function seed() {
       });
 
       console.log(`✓ Created ${term.name}`);
+    } else {
+      console.log(`✓ ${term.name} already exists`);
     }
   }
 
@@ -133,24 +138,76 @@ async function seed() {
   // ============================================================
 
   const classData = [
-    { name: "Creche", category: "creche" as const, sortOrder: 1 },
-
-    { name: "Nursery 1", category: "nursery" as const, sortOrder: 2 },
-    { name: "Nursery 2", category: "nursery" as const, sortOrder: 3 },
-
-    { name: "KG 1", category: "kg" as const, sortOrder: 4 },
-    { name: "KG 2", category: "kg" as const, sortOrder: 5 },
-
-    { name: "Primary 1", category: "primary" as const, sortOrder: 6 },
-    { name: "Primary 2", category: "primary" as const, sortOrder: 7 },
-    { name: "Primary 3", category: "primary" as const, sortOrder: 8 },
-    { name: "Primary 4", category: "primary" as const, sortOrder: 9 },
-    { name: "Primary 5", category: "primary" as const, sortOrder: 10 },
-    { name: "Primary 6", category: "primary" as const, sortOrder: 11 },
-
-    { name: "JHS 1", category: "jhs" as const, sortOrder: 12 },
-    { name: "JHS 2", category: "jhs" as const, sortOrder: 13 },
-    { name: "JHS 3", category: "jhs" as const, sortOrder: 14 },
+    {
+      name: "Creche",
+      category: "creche" as const,
+      sortOrder: 1,
+    },
+    {
+      name: "Nursery 1",
+      category: "nursery" as const,
+      sortOrder: 2,
+    },
+    {
+      name: "Nursery 2",
+      category: "nursery" as const,
+      sortOrder: 3,
+    },
+    {
+      name: "KG 1",
+      category: "kg" as const,
+      sortOrder: 4,
+    },
+    {
+      name: "KG 2",
+      category: "kg" as const,
+      sortOrder: 5,
+    },
+    {
+      name: "Primary 1",
+      category: "primary" as const,
+      sortOrder: 6,
+    },
+    {
+      name: "Primary 2",
+      category: "primary" as const,
+      sortOrder: 7,
+    },
+    {
+      name: "Primary 3",
+      category: "primary" as const,
+      sortOrder: 8,
+    },
+    {
+      name: "Primary 4",
+      category: "primary" as const,
+      sortOrder: 9,
+    },
+    {
+      name: "Primary 5",
+      category: "primary" as const,
+      sortOrder: 10,
+    },
+    {
+      name: "Primary 6",
+      category: "primary" as const,
+      sortOrder: 11,
+    },
+    {
+      name: "JHS 1",
+      category: "jhs" as const,
+      sortOrder: 12,
+    },
+    {
+      name: "JHS 2",
+      category: "jhs" as const,
+      sortOrder: 13,
+    },
+    {
+      name: "JHS 3",
+      category: "jhs" as const,
+      sortOrder: 14,
+    },
   ];
 
   for (const classDataItem of classData) {
@@ -172,6 +229,8 @@ async function seed() {
       });
 
       console.log(`✓ Created ${classDataItem.name}`);
+    } else {
+      console.log(`✓ ${classDataItem.name} already exists`);
     }
   }
 
@@ -204,6 +263,8 @@ async function seed() {
       });
 
       console.log(`✓ Created ${classLevel.name} A`);
+    } else {
+      console.log(`✓ ${classLevel.name} A already exists`);
     }
   }
 
@@ -212,17 +273,50 @@ async function seed() {
   // ============================================================
 
   const subjectData = [
-    { name: "English Language", code: "ENG" },
-    { name: "Mathematics", code: "MATH" },
-    { name: "Science", code: "SCI" },
-    { name: "Social Studies", code: "SST" },
-    { name: "Computing", code: "ICT" },
-    { name: "Religious and Moral Education", code: "RME" },
-    { name: "Creative Arts", code: "CA" },
-    { name: "Physical Education", code: "PE" },
-    { name: "Ghanaian Language", code: "GL" },
-    { name: "Career Technology", code: "CT" },
-    { name: "French", code: "FRE" },
+    {
+      name: "English Language",
+      code: "ENG",
+    },
+    {
+      name: "Mathematics",
+      code: "MATH",
+    },
+    {
+      name: "Science",
+      code: "SCI",
+    },
+    {
+      name: "Social Studies",
+      code: "SST",
+    },
+    {
+      name: "Computing",
+      code: "ICT",
+    },
+    {
+      name: "Religious and Moral Education",
+      code: "RME",
+    },
+    {
+      name: "Creative Arts",
+      code: "CA",
+    },
+    {
+      name: "Physical Education",
+      code: "PE",
+    },
+    {
+      name: "Ghanaian Language",
+      code: "GL",
+    },
+    {
+      name: "Career Technology",
+      code: "CT",
+    },
+    {
+      name: "French",
+      code: "FRE",
+    },
   ];
 
   for (const subject of subjectData) {
@@ -244,6 +338,8 @@ async function seed() {
       });
 
       console.log(`✓ Created ${subject.name}`);
+    } else {
+      console.log(`✓ ${subject.name} already exists`);
     }
   }
 

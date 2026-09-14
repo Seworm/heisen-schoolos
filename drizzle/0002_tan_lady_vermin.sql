@@ -1,0 +1,1 @@
+CREATE UNIQUE INDEX "student_guardians_one_primary_idx" ON "student_guardians" USING btree ("student_id") WHERE "student_guardians"."is_primary" = true;

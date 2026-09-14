@@ -1,3 +1,4 @@
+
 import {
   pgEnum,
   pgTable,
@@ -9,13 +10,16 @@ import {
   boolean,
   timestamp,
   unique,
+  uniqueIndex,
   primaryKey,
   index,
 } from "drizzle-orm/pg-core";
 
+import { sql } from "drizzle-orm";
+
 /* ============================================================
-   ENUMS
-   ============================================================ */
+ENUMS
+============================================================ */
 
 export const schoolTypeEnum = pgEnum("school_type", [
   "private_basic",
@@ -59,8 +63,8 @@ export const enrollmentStatusEnum = pgEnum("enrollment_status", [
 ]);
 
 /* ============================================================
-   SCHOOLS
-   ============================================================ */
+SCHOOLS
+============================================================ */
 
 export const schools = pgTable(
   "schools",
@@ -120,8 +124,8 @@ export const schools = pgTable(
 );
 
 /* ============================================================
-   ACADEMIC YEARS
-   ============================================================ */
+ACADEMIC YEARS
+============================================================ */
 
 export const academicYears = pgTable(
   "academic_years",
@@ -161,8 +165,8 @@ export const academicYears = pgTable(
 );
 
 /* ============================================================
-   TERMS
-   ============================================================ */
+TERMS
+============================================================ */
 
 export const terms = pgTable(
   "terms",
@@ -206,8 +210,8 @@ export const terms = pgTable(
 );
 
 /* ============================================================
-   CLASS LEVELS
-   ============================================================ */
+CLASS LEVELS
+============================================================ */
 
 export const classLevels = pgTable(
   "class_levels",
@@ -243,8 +247,8 @@ export const classLevels = pgTable(
 );
 
 /* ============================================================
-   STREAMS
-   ============================================================ */
+STREAMS
+============================================================ */
 
 export const streams = pgTable(
   "streams",
@@ -280,8 +284,8 @@ export const streams = pgTable(
 );
 
 /* ============================================================
-   SUBJECTS
-   ============================================================ */
+SUBJECTS
+============================================================ */
 
 export const subjects = pgTable(
   "subjects",
@@ -315,8 +319,8 @@ export const subjects = pgTable(
 );
 
 /* ============================================================
-   STAFF
-   ============================================================ */
+STAFF
+============================================================ */
 
 export const staff = pgTable(
   "staff",
@@ -386,8 +390,8 @@ export const staff = pgTable(
 );
 
 /* ============================================================
-   STUDENTS
-   ============================================================ */
+STUDENTS
+============================================================ */
 
 export const students = pgTable(
   "students",
@@ -453,8 +457,8 @@ export const students = pgTable(
 );
 
 /* ============================================================
-   GUARDIANS
-   ============================================================ */
+GUARDIANS
+============================================================ */
 
 export const guardians = pgTable(
   "guardians",
@@ -474,10 +478,6 @@ export const guardians = pgTable(
     lastName: varchar("last_name", {
       length: 100,
     }).notNull(),
-
-    relationship: varchar("relationship", {
-      length: 50,
-    }),
 
     phone: varchar("phone", { length: 30 }),
 
@@ -501,10 +501,9 @@ export const guardians = pgTable(
     index("guardians_school_idx").on(table.schoolId),
   ],
 );
-
 /* ============================================================
-   STUDENT GUARDIANS
-   ============================================================ */
+STUDENT GUARDIANS
+============================================================ */
 
 export const studentGuardians = pgTable(
   "student_guardians",
@@ -531,21 +530,22 @@ export const studentGuardians = pgTable(
   },
   (table) => [
     primaryKey({
-      columns: [
-        table.studentId,
-        table.guardianId,
-      ],
+      columns: [table.studentId, table.guardianId],
     }),
 
     index("student_guardians_guardian_idx").on(
       table.guardianId,
     ),
+
+    uniqueIndex("student_guardians_one_primary_idx")
+      .on(table.studentId)
+      .where(sql`${table.isPrimary} = true`),
   ],
-);
+); 
 
 /* ============================================================
-   STUDENT ENROLLMENTS
-   ============================================================ */
+STUDENT ENROLLMENTS
+============================================================ */
 
 export const studentEnrollments = pgTable(
   "student_enrollments",
@@ -613,8 +613,8 @@ export const studentEnrollments = pgTable(
 );
 
 /* ============================================================
-   TEACHER ASSIGNMENTS
-   ============================================================ */
+TEACHER ASSIGNMENTS
+============================================================ */
 
 export const teacherAssignments = pgTable(
   "teacher_assignments",
