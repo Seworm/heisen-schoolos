@@ -1,4 +1,7 @@
 import type { ReactNode } from "react";
+import Link from "next/link";
+
+export const dynamic = "force-dynamic";
 
 export default function DashboardLayout({
   children,
@@ -14,6 +17,7 @@ export default function DashboardLayout({
               <p className="text-lg font-semibold tracking-tight text-slate-950">
                 Heisen SchoolOS
               </p>
+
               <p className="text-xs text-slate-500">
                 School Management
               </p>
@@ -25,71 +29,65 @@ export default function DashboardLayout({
               Main
             </p>
 
-            <a
-              href="/"
-              className="flex items-center rounded-lg bg-slate-100 px-3 py-2.5 text-sm font-medium text-slate-950"
+            <Link
+              href="/dashboard"
+              className="block rounded-lg bg-slate-100 px-3 py-2.5 text-sm font-medium text-slate-950 transition hover:bg-slate-100"
             >
               Dashboard
-            </a>
+            </Link>
 
             <p className="mt-7 px-3 pb-2 text-xs font-semibold uppercase tracking-wider text-slate-400">
               Management
             </p>
 
             <div className="space-y-1">
-              <a
-                href="#"
-                className="block rounded-lg px-3 py-2.5 text-sm text-slate-600 hover:bg-slate-50"
+              <Link
+                href="/students"
+                className="block rounded-lg px-3 py-2.5 text-sm font-medium text-slate-700 transition hover:bg-slate-100"
               >
                 Students
-              </a>
+              </Link>
 
-              <a
-                href="#"
-                className="block rounded-lg px-3 py-2.5 text-sm text-slate-600 hover:bg-slate-50"
+              <Link
+                href="/staff"
+                className="block rounded-lg px-3 py-2.5 text-sm font-medium text-slate-700 transition hover:bg-slate-100"
               >
                 Staff
-              </a>
+              </Link>
 
-              <a
-                href="#"
-                className="block rounded-lg px-3 py-2.5 text-sm text-slate-600 hover:bg-slate-50"
+              <Link
+                href="/academics"
+                className="block rounded-lg px-3 py-2.5 text-sm font-medium text-slate-700 transition hover:bg-slate-100"
               >
                 Academics
-              </a>
+              </Link>
 
-              <a
-                href="#"
-                className="block rounded-lg px-3 py-2.5 text-sm text-slate-600 hover:bg-slate-50"
+              <Link
+                href="/attendance"
+                className="block rounded-lg px-3 py-2.5 text-sm font-medium text-slate-700 transition hover:bg-slate-100"
               >
                 Attendance
-              </a>
+              </Link>
 
-              <a
-                href="#"
-                className="block rounded-lg px-3 py-2.5 text-sm text-slate-600 hover:bg-slate-50"
+              <Link
+                href="/assessments"
+                className="block rounded-lg px-3 py-2.5 text-sm font-medium text-slate-700 transition hover:bg-slate-100"
               >
                 Assessments
-              </a>
+              </Link>
 
-              <a
-                href="#"
-                className="block rounded-lg px-3 py-2.5 text-sm text-slate-600 hover:bg-slate-50"
-              >
+              <span className="block cursor-not-allowed rounded-lg px-3 py-2.5 text-sm text-slate-400">
                 Finance
-              </a>
+              </span>
             </div>
 
             <p className="mt-7 px-3 pb-2 text-xs font-semibold uppercase tracking-wider text-slate-400">
               System
             </p>
 
-            <a
-              href="#"
-              className="block rounded-lg px-3 py-2.5 text-sm text-slate-600 hover:bg-slate-50"
-            >
+            <span className="block cursor-not-allowed rounded-lg px-3 py-2.5 text-sm text-slate-400">
               Settings
-            </a>
+            </span>
           </nav>
         </aside>
 
@@ -99,6 +97,10 @@ export default function DashboardLayout({
               <p className="text-sm font-medium text-slate-900">
                 School Administration
               </p>
+
+              <p className="text-xs text-slate-500">
+                Heisen SchoolOS
+              </p>
             </div>
 
             <div className="flex items-center gap-3">
@@ -106,6 +108,7 @@ export default function DashboardLayout({
                 <p className="text-sm font-medium text-slate-900">
                   Development Mode
                 </p>
+
                 <p className="text-xs text-slate-500">
                   Heisen Demo School
                 </p>
