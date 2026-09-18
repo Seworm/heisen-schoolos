@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-
+import ResultLifecycleControls from "./ResultLifecycleControls";
 import {
   calculateStudentResult,
   calculatePosition,
@@ -11,6 +11,16 @@ import type { ResultDataset } from "@/lib/result-data";
 
 type Props = {
   dataset: ResultDataset;
+  publication: {
+    id: string;
+    status:
+      | "draft"
+      | "ready"
+      | "published"
+      | "archived";
+    publishedAt: Date | null;
+    gradingSchemeId: string | null;
+  } | null;
 };
 
 function formatNumber(value: number) {
@@ -26,6 +36,7 @@ function getInitials(
 
 export default function ResultsWorkspace({
   dataset,
+  publication,
 }: Props) {
   const [selectedStudentId, setSelectedStudentId] =
     useState<string | null>(
@@ -177,6 +188,12 @@ export default function ResultsWorkspace({
 
   return (
     <div className="space-y-6">
+      <ResultLifecycleControls
+  academicYearId={dataset.academicYear.id}
+  termId={dataset.term.id}
+  streamId={dataset.stream.id}
+  publication={publication}
+/>
       {/* Header summary */}
 
       <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">

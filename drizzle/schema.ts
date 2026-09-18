@@ -539,3 +539,24 @@ export const studentGuardians = pgTable("student_guardians", {
 		}).onDelete("cascade"),
 	primaryKey({ columns: [table.studentId, table.guardianId], name: "student_guardians_student_id_guardian_id_pk"}),
 ]);
+export const reportCardStatusEnum = pgEnum(
+  "report_card_status",
+  [
+    "draft",
+    "teacher_review",
+    "headteacher_review",
+    "approved",
+  ],
+);
+
+export const promotionStatusEnum = pgEnum(
+  "promotion_status",
+  [
+    "pending",
+    "promoted",
+    "promoted_with_conditions",
+    "repeated",
+    "withdrawn",
+    "transferred",
+  ],
+);

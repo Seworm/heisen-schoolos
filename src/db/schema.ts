@@ -2484,3 +2484,743 @@ export const resultPublicationAssessments =
       ).on(table.assessmentId),
     ],
   );
+  export const reportCardStatusEnum = pgEnum(
+  "report_card_status",
+  [
+    "draft",
+    "teacher_review",
+    "headteacher_review",
+    "approved",
+  ],
+);
+
+export const promotionStatusEnum = pgEnum(
+  "promotion_status",
+  [
+    "pending",
+    "promoted",
+    "promoted_with_conditions",
+    "repeated",
+    "withdrawn",
+    "transferred",
+  ],
+);
+export const reportCards = pgTable(
+  "report_cards",
+  {
+    id: uuid("id")
+      .defaultRandom()
+      .primaryKey(),
+
+    schoolId: uuid("school_id")
+      .notNull()
+      .references(() => schools.id, {
+        onDelete: "cascade",
+      }),
+
+    publicationId: uuid("publication_id")
+      .notNull()
+      .references(
+        () => resultPublications.id,
+        {
+          onDelete: "cascade",
+        },
+      ),
+
+    publicationStudentId: uuid(
+      "publication_student_id",
+    )
+      .notNull()
+      .references(
+        () => resultPublicationStudents.id,
+        {
+          onDelete: "cascade",
+        },
+      ),
+
+    status: reportCardStatusEnum(
+      "status",
+    )
+      .notNull()
+      .default("draft"),
+
+    classTeacherRemark: text(
+      "class_teacher_remark",
+    ),
+
+    headteacherRemark: text(
+      "headteacher_remark",
+    ),
+
+    promotionStatus: promotionStatusEnum(
+      "promotion_status",
+    )
+      .notNull()
+      .default("pending"),
+
+    classTeacherSignedAt: timestamp(
+      "class_teacher_signed_at",
+      {
+        withTimezone: true,
+      },
+    ),
+
+    headteacherSignedAt: timestamp(
+      "headteacher_signed_at",
+      {
+        withTimezone: true,
+      },
+    ),
+
+    createdAt: timestamp(
+      "created_at",
+      {
+        withTimezone: true,
+      },
+    )
+      .defaultNow()
+      .notNull(),
+
+    updatedAt: timestamp(
+      "updated_at",
+      {
+        withTimezone: true,
+      })
+      .defaultNow()
+      .notNull(),
+  },
+
+  (table) => [
+    unique(
+      "report_cards_publication_student_unique",
+    ).on(
+      table.publicationId,
+      table.publicationStudentId,
+    ),
+
+    index(
+      "report_cards_school_idx",
+    ).on(table.schoolId),
+
+    index(
+      "report_cards_publication_idx",
+    ).on(table.publicationId),
+
+    index(
+      "report_cards_publication_student_idx",
+    ).on(table.publicationStudentId),
+
+    index(
+      "report_cards_status_idx",
+    ).on(table.status),
+
+    index(
+      "report_cards_school_status_idx",
+    ).on(
+      table.schoolId,
+      table.status,
+    ),
+
+    index(
+      "report_cards_publication_status_idx",
+    ).on(
+      table.publicationId,
+      table.status,
+    ),
+  ],
+);
+export const invoiceStatusEnum = pgEnum("invoice_status", [
+  "draft",
+  "issued",
+  "partially_paid",
+  "paid",
+  "overdue",
+  "cancelled",
+]);
+
+export const paymentStatusEnum = pgEnum("payment_status", [
+  "posted",
+  "reversed",
+]);
+
+export const paymentMethodEnum = pgEnum("payment_method", [
+  "cash",
+  "mobile_money",
+  "bank_transfer",
+  "card",
+  "other",
+]);
+
+export const adjustmentTypeEnum = pgEnum("adjustment_type", [
+  "discount",
+  "waiver",
+  "surcharge",
+]);
+
+export const adjustmentStatusEnum = pgEnum("adjustment_status", [
+  "active",
+  "cancelled",
+]);
+export const feeCategories = pgTable(
+  "fee_categories",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+
+    schoolId: uuid("school_id")
+      .notNull()
+      .references(() => schools.id, { onDelete: "cascade" }),
+
+    name: varchar("name", { length: 100 }).notNull(),
+
+    description: text("description"),
+
+    isActive: boolean("is_active").notNull().default(true),
+
+    createdAt: timestamp("created_at", {
+      withTimezone: true,
+    }).defaultNow().notNull(),
+
+    updatedAt: timestamp("updated_at", {
+      withTimezone: true,
+    }).defaultNow().notNull(),
+  },
+  (table) => [
+    unique("fee_categories_school_name_unique").on(
+      table.schoolId,
+      table.name,
+    ),
+
+    index("fee_categories_school_idx").on(table.schoolId),
+  ],
+);
+export const feeStructures = pgTable(
+  "fee_structures",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+
+    schoolId: uuid("school_id")
+      .notNull()
+      .references(() => schools.id, { onDelete: "cascade" }),
+
+    academicYearId: uuid("academic_year_id")
+      .notNull()
+      .references(() => academicYears.id, { onDelete: "cascade" }),
+
+    termId: uuid("term_id")
+      .notNull()
+      .references(() => terms.id, { onDelete: "cascade" }),
+
+    classLevelId: uuid("class_level_id")
+      .notNull()
+      .references(() => classLevels.id, { onDelete: "cascade" }),
+
+    name: varchar("name", { length: 150 }).notNull(),
+
+    description: text("description"),
+
+    isActive: boolean("is_active").notNull().default(true),
+
+    createdAt: timestamp("created_at", {
+      withTimezone: true,
+    }).defaultNow().notNull(),
+
+    updatedAt: timestamp("updated_at", {
+      withTimezone: true,
+    }).defaultNow().notNull(),
+  },
+  (table) => [
+    index("fee_structures_school_idx").on(table.schoolId),
+    index("fee_structures_year_idx").on(table.academicYearId),
+    index("fee_structures_term_idx").on(table.termId),
+    index("fee_structures_class_idx").on(table.classLevelId),
+
+    unique("fee_structures_scope_name_unique").on(
+      table.schoolId,
+      table.academicYearId,
+      table.termId,
+      table.classLevelId,
+      table.name,
+    ),
+  ],
+);
+export const feeStructureItems = pgTable(
+  "fee_structure_items",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+
+    feeStructureId: uuid("fee_structure_id")
+      .notNull()
+      .references(() => feeStructures.id, { onDelete: "cascade" }),
+
+    feeCategoryId: uuid("fee_category_id")
+      .notNull()
+      .references(() => feeCategories.id, { onDelete: "restrict" }),
+
+    amount: numeric("amount", {
+      precision: 12,
+      scale: 2,
+    }).notNull(),
+
+    description: text("description"),
+
+    createdAt: timestamp("created_at", {
+      withTimezone: true,
+    }).defaultNow().notNull(),
+
+    updatedAt: timestamp("updated_at", {
+      withTimezone: true,
+    }).defaultNow().notNull(),
+  },
+  (table) => [
+    unique("fee_structure_items_unique").on(
+      table.feeStructureId,
+      table.feeCategoryId,
+    ),
+
+    index("fee_structure_items_structure_idx").on(
+      table.feeStructureId,
+    ),
+
+    index("fee_structure_items_category_idx").on(
+      table.feeCategoryId,
+    ),
+  ],
+);
+
+export const studentInvoices = pgTable(
+  "student_invoices",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+
+    schoolId: uuid("school_id")
+      .notNull()
+      .references(() => schools.id, { onDelete: "cascade" }),
+
+    studentId: uuid("student_id")
+      .notNull()
+      .references(() => students.id, { onDelete: "restrict" }),
+
+    academicYearId: uuid("academic_year_id")
+      .notNull()
+      .references(() => academicYears.id, { onDelete: "restrict" }),
+
+    termId: uuid("term_id")
+      .notNull()
+      .references(() => terms.id, { onDelete: "restrict" }),
+
+    invoiceNumber: varchar("invoice_number", {
+      length: 50,
+    }).notNull(),
+
+    issueDate: date("issue_date").notNull(),
+
+    dueDate: date("due_date"),
+
+    status: invoiceStatusEnum("status")
+      .notNull()
+      .default("draft"),
+
+    notes: text("notes"),
+
+    createdAt: timestamp("created_at", {
+      withTimezone: true,
+    }).defaultNow().notNull(),
+
+    updatedAt: timestamp("updated_at", {
+      withTimezone: true,
+    }).defaultNow().notNull(),
+  },
+  (table) => [
+    unique("student_invoices_school_number_unique").on(
+      table.schoolId,
+      table.invoiceNumber,
+    ),
+
+    index("student_invoices_school_idx").on(table.schoolId),
+    index("student_invoices_student_idx").on(table.studentId),
+    index("student_invoices_year_idx").on(table.academicYearId),
+    index("student_invoices_term_idx").on(table.termId),
+    index("student_invoices_status_idx").on(table.status),
+  ],
+);
+export const studentInvoiceItems = pgTable(
+  "student_invoice_items",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+
+    invoiceId: uuid("invoice_id")
+      .notNull()
+      .references(() => studentInvoices.id, {
+        onDelete: "cascade",
+      }),
+
+    feeCategoryId: uuid("fee_category_id")
+      .notNull()
+      .references(() => feeCategories.id, {
+        onDelete: "restrict",
+      }),
+
+    description: varchar("description", {
+      length: 255,
+    }).notNull(),
+
+    amount: numeric("amount", {
+      precision: 12,
+      scale: 2,
+    }).notNull(),
+
+    createdAt: timestamp("created_at", {
+      withTimezone: true,
+    }).defaultNow().notNull(),
+  },
+  (table) => [
+    index("student_invoice_items_invoice_idx").on(
+      table.invoiceId,
+    ),
+
+    index("student_invoice_items_category_idx").on(
+      table.feeCategoryId,
+    ),
+  ],
+);
+export const payments = pgTable(
+  "payments",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+
+    schoolId: uuid("school_id")
+      .notNull()
+      .references(() => schools.id, { onDelete: "cascade" }),
+
+    studentId: uuid("student_id")
+      .notNull()
+      .references(() => students.id, { onDelete: "restrict" }),
+
+    receiptNumber: varchar("receipt_number", {
+      length: 50,
+    }).notNull(),
+
+    paymentDate: date("payment_date").notNull(),
+
+    amount: numeric("amount", {
+      precision: 12,
+      scale: 2,
+    }).notNull(),
+
+    method: paymentMethodEnum("method").notNull(),
+
+    reference: varchar("reference", {
+      length: 150,
+    }),
+
+    status: paymentStatusEnum("status")
+      .notNull()
+      .default("posted"),
+
+    notes: text("notes"),
+
+    createdAt: timestamp("created_at", {
+      withTimezone: true,
+    }).defaultNow().notNull(),
+
+    updatedAt: timestamp("updated_at", {
+      withTimezone: true,
+    }).defaultNow().notNull(),
+  },
+  (table) => [
+    unique("payments_school_receipt_unique").on(
+      table.schoolId,
+      table.receiptNumber,
+    ),
+
+    index("payments_school_idx").on(table.schoolId),
+    index("payments_student_idx").on(table.studentId),
+    index("payments_date_idx").on(table.paymentDate),
+    index("payments_status_idx").on(table.status),
+  ],
+);
+export const paymentAllocations = pgTable(
+  "payment_allocations",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+
+    paymentId: uuid("payment_id")
+      .notNull()
+      .references(() => payments.id, {
+        onDelete: "restrict",
+      }),
+
+    invoiceId: uuid("invoice_id")
+      .notNull()
+      .references(() => studentInvoices.id, {
+        onDelete: "restrict",
+      }),
+
+    amount: numeric("amount", {
+      precision: 12,
+      scale: 2,
+    }).notNull(),
+
+    createdAt: timestamp("created_at", {
+      withTimezone: true,
+    }).defaultNow().notNull(),
+  },
+  (table) => [
+    unique("payment_allocations_unique").on(
+      table.paymentId,
+      table.invoiceId,
+    ),
+
+    index("payment_allocations_payment_idx").on(
+      table.paymentId,
+    ),
+
+    index("payment_allocations_invoice_idx").on(
+      table.invoiceId,
+    ),
+  ],
+);
+export const invoiceAdjustments = pgTable(
+  "invoice_adjustments",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+
+    invoiceId: uuid("invoice_id")
+      .notNull()
+      .references(() => studentInvoices.id, {
+        onDelete: "cascade",
+      }),
+
+    type: adjustmentTypeEnum("type").notNull(),
+
+    amount: numeric("amount", {
+      precision: 12,
+      scale: 2,
+    }).notNull(),
+
+    reason: text("reason").notNull(),
+
+    status: adjustmentStatusEnum("status")
+      .notNull()
+      .default("active"),
+
+    createdAt: timestamp("created_at", {
+      withTimezone: true,
+    }).defaultNow().notNull(),
+
+    updatedAt: timestamp("updated_at", {
+      withTimezone: true,
+    }).defaultNow().notNull(),
+  },
+  (table) => [
+    index("invoice_adjustments_invoice_idx").on(
+      table.invoiceId,
+    ),
+
+    index("invoice_adjustments_status_idx").on(
+      table.status,
+    ),
+  ],
+);
+export const userStatusEnum = pgEnum("user_status", [
+  "active",
+  "inactive",
+  "suspended",
+]);
+
+export const schoolMembershipRoleEnum = pgEnum(
+  "school_membership_role",
+  [
+    "super_admin",
+    "school_admin",
+    "headteacher",
+    "teacher",
+    "accountant",
+    "staff",
+  ],
+);
+export const users = pgTable(
+  "users",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+
+    email: text("email").notNull().unique(),
+
+    passwordHash: text("password_hash").notNull(),
+
+    firstName: text("first_name").notNull(),
+
+    lastName: text("last_name").notNull(),
+
+    status: userStatusEnum("status")
+      .notNull()
+      .default("active"),
+
+    createdAt: timestamp("created_at", {
+      withTimezone: true,
+    })
+      .notNull()
+      .defaultNow(),
+
+    updatedAt: timestamp("updated_at", {
+      withTimezone: true,
+    })
+      .notNull()
+      .defaultNow(),
+  },
+  (table) => [
+    index("users_status_idx").on(table.status),
+  ],
+);
+
+export const schoolMemberships = pgTable(
+  "school_memberships",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, {
+        onDelete: "cascade",
+      }),
+
+    schoolId: uuid("school_id")
+      .notNull()
+      .references(() => schools.id, {
+        onDelete: "cascade",
+      }),
+
+    role: schoolMembershipRoleEnum("role").notNull(),
+
+    isActive: boolean("is_active")
+      .notNull()
+      .default(true),
+
+    createdAt: timestamp("created_at", {
+      withTimezone: true,
+    })
+      .notNull()
+      .defaultNow(),
+
+    updatedAt: timestamp("updated_at", {
+      withTimezone: true,
+    })
+      .notNull()
+      .defaultNow(),
+  },
+  (table) => [
+    unique("school_memberships_unique").on(
+      table.userId,
+      table.schoolId,
+    ),
+
+    index("school_memberships_user_idx").on(
+      table.userId,
+    ),
+
+    index("school_memberships_school_idx").on(
+      table.schoolId,
+    ),
+
+    index("school_memberships_role_idx").on(
+      table.role,
+    ),
+
+    index("school_memberships_active_idx").on(
+      table.isActive,
+    ),
+  ],
+);
+
+export const studentAccountStatusEnum = pgEnum(
+  "student_account_status",
+  [
+    "pending",
+    "active",
+    "disabled",
+  ],
+);
+
+export const studentUserAccounts = pgTable(
+  "student_user_accounts",
+  {
+    id: uuid("id")
+      .defaultRandom()
+      .primaryKey(),
+
+    studentId: uuid("student_id")
+      .notNull()
+      .unique()
+      .references(() => students.id, {
+        onDelete: "cascade",
+      }),
+
+    email: text("email")
+      .notNull()
+      .unique(),
+
+    passwordHash: text("password_hash"),
+
+    activationCodeHash: text(
+      "activation_code_hash",
+    ),
+
+    activationCodeExpiresAt: timestamp(
+      "activation_code_expires_at",
+      {
+        withTimezone: true,
+      },
+    ),
+
+    activatedAt: timestamp(
+      "activated_at",
+      {
+        withTimezone: true,
+      },
+    ),
+
+    lastLoginAt: timestamp(
+      "last_login_at",
+      {
+        withTimezone: true,
+      },
+    ),
+
+    status: studentAccountStatusEnum(
+      "status",
+    )
+      .notNull()
+      .default("pending"),
+
+    createdAt: timestamp(
+      "created_at",
+      {
+        withTimezone: true,
+      },
+    )
+      .notNull()
+      .defaultNow(),
+
+    updatedAt: timestamp(
+      "updated_at",
+      {
+        withTimezone: true,
+      },
+    )
+      .notNull()
+      .defaultNow(),
+  },
+  (table) => [
+    index(
+      "student_user_accounts_student_idx",
+    ).on(table.studentId),
+
+    index(
+      "student_user_accounts_status_idx",
+    ).on(table.status),
+
+    index(
+      "student_user_accounts_activation_idx",
+    ).on(table.activationCodeHash),
+  ],
+);
