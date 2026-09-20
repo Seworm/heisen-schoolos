@@ -18,32 +18,53 @@ export default function SetupPage() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
-  async function submit(event: React.FormEvent<HTMLFormElement>) {
+    async function submit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
     setError("");
     setLoading(true);
 
     try {
+      const normalizedEmail = email.trim().toLowerCase();
+      const normalizedFirstName = firstName.trim();
+      const normalizedLastName = lastName.trim();
+
       const signUp = await authClient.signUp.email({
-        email: email.trim().toLowerCase(),
+        email: normalizedEmail,
         password,
-        name: `${firstName.trim()} ${lastName.trim()}`,
+        name: `${normalizedFirstName} ${normalizedLastName}`,
       });
 
       if (signUp.error) {
-        setError(
-          signUp.error.message ||
-            "Unable to create the administrator account.",
-        );
-        return;
+        if (
+          signUp.error.code !== "USER_ALREADY_EXISTS_USE_ANOTHER_EMAIL"
+        ) {
+          setError(
+            signUp.error.message ||
+              "Unable to create the administrator account.",
+          );
+          return;
+        }
+
+        const signIn = await authClient.signIn.email({
+          email: normalizedEmail,
+          password,
+        });
+
+        if (signIn.error) {
+          setError(
+            signIn.error.message ||
+              "This administrator account already exists. Sign in with its password to continue setup.",
+          );
+          return;
+        }
       }
 
       const result = await bootstrapPlatformAdmin({
         schoolName,
         schoolCode,
-        firstName,
-        lastName,
+        firstName: normalizedFirstName,
+        lastName: normalizedLastName,
       });
 
       if (!result.success) {
