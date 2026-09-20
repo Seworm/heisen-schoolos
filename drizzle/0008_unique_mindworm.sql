@@ -1,0 +1,1 @@
+ALTER TYPE "public"."school_membership_role" ADD VALUE 'super_admin' BEFORE 'platform_admin';

@@ -1,4 +1,4 @@
-import {
+﻿import {
   pgEnum,
   pgTable,
   uuid,
@@ -3053,6 +3053,7 @@ export const userStatusEnum = pgEnum("user_status", [
 export const schoolMembershipRoleEnum = pgEnum(
   "school_membership_role",
   [
+    "super_admin",
     "platform_admin",
     "school_owner",
     "school_admin",
@@ -3070,6 +3071,13 @@ export const schoolMembershipRoleEnum = pgEnum(
     "super_admin",
   ],
 );
+export const platformRoleEnum = pgEnum(
+  "platform_role",
+  [
+    "platform_admin",
+    "super_admin",
+  ],
+);
 export const users = pgTable(
   "users",
   {
@@ -3082,6 +3090,8 @@ export const users = pgTable(
     firstName: text("first_name").notNull(),
 
     lastName: text("last_name").notNull(),
+
+    platformRole: platformRoleEnum("platform_role"),
 
     status: userStatusEnum("status")
       .notNull()
@@ -3432,3 +3442,6 @@ export const studentImports = pgTable("student_imports", {
   status: varchar("status", { length: 30 }).notNull().default("completed"),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 }, (table) => [index("student_imports_school_idx").on(table.schoolId), index("student_imports_created_idx").on(table.createdAt)]);
+
+
+

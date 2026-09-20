@@ -1,4 +1,4 @@
-import { and, eq } from "drizzle-orm";
+﻿import { and, eq } from "drizzle-orm";
 import { auth } from "@/../auth";
 import { db } from "@/db";
 import { schoolMemberships } from "@/db/schema";
@@ -67,11 +67,11 @@ export async function requireSchoolMembership(
   }
 
   /*
-   * Platform administrators are not restricted to one school.
+   * Platform administrators can operate across schools.
    *
-   * Their primary schoolId is only the default workspace used by
-   * the existing school-scoped UI. Authorization itself remains
-   * platform-wide.
+   * Their schoolId is only the default workspace for the
+   * existing school-scoped dashboard. Platform authorization
+   * itself is not limited to that school.
    */
   if (isPlatformRole(user.role)) {
     if (schoolId) {
@@ -91,8 +91,8 @@ export async function requireSchoolMembership(
         .limit(1);
 
       /*
-       * A super admin does not need an explicit membership in every
-       * school. Platform authority itself permits access.
+       * Platform authority does not require a membership
+       * record in every school.
        */
       return {
         ...user,
@@ -165,10 +165,10 @@ export async function requireSuperAdmin() {
 
   if (
     user.accountType === "student" ||
-    !isPlatformRole(user.role)
+    user.role !== "super_admin"
   ) {
     throw new Error(
-      "Platform administrator permission required.",
+      "Super administrator permission required.",
     );
   }
 

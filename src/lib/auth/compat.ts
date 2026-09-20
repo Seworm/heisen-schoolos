@@ -1,4 +1,4 @@
-import { and, eq } from "drizzle-orm";
+﻿import { and, eq } from "drizzle-orm";
 import { db } from "@/db";
 import {
   schoolMemberships,
@@ -23,6 +23,7 @@ export type ApplicationUser = {
   schoolName?: string;
   membershipId?: string;
   role?: string;
+  isPlatformAdmin?: boolean;
   isSuperAdmin?: boolean;
   schoolMemberships?: Array<{
     membershipId: string;
@@ -50,6 +51,7 @@ export async function getApplicationSession() {
       email: users.email,
       firstName: users.firstName,
       lastName: users.lastName,
+      platformRole: users.platformRole,
       status: users.status,
     })
     .from(users)
@@ -81,17 +83,25 @@ export async function getApplicationSession() {
         ),
       );
 
-    if (memberships.length === 0) {
-      return null;
-    }
-
     const platformMembership = memberships.find((membership) =>
       PLATFORM_ROLES.includes(
         membership.role as (typeof PLATFORM_ROLES)[number],
       ),
     );
+    const platformRole = applicationUser.platformRole ?? platformMembership?.role;
+    const isPlatformAdmin = platformRole !== undefined;
+    const isSuperAdmin = platformRole === "super_admin";
 
-    const primaryMembership = platformMembership ?? memberships[0];
+    /*
+     * Platform administrators can exist without a school membership.
+     * Ordinary staff users cannot.
+     */
+    if (memberships.length === 0 && !isPlatformAdmin) {
+      return null;
+    }
+
+    const primaryMembership =
+      platformMembership ?? memberships[0];
 
     return {
       user: {
@@ -102,11 +112,12 @@ export async function getApplicationSession() {
         firstName: applicationUser.firstName,
         lastName: applicationUser.lastName,
         accountType: "staff" as const,
-        schoolId: primaryMembership.schoolId,
-        membershipId: primaryMembership.membershipId,
-        role: primaryMembership.role,
-        schoolName: primaryMembership.schoolName,
-        isSuperAdmin: Boolean(platformMembership),
+        schoolId: primaryMembership?.schoolId,
+        membershipId: primaryMembership?.membershipId,
+        role: platformRole ?? primaryMembership?.role,
+        schoolName: primaryMembership?.schoolName,
+        isSuperAdmin,
+        isPlatformAdmin,
         schoolMemberships: memberships,
       } satisfies ApplicationUser,
     };

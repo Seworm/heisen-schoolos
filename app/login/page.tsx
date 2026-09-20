@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
@@ -29,8 +29,8 @@ export default function LoginPage() {
         return;
       }
 
-      router.replace("/dashboard");
-      router.refresh();
+      router.replace("/auth/continue");
+router.refresh();
     } catch {
       setError("Unable to sign in. Please try again.");
     } finally {
@@ -111,7 +111,7 @@ export default function LoginPage() {
               disabled={loading}
               className="w-full rounded-lg bg-slate-950 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-50"
             >
-              {loading ? "Signing in…" : "Sign in"}
+              {loading ? "Signing inâ€¦" : "Sign in"}
             </button>
           </div>
         </form>
@@ -123,4 +123,5 @@ export default function LoginPage() {
     </main>
   );
 }
+
 

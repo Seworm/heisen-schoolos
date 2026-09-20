@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
@@ -72,7 +72,7 @@ export default function SetupPage() {
         return;
       }
 
-      router.replace("/dashboard");
+      router.replace("/auth/continue");
       router.refresh();
     } catch {
       setError("Unable to complete setup. Please try again.");
@@ -222,7 +222,7 @@ export default function SetupPage() {
               disabled={loading}
               className="w-full rounded-lg bg-slate-950 px-4 py-3 text-sm font-medium text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-50"
             >
-              {loading ? "Creating platform…" : "Create platform"}
+              {loading ? "Creating platformâ€¦" : "Create platform"}
             </button>
           </div>
         </form>
@@ -230,4 +230,5 @@ export default function SetupPage() {
     </main>
   );
 }
+
 

@@ -8,10 +8,11 @@ declare module "next-auth" {
 
     accountType: "staff" | "student";
 
-    schoolId: string;
+    schoolId?: string;
 
     membershipId?: string;
     role?: string;
+    isPlatformAdmin?: boolean;
     schoolName?: string;
 
     studentNumber?: string;
@@ -28,10 +29,11 @@ declare module "next-auth" {
 
       accountType: "staff" | "student";
 
-      schoolId: string;
+      schoolId?: string;
 
       membershipId?: string;
       role?: string;
+      isPlatformAdmin?: boolean;
       schoolName?: string;
 
       studentNumber?: string;
@@ -47,10 +49,11 @@ declare module "next-auth/jwt" {
     userId: string;
     accountType: "staff" | "student";
 
-    schoolId: string;
+    schoolId?: string;
 
     membershipId?: string;
     role?: string;
+    isPlatformAdmin?: boolean;
     schoolName?: string;
 
     studentNumber?: string;

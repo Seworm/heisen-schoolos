@@ -1,4 +1,5 @@
 ﻿import { and, eq } from "drizzle-orm";
+import { cookies } from "next/headers";
 import { db } from "@/db";
 import { schoolMemberships, schools } from "@/db/schema";
 import { requireAuth, isPlatformRole } from "@/lib/authorization";
@@ -6,13 +7,33 @@ import { requireAuth, isPlatformRole } from "@/lib/authorization";
 export async function getCurrentSchool() {
   const user = await requireAuth();
 
-  let schoolId = user.schoolId;
+  const requestedSchoolId = (await cookies()).get("schoolos_active_school_id")?.value;
+  let schoolId: string | undefined = isPlatformRole(user.role)
+    ? requestedSchoolId || user.schoolId
+    : user.schoolId;
 
   /*
    * Platform owners are allowed to operate across all schools.
    * The existing workspace still needs one school to render, so
    * use the user's primary school as the default.
    */
+  if (isPlatformRole(user.role) && requestedSchoolId) {
+    const [selectedSchool] = await db
+      .select({ id: schools.id })
+      .from(schools)
+      .where(
+        and(
+          eq(schools.id, requestedSchoolId),
+          eq(schools.status, "active"),
+        ),
+      )
+      .limit(1);
+
+    if (!selectedSchool) {
+      schoolId = undefined;
+    }
+  }
+
   if (!schoolId && isPlatformRole(user.role)) {
     const [membership] = await db
       .select({

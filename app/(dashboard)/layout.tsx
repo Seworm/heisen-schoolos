@@ -1,8 +1,9 @@
 import type { ReactNode } from "react";
-import { redirect } from "next/navigation";
 import { requireCurrentSchool } from "@/lib/current-school";
 import { SchoolSidebar } from "@/components/SchoolSidebar";
 import { SchoolTopbar } from "@/components/SchoolTopbar";
+import { getApplicationSession } from "@/lib/auth/compat";
+import { getAvailableSchools } from "@/lib/school-workspace";
 
 export const dynamic = "force-dynamic";
 
@@ -12,18 +13,25 @@ export default async function DashboardLayout({
   children: ReactNode;
 }) {
   const school = await requireCurrentSchool();
+  const session = await getApplicationSession();
+  const availableSchools =
+    session?.user.isPlatformAdmin ? await getAvailableSchools() : [];
 
   return (
-    <div className="min-h-screen bg-[#F5F7FB] text-slate-900">
+    <div className="min-h-screen bg-[#f7f9fc] text-slate-900">
       <div className="flex min-h-screen">
         {/* Fixed navigation */}
-        <SchoolSidebar />
+        <SchoolSidebar isPlatformAdmin={Boolean(session?.user.isPlatformAdmin)} />
 
         {/* Application workspace */}
-        <div className="min-w-0 flex-1 bg-[#F5F7FB]">
-          <SchoolTopbar school={school} />
+        <div className="min-w-0 flex-1 bg-[radial-gradient(circle_at_top_right,rgba(99,102,241,0.08),transparent_28rem)]">
+          <SchoolTopbar
+            school={school}
+            availableSchools={availableSchools}
+            isPlatformAdmin={Boolean(session?.user.isPlatformAdmin)}
+          />
 
-          <main className="min-h-[calc(100vh-4rem)] px-4 py-5 sm:px-6 lg:px-8">
+          <main className="min-h-[calc(100vh-4rem)] px-4 py-6 sm:px-6 lg:px-8">
             <div className="mx-auto w-full max-w-[1600px]">
               {children}
             </div>
@@ -33,4 +41,3 @@ export default async function DashboardLayout({
     </div>
   );
 }
-
