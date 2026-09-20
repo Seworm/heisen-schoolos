@@ -19,7 +19,7 @@ export type BootstrapResult =
       error: string;
     };
 
-export async function bootstrapPlatformAdmin(input: {
+export async function bootstrapSuperAdmin(input: {
   schoolName: string;
   schoolCode: string;
   firstName: string;
@@ -38,18 +38,18 @@ export async function bootstrapPlatformAdmin(input: {
 
     const email = authUser.email.trim().toLowerCase();
 
-    const existingPlatformAdmin = await db
-      .select({ id: schoolMemberships.id })
-      .from(schoolMemberships)
-      .where(eq(schoolMemberships.role, "platform_admin"))
-      .limit(1);
+    const existingSuperAdmin = await db
+  .select({ id: schoolMemberships.id })
+  .from(schoolMemberships)
+  .where(eq(schoolMemberships.role, "super_admin"))
+  .limit(1);
 
-    if (existingPlatformAdmin.length > 0) {
-      return {
-        success: false,
-        error: "Platform setup has already been completed.",
-      };
-    }
+if (existingSuperAdmin.length > 0) {
+  return {
+    success: false,
+    error: "Platform setup has already been completed.",
+  };
+}
 
     const schoolName = input.schoolName.trim();
     const schoolCode = input.schoolCode.trim().toUpperCase();
@@ -133,7 +133,7 @@ export async function bootstrapPlatformAdmin(input: {
       await tx.insert(schoolMemberships).values({
         userId: user.id,
         schoolId: school.id,
-        role: "platform_admin",
+        role: "super_admin",
         isActive: true,
       });
 

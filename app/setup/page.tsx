@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { authClient } from "@/lib/auth/client";
-import { bootstrapPlatformAdmin } from "@/lib/actions/bootstrap";
+import { bootstrapSuperAdmin } from "@/lib/actions/bootstrap";
 
 export default function SetupPage() {
   const router = useRouter();
@@ -60,7 +60,7 @@ export default function SetupPage() {
         }
       }
 
-      const result = await bootstrapPlatformAdmin({
+      const result = await bootstrapSuperAdmin({
         schoolName,
         schoolCode,
         firstName: normalizedFirstName,

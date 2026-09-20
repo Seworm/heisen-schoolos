@@ -1,5 +1,5 @@
 import { relations } from "drizzle-orm/relations";
-import { schools, announcements, feeStructures, feeStructureItems, feeCategories, internalMessages, studentInvoices, invoiceAdjustments, auditLogs, classrooms, feeAssignments, students, academicYears, terms, classLevels, streams, staff, payments, guardians, paymentAllocations, studentEnrollments, subjects, teacherAssignments, studentPlacements, classSubjects, attendanceSessions, attendanceRecords, assessmentTypes, staffDocuments, assessmentPeriods, assessments, promotionDecisions, scholarships, schoolSettings, assessmentScores, gradingSchemes, gradeBands, gradingSchemeItems, studentInvoiceItems, studentDocuments, studentImports, resultPublicationAssessments, resultPublicationSubjects, resultPublications, resultPublicationStudents, reportCards, studentScholarships, users, schoolMemberships, studentUserAccounts, studentStatusHistory, timetableEntries, timetablePeriods, notifications, studentGuardians } from "./schema";
+import { schools, announcements, feeStructures, feeStructureItems, feeCategories, internalMessages, studentInvoices, invoiceAdjustments, auditLogs, classrooms, feeAssignments, students, academicYears, terms, classLevels, streams, staff, assessmentTypes, subjects, resultPublicationSubjects, resultPublicationStudents, resultPublications, gradingSchemes, reportCards, studentScholarships, scholarships, users, schoolMemberships, studentUserAccounts, studentStatusHistory, timetableEntries, timetablePeriods, payments, guardians, paymentAllocations, studentEnrollments, teacherAssignments, studentPlacements, classSubjects, attendanceSessions, attendanceRecords, staffDocuments, assessmentPeriods, assessments, promotionDecisions, schoolSettings, assessmentScores, gradeBands, gradingSchemeItems, studentInvoiceItems, studentDocuments, studentImports, resultPublicationAssessments, notifications, studentGuardians } from "./schema";
 
 export const announcementsRelations = relations(announcements, ({one}) => ({
 	school: one(schools, {
@@ -15,8 +15,16 @@ export const schoolsRelations = relations(schools, ({many}) => ({
 	auditLogs: many(auditLogs),
 	classrooms: many(classrooms),
 	feeAssignments: many(feeAssignments),
-	feeStructures: many(feeStructures),
 	staff: many(staff),
+	assessmentTypes: many(assessmentTypes),
+	resultPublications: many(resultPublications),
+	reportCards: many(reportCards),
+	studentScholarships: many(studentScholarships),
+	schoolMemberships: many(schoolMemberships),
+	studentStatusHistories: many(studentStatusHistory),
+	timetableEntries: many(timetableEntries),
+	timetablePeriods: many(timetablePeriods),
+	feeStructures: many(feeStructures),
 	students: many(students),
 	payments: many(payments),
 	academicYears: many(academicYears),
@@ -24,7 +32,6 @@ export const schoolsRelations = relations(schools, ({many}) => ({
 	guardians: many(guardians),
 	subjects: many(subjects),
 	attendanceSessions: many(attendanceSessions),
-	assessmentTypes: many(assessmentTypes),
 	staffDocuments: many(staffDocuments),
 	assessmentPeriods: many(assessmentPeriods),
 	assessments: many(assessments),
@@ -35,13 +42,6 @@ export const schoolsRelations = relations(schools, ({many}) => ({
 	studentDocuments: many(studentDocuments),
 	studentInvoices: many(studentInvoices),
 	studentImports: many(studentImports),
-	resultPublications: many(resultPublications),
-	reportCards: many(reportCards),
-	studentScholarships: many(studentScholarships),
-	schoolMemberships: many(schoolMemberships),
-	studentStatusHistories: many(studentStatusHistory),
-	timetableEntries: many(timetableEntries),
-	timetablePeriods: many(timetablePeriods),
 	notifications: many(notifications),
 }));
 
@@ -162,6 +162,10 @@ export const feeAssignmentsRelations = relations(feeAssignments, ({one}) => ({
 
 export const studentsRelations = relations(students, ({one, many}) => ({
 	feeAssignments: many(feeAssignments),
+	resultPublicationStudents: many(resultPublicationStudents),
+	studentScholarships: many(studentScholarships),
+	studentUserAccounts: many(studentUserAccounts),
+	studentStatusHistories: many(studentStatusHistory),
 	school: one(schools, {
 		fields: [students.schoolId],
 		references: [schools.id]
@@ -173,15 +177,14 @@ export const studentsRelations = relations(students, ({one, many}) => ({
 	assessmentScores: many(assessmentScores),
 	studentDocuments: many(studentDocuments),
 	studentInvoices: many(studentInvoices),
-	resultPublicationStudents: many(resultPublicationStudents),
-	studentScholarships: many(studentScholarships),
-	studentUserAccounts: many(studentUserAccounts),
-	studentStatusHistories: many(studentStatusHistory),
 	studentGuardians: many(studentGuardians),
 }));
 
 export const academicYearsRelations = relations(academicYears, ({one, many}) => ({
 	feeAssignments: many(feeAssignments),
+	resultPublications: many(resultPublications),
+	studentScholarships: many(studentScholarships),
+	timetableEntries: many(timetableEntries),
 	feeStructures: many(feeStructures),
 	school: one(schools, {
 		fields: [academicYears.schoolId],
@@ -194,13 +197,13 @@ export const academicYearsRelations = relations(academicYears, ({one, many}) => 
 	assessmentPeriods: many(assessmentPeriods),
 	assessments: many(assessments),
 	studentInvoices: many(studentInvoices),
-	resultPublications: many(resultPublications),
-	studentScholarships: many(studentScholarships),
-	timetableEntries: many(timetableEntries),
 }));
 
 export const termsRelations = relations(terms, ({one, many}) => ({
 	feeAssignments: many(feeAssignments),
+	resultPublications: many(resultPublications),
+	studentScholarships: many(studentScholarships),
+	timetableEntries: many(timetableEntries),
 	feeStructures: many(feeStructures),
 	academicYear: one(academicYears, {
 		fields: [terms.academicYearId],
@@ -210,19 +213,6 @@ export const termsRelations = relations(terms, ({one, many}) => ({
 	assessmentPeriods: many(assessmentPeriods),
 	assessments: many(assessments),
 	studentInvoices: many(studentInvoices),
-	resultPublications: many(resultPublications),
-	studentScholarships: many(studentScholarships),
-	timetableEntries: many(timetableEntries),
-}));
-
-export const classLevelsRelations = relations(classLevels, ({one, many}) => ({
-	feeStructures: many(feeStructures),
-	streams: many(streams),
-	school: one(schools, {
-		fields: [classLevels.schoolId],
-		references: [schools.id]
-	}),
-	classSubjects: many(classSubjects),
 }));
 
 export const streamsRelations = relations(streams, ({one, many}) => ({
@@ -230,13 +220,23 @@ export const streamsRelations = relations(streams, ({one, many}) => ({
 		fields: [streams.classLevelId],
 		references: [classLevels.id]
 	}),
+	resultPublications: many(resultPublications),
+	timetableEntries: many(timetableEntries),
 	studentEnrollments: many(studentEnrollments),
 	teacherAssignments: many(teacherAssignments),
 	studentPlacements: many(studentPlacements),
 	attendanceSessions: many(attendanceSessions),
 	assessments: many(assessments),
-	resultPublications: many(resultPublications),
-	timetableEntries: many(timetableEntries),
+}));
+
+export const classLevelsRelations = relations(classLevels, ({one, many}) => ({
+	streams: many(streams),
+	feeStructures: many(feeStructures),
+	school: one(schools, {
+		fields: [classLevels.schoolId],
+		references: [schools.id]
+	}),
+	classSubjects: many(classSubjects),
 }));
 
 export const staffRelations = relations(staff, ({one, many}) => ({
@@ -244,9 +244,212 @@ export const staffRelations = relations(staff, ({one, many}) => ({
 		fields: [staff.schoolId],
 		references: [schools.id]
 	}),
+	timetableEntries: many(timetableEntries),
 	teacherAssignments: many(teacherAssignments),
 	staffDocuments: many(staffDocuments),
+}));
+
+export const assessmentTypesRelations = relations(assessmentTypes, ({one, many}) => ({
+	school: one(schools, {
+		fields: [assessmentTypes.schoolId],
+		references: [schools.id]
+	}),
+	assessments: many(assessments),
+	gradingSchemeItems: many(gradingSchemeItems),
+}));
+
+export const resultPublicationSubjectsRelations = relations(resultPublicationSubjects, ({one, many}) => ({
+	subject: one(subjects, {
+		fields: [resultPublicationSubjects.subjectId],
+		references: [subjects.id]
+	}),
+	resultPublicationStudent: one(resultPublicationStudents, {
+		fields: [resultPublicationSubjects.publicationStudentId],
+		references: [resultPublicationStudents.id]
+	}),
+	resultPublicationAssessments: many(resultPublicationAssessments),
+}));
+
+export const subjectsRelations = relations(subjects, ({one, many}) => ({
+	resultPublicationSubjects: many(resultPublicationSubjects),
 	timetableEntries: many(timetableEntries),
+	school: one(schools, {
+		fields: [subjects.schoolId],
+		references: [schools.id]
+	}),
+	teacherAssignments: many(teacherAssignments),
+	classSubjects: many(classSubjects),
+	assessments: many(assessments),
+}));
+
+export const resultPublicationStudentsRelations = relations(resultPublicationStudents, ({one, many}) => ({
+	resultPublicationSubjects: many(resultPublicationSubjects),
+	student: one(students, {
+		fields: [resultPublicationStudents.studentId],
+		references: [students.id]
+	}),
+	resultPublication: one(resultPublications, {
+		fields: [resultPublicationStudents.publicationId],
+		references: [resultPublications.id]
+	}),
+	reportCards: many(reportCards),
+}));
+
+export const resultPublicationsRelations = relations(resultPublications, ({one, many}) => ({
+	school: one(schools, {
+		fields: [resultPublications.schoolId],
+		references: [schools.id]
+	}),
+	academicYear: one(academicYears, {
+		fields: [resultPublications.academicYearId],
+		references: [academicYears.id]
+	}),
+	term: one(terms, {
+		fields: [resultPublications.termId],
+		references: [terms.id]
+	}),
+	stream: one(streams, {
+		fields: [resultPublications.streamId],
+		references: [streams.id]
+	}),
+	gradingScheme: one(gradingSchemes, {
+		fields: [resultPublications.gradingSchemeId],
+		references: [gradingSchemes.id]
+	}),
+	resultPublicationStudents: many(resultPublicationStudents),
+	reportCards: many(reportCards),
+}));
+
+export const gradingSchemesRelations = relations(gradingSchemes, ({one, many}) => ({
+	resultPublications: many(resultPublications),
+	school: one(schools, {
+		fields: [gradingSchemes.schoolId],
+		references: [schools.id]
+	}),
+	gradeBands: many(gradeBands),
+	gradingSchemeItems: many(gradingSchemeItems),
+}));
+
+export const reportCardsRelations = relations(reportCards, ({one}) => ({
+	school: one(schools, {
+		fields: [reportCards.schoolId],
+		references: [schools.id]
+	}),
+	resultPublication: one(resultPublications, {
+		fields: [reportCards.publicationId],
+		references: [resultPublications.id]
+	}),
+	resultPublicationStudent: one(resultPublicationStudents, {
+		fields: [reportCards.publicationStudentId],
+		references: [resultPublicationStudents.id]
+	}),
+}));
+
+export const studentScholarshipsRelations = relations(studentScholarships, ({one}) => ({
+	school: one(schools, {
+		fields: [studentScholarships.schoolId],
+		references: [schools.id]
+	}),
+	student: one(students, {
+		fields: [studentScholarships.studentId],
+		references: [students.id]
+	}),
+	scholarship: one(scholarships, {
+		fields: [studentScholarships.scholarshipId],
+		references: [scholarships.id]
+	}),
+	academicYear: one(academicYears, {
+		fields: [studentScholarships.academicYearId],
+		references: [academicYears.id]
+	}),
+	term: one(terms, {
+		fields: [studentScholarships.termId],
+		references: [terms.id]
+	}),
+}));
+
+export const scholarshipsRelations = relations(scholarships, ({one, many}) => ({
+	studentScholarships: many(studentScholarships),
+	school: one(schools, {
+		fields: [scholarships.schoolId],
+		references: [schools.id]
+	}),
+}));
+
+export const schoolMembershipsRelations = relations(schoolMemberships, ({one}) => ({
+	user: one(users, {
+		fields: [schoolMemberships.userId],
+		references: [users.id]
+	}),
+	school: one(schools, {
+		fields: [schoolMemberships.schoolId],
+		references: [schools.id]
+	}),
+}));
+
+export const usersRelations = relations(users, ({many}) => ({
+	schoolMemberships: many(schoolMemberships),
+}));
+
+export const studentUserAccountsRelations = relations(studentUserAccounts, ({one}) => ({
+	student: one(students, {
+		fields: [studentUserAccounts.studentId],
+		references: [students.id]
+	}),
+}));
+
+export const studentStatusHistoryRelations = relations(studentStatusHistory, ({one}) => ({
+	school: one(schools, {
+		fields: [studentStatusHistory.schoolId],
+		references: [schools.id]
+	}),
+	student: one(students, {
+		fields: [studentStatusHistory.studentId],
+		references: [students.id]
+	}),
+}));
+
+export const timetableEntriesRelations = relations(timetableEntries, ({one}) => ({
+	school: one(schools, {
+		fields: [timetableEntries.schoolId],
+		references: [schools.id]
+	}),
+	academicYear: one(academicYears, {
+		fields: [timetableEntries.academicYearId],
+		references: [academicYears.id]
+	}),
+	term: one(terms, {
+		fields: [timetableEntries.termId],
+		references: [terms.id]
+	}),
+	stream: one(streams, {
+		fields: [timetableEntries.streamId],
+		references: [streams.id]
+	}),
+	subject: one(subjects, {
+		fields: [timetableEntries.subjectId],
+		references: [subjects.id]
+	}),
+	staff: one(staff, {
+		fields: [timetableEntries.staffId],
+		references: [staff.id]
+	}),
+	timetablePeriod: one(timetablePeriods, {
+		fields: [timetableEntries.periodId],
+		references: [timetablePeriods.id]
+	}),
+	classroom: one(classrooms, {
+		fields: [timetableEntries.classroomId],
+		references: [classrooms.id]
+	}),
+}));
+
+export const timetablePeriodsRelations = relations(timetablePeriods, ({one, many}) => ({
+	timetableEntries: many(timetableEntries),
+	school: one(schools, {
+		fields: [timetablePeriods.schoolId],
+		references: [schools.id]
+	}),
 }));
 
 export const paymentsRelations = relations(payments, ({one, many}) => ({
@@ -300,18 +503,6 @@ export const studentEnrollmentsRelations = relations(studentEnrollments, ({one, 
 	promotionDecisions_fromEnrollmentId: many(promotionDecisions, {
 		relationName: "promotionDecisions_fromEnrollmentId_studentEnrollments_id"
 	}),
-}));
-
-export const subjectsRelations = relations(subjects, ({one, many}) => ({
-	school: one(schools, {
-		fields: [subjects.schoolId],
-		references: [schools.id]
-	}),
-	teacherAssignments: many(teacherAssignments),
-	classSubjects: many(classSubjects),
-	assessments: many(assessments),
-	resultPublicationSubjects: many(resultPublicationSubjects),
-	timetableEntries: many(timetableEntries),
 }));
 
 export const teacherAssignmentsRelations = relations(teacherAssignments, ({one}) => ({
@@ -384,15 +575,6 @@ export const attendanceRecordsRelations = relations(attendanceRecords, ({one}) =
 		fields: [attendanceRecords.attendanceSessionId],
 		references: [attendanceSessions.id]
 	}),
-}));
-
-export const assessmentTypesRelations = relations(assessmentTypes, ({one, many}) => ({
-	school: one(schools, {
-		fields: [assessmentTypes.schoolId],
-		references: [schools.id]
-	}),
-	assessments: many(assessments),
-	gradingSchemeItems: many(gradingSchemeItems),
 }));
 
 export const staffDocumentsRelations = relations(staffDocuments, ({one}) => ({
@@ -476,14 +658,6 @@ export const promotionDecisionsRelations = relations(promotionDecisions, ({one})
 	}),
 }));
 
-export const scholarshipsRelations = relations(scholarships, ({one, many}) => ({
-	school: one(schools, {
-		fields: [scholarships.schoolId],
-		references: [schools.id]
-	}),
-	studentScholarships: many(studentScholarships),
-}));
-
 export const schoolSettingsRelations = relations(schoolSettings, ({one}) => ({
 	school: one(schools, {
 		fields: [schoolSettings.schoolId],
@@ -500,16 +674,6 @@ export const assessmentScoresRelations = relations(assessmentScores, ({one}) => 
 		fields: [assessmentScores.studentId],
 		references: [students.id]
 	}),
-}));
-
-export const gradingSchemesRelations = relations(gradingSchemes, ({one, many}) => ({
-	school: one(schools, {
-		fields: [gradingSchemes.schoolId],
-		references: [schools.id]
-	}),
-	gradeBands: many(gradeBands),
-	gradingSchemeItems: many(gradingSchemeItems),
-	resultPublications: many(resultPublications),
 }));
 
 export const gradeBandsRelations = relations(gradeBands, ({one}) => ({
@@ -567,170 +731,6 @@ export const resultPublicationAssessmentsRelations = relations(resultPublication
 	resultPublicationSubject: one(resultPublicationSubjects, {
 		fields: [resultPublicationAssessments.publicationSubjectId],
 		references: [resultPublicationSubjects.id]
-	}),
-}));
-
-export const resultPublicationSubjectsRelations = relations(resultPublicationSubjects, ({one, many}) => ({
-	resultPublicationAssessments: many(resultPublicationAssessments),
-	subject: one(subjects, {
-		fields: [resultPublicationSubjects.subjectId],
-		references: [subjects.id]
-	}),
-	resultPublicationStudent: one(resultPublicationStudents, {
-		fields: [resultPublicationSubjects.publicationStudentId],
-		references: [resultPublicationStudents.id]
-	}),
-}));
-
-export const resultPublicationsRelations = relations(resultPublications, ({one, many}) => ({
-	school: one(schools, {
-		fields: [resultPublications.schoolId],
-		references: [schools.id]
-	}),
-	academicYear: one(academicYears, {
-		fields: [resultPublications.academicYearId],
-		references: [academicYears.id]
-	}),
-	term: one(terms, {
-		fields: [resultPublications.termId],
-		references: [terms.id]
-	}),
-	stream: one(streams, {
-		fields: [resultPublications.streamId],
-		references: [streams.id]
-	}),
-	gradingScheme: one(gradingSchemes, {
-		fields: [resultPublications.gradingSchemeId],
-		references: [gradingSchemes.id]
-	}),
-	resultPublicationStudents: many(resultPublicationStudents),
-	reportCards: many(reportCards),
-}));
-
-export const resultPublicationStudentsRelations = relations(resultPublicationStudents, ({one, many}) => ({
-	student: one(students, {
-		fields: [resultPublicationStudents.studentId],
-		references: [students.id]
-	}),
-	resultPublication: one(resultPublications, {
-		fields: [resultPublicationStudents.publicationId],
-		references: [resultPublications.id]
-	}),
-	reportCards: many(reportCards),
-	resultPublicationSubjects: many(resultPublicationSubjects),
-}));
-
-export const reportCardsRelations = relations(reportCards, ({one}) => ({
-	school: one(schools, {
-		fields: [reportCards.schoolId],
-		references: [schools.id]
-	}),
-	resultPublication: one(resultPublications, {
-		fields: [reportCards.publicationId],
-		references: [resultPublications.id]
-	}),
-	resultPublicationStudent: one(resultPublicationStudents, {
-		fields: [reportCards.publicationStudentId],
-		references: [resultPublicationStudents.id]
-	}),
-}));
-
-export const studentScholarshipsRelations = relations(studentScholarships, ({one}) => ({
-	school: one(schools, {
-		fields: [studentScholarships.schoolId],
-		references: [schools.id]
-	}),
-	student: one(students, {
-		fields: [studentScholarships.studentId],
-		references: [students.id]
-	}),
-	scholarship: one(scholarships, {
-		fields: [studentScholarships.scholarshipId],
-		references: [scholarships.id]
-	}),
-	academicYear: one(academicYears, {
-		fields: [studentScholarships.academicYearId],
-		references: [academicYears.id]
-	}),
-	term: one(terms, {
-		fields: [studentScholarships.termId],
-		references: [terms.id]
-	}),
-}));
-
-export const schoolMembershipsRelations = relations(schoolMemberships, ({one}) => ({
-	user: one(users, {
-		fields: [schoolMemberships.userId],
-		references: [users.id]
-	}),
-	school: one(schools, {
-		fields: [schoolMemberships.schoolId],
-		references: [schools.id]
-	}),
-}));
-
-export const usersRelations = relations(users, ({many}) => ({
-	schoolMemberships: many(schoolMemberships),
-}));
-
-export const studentUserAccountsRelations = relations(studentUserAccounts, ({one}) => ({
-	student: one(students, {
-		fields: [studentUserAccounts.studentId],
-		references: [students.id]
-	}),
-}));
-
-export const studentStatusHistoryRelations = relations(studentStatusHistory, ({one}) => ({
-	school: one(schools, {
-		fields: [studentStatusHistory.schoolId],
-		references: [schools.id]
-	}),
-	student: one(students, {
-		fields: [studentStatusHistory.studentId],
-		references: [students.id]
-	}),
-}));
-
-export const timetableEntriesRelations = relations(timetableEntries, ({one}) => ({
-	school: one(schools, {
-		fields: [timetableEntries.schoolId],
-		references: [schools.id]
-	}),
-	academicYear: one(academicYears, {
-		fields: [timetableEntries.academicYearId],
-		references: [academicYears.id]
-	}),
-	term: one(terms, {
-		fields: [timetableEntries.termId],
-		references: [terms.id]
-	}),
-	stream: one(streams, {
-		fields: [timetableEntries.streamId],
-		references: [streams.id]
-	}),
-	subject: one(subjects, {
-		fields: [timetableEntries.subjectId],
-		references: [subjects.id]
-	}),
-	staff: one(staff, {
-		fields: [timetableEntries.staffId],
-		references: [staff.id]
-	}),
-	timetablePeriod: one(timetablePeriods, {
-		fields: [timetableEntries.periodId],
-		references: [timetablePeriods.id]
-	}),
-	classroom: one(classrooms, {
-		fields: [timetableEntries.classroomId],
-		references: [classrooms.id]
-	}),
-}));
-
-export const timetablePeriodsRelations = relations(timetablePeriods, ({one, many}) => ({
-	timetableEntries: many(timetableEntries),
-	school: one(schools, {
-		fields: [timetablePeriods.schoolId],
-		references: [schools.id]
 	}),
 }));
 

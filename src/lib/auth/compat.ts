@@ -9,6 +9,31 @@ import {
 } from "@/db/schema";
 import { getNeonAuth } from "@/lib/auth/server";
 
+const PLATFORM_ROLES = ["super_admin", "platform_admin"] as const;
+
+export type ApplicationUser = {
+  id: string;
+  authUserId?: string;
+  email: string;
+  name: string;
+  firstName: string;
+  lastName: string;
+  accountType: "staff" | "student";
+  schoolId?: string;
+  schoolName?: string;
+  membershipId?: string;
+  role?: string;
+  isSuperAdmin?: boolean;
+  schoolMemberships?: Array<{
+    membershipId: string;
+    schoolId: string;
+    schoolName: string;
+    role: string;
+  }>;
+  studentNumber?: string;
+  mustChangePassword?: boolean;
+};
+
 export async function getApplicationSession() {
   const { data } = await getNeonAuth().getSession();
   const authUser = data?.user;
@@ -19,24 +44,24 @@ export async function getApplicationSession() {
 
   const email = authUser.email.trim().toLowerCase();
 
-  /*
-   * Staff/admin users are stored in the application users table.
-   * Check this first so normal staff requests do not depend on
-   * the student authentication tables.
-   */
   const [applicationUser] = await db
     .select({
       id: users.id,
       email: users.email,
       firstName: users.firstName,
       lastName: users.lastName,
+      status: users.status,
     })
     .from(users)
     .where(eq(users.email, email))
     .limit(1);
 
   if (applicationUser) {
-    const [membership] = await db
+    if (applicationUser.status !== "active") {
+      return null;
+    }
+
+    const memberships = await db
       .select({
         membershipId: schoolMemberships.id,
         schoolId: schools.id,
@@ -54,12 +79,19 @@ export async function getApplicationSession() {
           eq(schoolMemberships.isActive, true),
           eq(schools.status, "active"),
         ),
-      )
-      .limit(1);
+      );
 
-    if (!membership) {
+    if (memberships.length === 0) {
       return null;
     }
+
+    const platformMembership = memberships.find((membership) =>
+      PLATFORM_ROLES.includes(
+        membership.role as (typeof PLATFORM_ROLES)[number],
+      ),
+    );
+
+    const primaryMembership = platformMembership ?? memberships[0];
 
     return {
       user: {
@@ -70,18 +102,16 @@ export async function getApplicationSession() {
         firstName: applicationUser.firstName,
         lastName: applicationUser.lastName,
         accountType: "staff" as const,
-        schoolId: membership.schoolId,
-        membershipId: membership.membershipId,
-        role: membership.role,
-        schoolName: membership.schoolName,
-      },
+        schoolId: primaryMembership.schoolId,
+        membershipId: primaryMembership.membershipId,
+        role: primaryMembership.role,
+        schoolName: primaryMembership.schoolName,
+        isSuperAdmin: Boolean(platformMembership),
+        schoolMemberships: memberships,
+      } satisfies ApplicationUser,
     };
   }
 
-  /*
-   * If the email is not an application staff/admin account,
-   * check whether it belongs to a student account.
-   */
   const [student] = await db
     .select({
       studentId: studentUserAccounts.studentId,
@@ -113,6 +143,7 @@ export async function getApplicationSession() {
   return {
     user: {
       id: authUser.id,
+      authUserId: authUser.id,
       email,
       name: `${student.firstName} ${student.lastName}`,
       firstName: student.firstName,
@@ -121,7 +152,8 @@ export async function getApplicationSession() {
       schoolId: student.schoolId,
       studentNumber: student.studentNumber,
       mustChangePassword: student.mustChangePassword,
-    },
+      isSuperAdmin: false,
+    } satisfies ApplicationUser,
   };
 }
 

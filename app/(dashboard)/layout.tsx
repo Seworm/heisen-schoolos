@@ -11,13 +11,7 @@ export default async function DashboardLayout({
 }: {
   children: ReactNode;
 }) {
-  let school;
-
-  try {
-    school = await requireCurrentSchool();
-  } catch {
-    redirect("/login");
-  }
+  const school = await requireCurrentSchool();
 
   return (
     <div className="min-h-screen bg-[#F5F7FB] text-slate-900">
