@@ -142,11 +142,21 @@ export async function bootstrapPlatformAdmin(input: {
       };
     });
 
-    return {
+        return {
       success: true,
       schoolId: result.schoolId,
     };
   } catch (error) {
+    console.error("BOOTSTRAP_PLATFORM_ADMIN_FAILED", {
+      error,
+      message: error instanceof Error ? error.message : String(error),
+      cause:
+        error instanceof Error && error.cause
+          ? error.cause
+          : undefined,
+      stack: error instanceof Error ? error.stack : undefined,
+    });
+
     return {
       success: false,
       error:
