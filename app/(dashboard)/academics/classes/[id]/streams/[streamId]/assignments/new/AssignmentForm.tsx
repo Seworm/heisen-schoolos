@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState } from "react";
+import { useState, useActionState } from "react";
 import Link from "next/link";
 
 import { createStreamAssignment } from "./actions";
@@ -49,10 +49,20 @@ export default function AssignmentForm({
     initialState,
   );
 
+  const [assignmentType, setAssignmentType] =
+    useState<"subject" | "class_teacher">("subject");
+
   const noTeachersAvailable = teachers.length === 0;
+  const isClassTeacher = assignmentType === "class_teacher";
 
   return (
     <form action={formAction} className="space-y-6">
+      <input
+        type="hidden"
+        name="classId"
+        value={classId}
+      />
+
       <input
         type="hidden"
         name="streamId"
@@ -100,7 +110,7 @@ export default function AssignmentForm({
           name="staffId"
           required
           defaultValue=""
-          disabled={noTeachersAvailable}
+          disabled={noTeachersAvailable || pending}
           className="mt-2 block w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none transition focus:border-slate-500 focus:ring-2 focus:ring-slate-200 disabled:cursor-not-allowed disabled:bg-slate-100"
         >
           <option value="" disabled>
@@ -139,8 +149,15 @@ export default function AssignmentForm({
         <select
           id="assignmentType"
           name="assignmentType"
-          defaultValue="subject"
-          disabled={noTeachersAvailable}
+          value={assignmentType}
+          onChange={(event) =>
+            setAssignmentType(
+              event.target.value as
+                | "subject"
+                | "class_teacher",
+            )
+          }
+          disabled={noTeachersAvailable || pending}
           className="mt-2 block w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none transition focus:border-slate-500 focus:ring-2 focus:ring-slate-200 disabled:cursor-not-allowed disabled:bg-slate-100"
         >
           <option value="subject">
@@ -153,9 +170,9 @@ export default function AssignmentForm({
         </select>
 
         <p className="mt-2 text-xs text-slate-500">
-          A subject teacher is responsible for a specific
-          subject. A class teacher is responsible for the
-          overall stream.
+          A subject teacher is responsible for a
+          specific subject. A class teacher is
+          responsible for the overall stream.
         </p>
       </div>
 
@@ -168,34 +185,45 @@ export default function AssignmentForm({
         </label>
 
         <select
-  id="subjectId"
-  name="subjectId"
-  disabled={pending || subjects.length === 0}
-  className="mt-2 block w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none transition focus:border-slate-500 focus:ring-2 focus:ring-slate-200 disabled:cursor-not-allowed disabled:bg-slate-100"
->
-  <option value="">
-    {subjects.length === 0
-      ? "No curriculum subjects configured"
-      : "Select a subject"}
-  </option>
+          id="subjectId"
+          name="subjectId"
+          required={!isClassTeacher}
+          disabled={
+            pending ||
+            noTeachersAvailable ||
+            isClassTeacher ||
+            subjects.length === 0
+          }
+          defaultValue=""
+          className="mt-2 block w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none transition focus:border-slate-500 focus:ring-2 focus:ring-slate-200 disabled:cursor-not-allowed disabled:bg-slate-100"
+        >
+          <option value="">
+            {isClassTeacher
+              ? "Not required for class teacher"
+              : subjects.length === 0
+                ? "No curriculum subjects configured"
+                : "Select a subject"}
+          </option>
 
-  {subjects.map((subject) => (
-    <option
-      key={subject.id}
-      value={subject.id}
-    >
-      {subject.name}
-      {subject.code
-        ? ` (${subject.code})`
-        : ""}
-    </option>
-  ))}
-</select>
+          {!isClassTeacher &&
+            subjects.map((subject) => (
+              <option
+                key={subject.id}
+                value={subject.id}
+              >
+                {subject.name}
+                {subject.code
+                  ? ` (${subject.code})`
+                  : ""}
+              </option>
+            ))}
+        </select>
 
         <p className="mt-2 text-xs text-slate-500">
-  Subjects are determined by the curriculum configured for{" "}
-  {className}.
-</p>
+          {isClassTeacher
+            ? "Class teacher assignments do not require a subject."
+            : `Subjects are determined by the curriculum configured for ${className}.`}
+        </p>
       </div>
 
       <div className="rounded-lg bg-slate-50 px-4 py-3">

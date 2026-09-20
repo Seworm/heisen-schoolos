@@ -34,7 +34,7 @@ export default function StaffForm() {
         </h2>
 
         <p className="mt-1 text-sm text-slate-500">
-          Enter the staff member's basic details.
+          Enter the staff member&apos;s basic details.
         </p>
       </div>
 
@@ -321,3 +321,4 @@ export default function StaffForm() {
     </form>
   );
 }
+

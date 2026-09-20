@@ -279,3 +279,4 @@ function formatPublishedDate(date: Date) {
     year: "numeric",
   }).format(date);
 }
+

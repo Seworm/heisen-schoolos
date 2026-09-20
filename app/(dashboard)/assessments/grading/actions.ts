@@ -309,14 +309,14 @@ export async function saveGradingConfiguration(
           !Number.isFinite(
             item.weightPercent,
           ) ||
-          item.weightPercent <= 0 ||
+          item.weightPercent < 0 ||
           item.weightPercent > 100,
       )
     ) {
       return {
         success: false,
         error:
-          "Every assessment weight must be greater than 0% and no more than 100%.",
+          "Every assessment weight must be between 0% and 100%.",
       };
     }
 
@@ -405,128 +405,25 @@ export async function saveGradingConfiguration(
 
     /*
      * ------------------------------------------------------------
-     * Map assessment type -> category
-     * ------------------------------------------------------------
-     */
-
-    const assessmentTypeCategoryMap =
-      new Map<
-        string,
-        string
-      >(
-        assessmentTypeRecords.map(
-          (type) => [
-            type.id,
-            type.category,
-          ],
-        ),
-      );
-
-    /*
-     * ------------------------------------------------------------
-     * Enforce 50:50 grading model
+     * Validate the overall weighting.
      *
-     * Continuous assessment = 50%
-     * Examination = 50%
-     * Total = 100%
+     * Category (continuous assessment vs examination) is
+     * descriptive only. Schools may use 50/50, 40/60, 60/40,
+     * 100/0 or other valid combinations as long as all
+     * configured component weights total exactly 100%.
      * ------------------------------------------------------------
      */
+    const totalWeight = Math.round(
+      normalizedItems.reduce(
+        (sum, item) => sum + item.weightPercent,
+        0,
+      ) * 100,
+    ) / 100;
 
-    let continuousAssessmentWeight =
-      0;
-
-    let examinationWeight = 0;
-
-    for (const item of normalizedItems) {
-      const category =
-        assessmentTypeCategoryMap.get(
-          item.assessmentTypeId,
-        );
-
-      if (!category) {
-        return {
-          success: false,
-          error:
-            "One or more assessment types do not belong to this school.",
-        };
-      }
-
-      if (
-        category ===
-        "continuous_assessment"
-      ) {
-        continuousAssessmentWeight +=
-          item.weightPercent;
-      } else if (
-        category ===
-        "examination"
-      ) {
-        examinationWeight +=
-          item.weightPercent;
-      } else {
-        return {
-          success: false,
-          error:
-            "Unsupported assessment category.",
-        };
-      }
-    }
-
-    continuousAssessmentWeight =
-      Math.round(
-        continuousAssessmentWeight *
-          100,
-      ) / 100;
-
-    examinationWeight =
-      Math.round(
-        examinationWeight *
-          100,
-      ) / 100;
-
-    /*
-     * Class Score must be exactly 50%.
-     */
-    if (
-      continuousAssessmentWeight !==
-      50
-    ) {
+    if (Math.abs(totalWeight - 100) > 0.001) {
       return {
         success: false,
-        error:
-          `Class Score components must total exactly 50%. Current total is ${continuousAssessmentWeight}%.`,
-      };
-    }
-
-    /*
-     * Examination must be exactly 50%.
-     */
-    if (
-      examinationWeight !==
-      50
-    ) {
-      return {
-        success: false,
-        error:
-          `Examination components must total exactly 50%. Current total is ${examinationWeight}%.`,
-      };
-    }
-
-    /*
-     * Final safety check.
-     */
-    const totalWeight =
-      Math.round(
-        (continuousAssessmentWeight +
-          examinationWeight) *
-          100,
-      ) / 100;
-
-    if (totalWeight !== 100) {
-      return {
-        success: false,
-        error:
-          "All assessment weights must total exactly 100%.",
+        error: `Assessment weights must total exactly 100%. Current total is ${totalWeight}%.`,
       };
     }
 
@@ -894,3 +791,6 @@ export async function saveGradingConfiguration(
     };
   }
 }
+
+
+

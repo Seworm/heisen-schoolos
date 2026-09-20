@@ -16,19 +16,10 @@ export default async function ClassesPage() {
 
   const classIds = classes.map((classLevel) => classLevel.id);
 
-  const allStreams =
-    classIds.length > 0
-      ? await db
-          .select()
-          .from(streams)
-          .where(
-            eq(streams.classLevelId, classIds[0]),
-          )
-      : [];
 
   const streamsByClass = new Map<
     string,
-    typeof allStreams
+    typeof streams.$inferSelect[]
   >();
 
   if (classIds.length > 0) {
@@ -187,3 +178,5 @@ export default async function ClassesPage() {
     </div>
   );
 }
+
+

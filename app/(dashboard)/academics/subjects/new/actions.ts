@@ -89,3 +89,4 @@ export async function createSubject(
 
   redirect("/academics/subjects");
 }
+

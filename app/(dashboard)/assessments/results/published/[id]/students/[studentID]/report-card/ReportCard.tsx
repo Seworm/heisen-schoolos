@@ -455,7 +455,7 @@ export default function ReportCard({
           <div className="grid grid-cols-2 gap-4">
             <div className="avoid-break rounded-lg border border-slate-300 p-4">
               <p className="text-[9px] font-bold uppercase tracking-wider text-slate-500">
-                Class Teacher's Remark
+                Class Teacher&apos;s Remark
               </p>
 
               <p className="mt-3 min-h-[58px] whitespace-pre-wrap text-sm leading-6">
@@ -465,7 +465,7 @@ export default function ReportCard({
 
             <div className="avoid-break rounded-lg border border-slate-300 p-4">
               <p className="text-[9px] font-bold uppercase tracking-wider text-slate-500">
-                Headteacher's Remark
+                Headteacher&apos;s Remark
               </p>
 
               <p className="mt-3 min-h-[58px] whitespace-pre-wrap text-sm leading-6">

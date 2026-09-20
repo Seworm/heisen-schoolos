@@ -60,7 +60,7 @@ export default function StaffEditForm({
         </h2>
 
         <p className="mt-1 text-sm text-slate-500">
-          Update the staff member's basic details.
+          Update the staff member&apos;s basic details.
         </p>
       </div>
 

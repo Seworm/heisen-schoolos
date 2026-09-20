@@ -43,6 +43,20 @@
       "when": 1789402676232,
       "tag": "0005_misty_ogun",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1789808328349,
+      "tag": "0006_freezing_roland_deschain",
+      "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1789898380147,
+      "tag": "0007_silly_saracen",
+      "breakpoints": true
     }
   ]
 }

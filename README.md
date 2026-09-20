@@ -1,36 +1,162 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Heisen SchoolOS
 
-## Getting Started
+Heisen SchoolOS is a multi-school operating system for Ghanaian basic schools, built on Next.js App Router, React, TypeScript, Neon PostgreSQL, Drizzle ORM and Neon Auth.
 
-First, run the development server:
+## Architecture
+
+- **Next.js 16 App Router** with Server Components by default.
+- **Neon PostgreSQL + Drizzle ORM** for relational school data.
+- **Neon Auth** for staff and student authentication.
+- **Zod** for server-side input validation.
+- **Lucide React** for interface icons.
+- School tenancy is derived from the authenticated user's active membership; client-supplied `schoolId` values are not trusted for authorization.
+- Existing academic/result/report-card architecture is retained and extended rather than duplicated.
+
+## Environment
+
+Copy `.env.example` to `.env.local` and provide:
+
+```env
+DATABASE_URL=postgresql://USER:PASSWORD@HOST/DB?sslmode=require
+NEON_AUTH_BASE_URL=https://YOUR-NEON-AUTH-URL
+NEXT_PUBLIC_NEON_AUTH_URL=https://YOUR-NEON-AUTH-URL
+NEON_AUTH_COOKIE_SECRET=at-least-32-random-characters
+```
+
+Enable Neon Auth for the Neon project before starting the application.
+
+## Install
+
+```bash
+npm install
+```
+
+The current development environment used for this repository could not reach the npm registry, so dependency installation and the final production verification must be run in an environment with registry access.
+
+## Database
+
+The repository contains the existing migration history plus:
+
+```text
+dizzle/018_platform_foundation.sql
+```
+
+Apply the platform foundation migration with:
+
+```bash
+npm run db:migrate:platform
+```
+
+It adds school settings, profiles, documents, student status history, fee assignments, scholarships, timetable infrastructure, communications, notifications, audit logs, promotion decisions and import history, and extends student records and membership roles.
+
+## Development
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Verification
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+npm run typecheck
+npm run lint
+npm test
+npm run build
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+or:
 
-## Learn More
+```bash
+npm run verify
+```
 
-To learn more about Next.js, take a look at the following resources:
+## Assessment weighting
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Assessment **maximum raw score** and **assessment weight** are separate concepts.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Example:
 
-## Deploy on Vercel
+```text
+Class Test
+Maximum Score: 50
+Weight: 50%
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Examination
+Maximum Score: 100
+Weight: 50%
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+A student scoring 35/50 in the class test receives 70%, and its 50% weight contributes 35 points to the final result.
+
+The configuration validator requires the sum of all component weights to equal exactly 100%. It does not force a 50/50 class-test/examination split. Therefore valid configurations include 50/50, 40/60, 60/40 and 100/0.
+
+Raw scores must satisfy:
+
+```text
+0 <= raw score <= maximum raw score
+```
+
+## Multi-tenancy and authorization
+
+School-scoped operations use the authenticated user's active membership. Reusable helpers are in:
+
+```text
+src/lib/authorization.ts
+src/lib/current-school.ts
+src/lib/tenant.ts
+```
+
+Sensitive operations should use `requireRole()`/`requireTeacherScope()` before touching school data and should write an audit event through `writeAuditLog()`.
+
+## Authentication bootstrap
+
+Neon Auth must have an initial administrator account configured in the Neon Auth project. Staff records in the application database are linked to their Neon Auth identity by normalized email. The application then resolves the local school membership and role server-side.
+
+Student activation verifies the one-time hashed activation code, creates the Neon Auth email/password account, activates the local student account and records an audit event. The raw activation code is never stored.
+
+## Current implementation areas
+
+The repository already contains substantial working implementations for:
+
+- academic years and terms
+- class levels and streams
+- subjects and class subjects
+- teacher assignments
+- student admission and guardians
+- enrollment and placement
+- attendance
+- assessment periods and assessments
+- score entry
+- configurable grading
+- result lifecycle and publication
+- report cards and print layouts
+- student activation
+- fee structures, invoices and payments
+
+The platform layer adds:
+
+- secure school-context resolution
+- expanded school roles
+- audit logging
+- school settings
+- documents
+- scholarships and fee assignments
+- timetable periods, rooms and conflict constraints
+- announcements, notifications and messages
+- promotion decision history
+- validated CSV student import infrastructure
+- global school-scoped search API
+- administration dashboard and staff access workflow
+
+## Important production checks
+
+Before production deployment:
+
+1. Configure Neon Auth and its production cookie secret.
+2. Apply all migrations in order against a staging database first.
+3. Create the first platform/school administrator in Neon Auth and map the account to a local school membership.
+4. Run `npm run typecheck`, `npm run lint`, `npm test` and `npm run build`.
+5. Exercise cross-school authorization tests using two separate school memberships.
+6. Verify report-card printing on an actual A4 browser print/PDF workflow.
+7. Configure an object-storage provider for document `storageKey` records before enabling uploads.
+8. Configure transactional email for password recovery and student activation communications.

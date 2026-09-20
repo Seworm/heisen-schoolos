@@ -108,3 +108,4 @@ export async function createAcademicYear(
 
   redirect("/academics/years");
 }
+

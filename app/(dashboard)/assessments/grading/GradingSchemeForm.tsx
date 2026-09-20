@@ -1,5 +1,7 @@
 "use client";
 
+import Link from "next/link";
+
 import { useActionState } from "react";
 
 import { createGradingScheme } from "./actions";
@@ -62,12 +64,12 @@ export default function GradingSchemeForm() {
       </div>
 
       <div className="flex justify-end gap-3 border-t border-slate-100 pt-5">
-        <a
+        <Link
           href="/assessments/grading"
           className="rounded-xl border border-slate-200 px-4 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50"
         >
           Cancel
-        </a>
+        </Link>
 
         <button
           type="submit"
@@ -82,3 +84,5 @@ export default function GradingSchemeForm() {
     </form>
   );
 }
+
+

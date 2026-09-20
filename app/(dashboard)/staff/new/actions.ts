@@ -191,3 +191,4 @@ export async function createStaff(
 
   redirect(`/staff/${createdStaff.id}`);
 }
+

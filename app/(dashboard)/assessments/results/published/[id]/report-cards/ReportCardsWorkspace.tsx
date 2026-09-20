@@ -72,7 +72,7 @@ export default function ReportCardsWorkspace({
   publication,
   students,
 }: Props) {
-  const [rows, setRows] =
+  const [rows] =
     useState(students);
 
   const [search, setSearch] =
@@ -143,13 +143,6 @@ export default function ReportCardsWorkspace({
     filteredRows.filter((row) =>
       selected.has(
         row.reportCardId,
-      ),
-    );
-
-  const selectedStatuses =
-    new Set(
-      selectedRows.map(
-        (row) => row.status,
       ),
     );
 

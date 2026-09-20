@@ -19,6 +19,9 @@ type FormState = {
   error?: string;
 };
 
+const UUID_REGEX =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
 export async function createStreamAssignment(
   _previousState: FormState,
   formData: FormData,
@@ -51,6 +54,9 @@ export async function createStreamAssignment(
 
   const subjectId = subjectIdValue || null;
 
+  /*
+   * Basic required-field validation.
+   */
   if (
     !classId ||
     !streamId ||
@@ -63,6 +69,33 @@ export async function createStreamAssignment(
     };
   }
 
+  /*
+   * Validate all database identifiers before sending them
+   * to PostgreSQL.
+   */
+  if (
+    !UUID_REGEX.test(classId) ||
+    !UUID_REGEX.test(streamId) ||
+    !UUID_REGEX.test(academicYearId) ||
+    !UUID_REGEX.test(staffId)
+  ) {
+    return {
+      error: "Invalid assignment details.",
+    };
+  }
+
+  if (
+    subjectId &&
+    !UUID_REGEX.test(subjectId)
+  ) {
+    return {
+      error: "Invalid subject.",
+    };
+  }
+
+  /*
+   * Validate assignment type.
+   */
   if (
     assignmentType !== "subject" &&
     assignmentType !== "class_teacher"
@@ -72,6 +105,9 @@ export async function createStreamAssignment(
     };
   }
 
+  /*
+   * Subject teachers must have a subject.
+   */
   if (
     assignmentType === "subject" &&
     !subjectId
@@ -82,6 +118,9 @@ export async function createStreamAssignment(
     };
   }
 
+  /*
+   * Class teachers must not have a subject.
+   */
   if (
     assignmentType === "class_teacher" &&
     subjectId
@@ -93,8 +132,8 @@ export async function createStreamAssignment(
   }
 
   /*
-   * Verify the stream belongs to the requested class
-   * and the class belongs to the current school.
+   * Verify that the stream belongs to the requested
+   * class and that the class belongs to the current school.
    */
   const [streamResult] = await db
     .select({
@@ -125,7 +164,8 @@ export async function createStreamAssignment(
   }
 
   /*
-   * Verify the academic year belongs to this school.
+   * Verify that the academic year belongs to this school
+   * and is the current academic year.
    */
   const [academicYear] = await db
     .select({
@@ -142,18 +182,23 @@ export async function createStreamAssignment(
           academicYears.schoolId,
           school.id,
         ),
+        eq(
+          academicYears.isCurrent,
+          true,
+        ),
       ),
     )
     .limit(1);
 
   if (!academicYear) {
     return {
-      error: "Academic year not found.",
+      error:
+        "The selected academic year is not the current academic year.",
     };
   }
 
   /*
-   * Verify the teacher belongs to this school
+   * Verify that the teacher belongs to this school
    * and is currently active.
    */
   const [teacher] = await db
@@ -177,8 +222,9 @@ export async function createStreamAssignment(
   }
 
   /*
-   * Subject assignment must belong to the school's
-   * subject catalogue AND be offered to this class.
+   * Subject assignments must use a subject from the
+   * school's subject catalogue and the subject must be
+   * offered to this class.
    */
   if (subjectId) {
     const [classSubject] = await db
@@ -258,7 +304,8 @@ export async function createStreamAssignment(
   }
 
   /*
-   * Prevent duplicate subject assignments.
+   * Prevent the same teacher from being assigned to the
+   * same subject in the same stream and academic year.
    */
   if (subjectId) {
     const [duplicate] = await db
@@ -297,7 +344,8 @@ export async function createStreamAssignment(
   }
 
   /*
-   * Prevent duplicate class-teacher assignment.
+   * Prevent duplicate class-teacher assignments for
+   * the same teacher, stream and academic year.
    */
   if (assignmentType === "class_teacher") {
     const [duplicateClassTeacher] =
@@ -336,6 +384,9 @@ export async function createStreamAssignment(
     }
   }
 
+  /*
+   * Create the assignment.
+   */
   try {
     await db.insert(teacherAssignments).values({
       staffId,
@@ -357,6 +408,9 @@ export async function createStreamAssignment(
     };
   }
 
+  /*
+   * Return to the stream detail page after success.
+   */
   redirect(
     `/academics/classes/${classId}/streams/${streamId}`,
   );

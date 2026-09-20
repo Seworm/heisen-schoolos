@@ -1,5 +1,21 @@
 export const dynamic = "force-dynamic";
+
+import {
+  Activity,
+  ArrowRight,
+  BarChart3,
+  BookOpen,
+  Building2,
+  CalendarDays,
+  CheckCircle2,
+  ClipboardList,
+  GraduationCap,
+  Users,
+  UsersRound,
+} from "lucide-react";
+import Link from "next/link";
 import { and, count, eq } from "drizzle-orm";
+
 import { db } from "@/db";
 import {
   academicYears,
@@ -25,31 +41,31 @@ export default async function Home() {
     subjectCountResult,
   ] = await Promise.all([
     db
-  .select()
-  .from(academicYears)
-  .where(
-    and(
-      eq(academicYears.schoolId, school.id),
-      eq(academicYears.isCurrent, true),
-    ),
-  )
-  .limit(1),
+      .select()
+      .from(academicYears)
+      .where(
+        and(
+          eq(academicYears.schoolId, school.id),
+          eq(academicYears.isCurrent, true),
+        ),
+      )
+      .limit(1),
 
     db
-  .select()
-  .from(terms)
-  .innerJoin(
-    academicYears,
-    eq(terms.academicYearId, academicYears.id),
-  )
-  .where(
-    and(
-      eq(academicYears.schoolId, school.id),
-      eq(academicYears.isCurrent, true),
-      eq(terms.isCurrent, true),
-    ),
-  )
-  .limit(1),
+      .select()
+      .from(terms)
+      .innerJoin(
+        academicYears,
+        eq(terms.academicYearId, academicYears.id),
+      )
+      .where(
+        and(
+          eq(academicYears.schoolId, school.id),
+          eq(academicYears.isCurrent, true),
+          eq(terms.isCurrent, true),
+        ),
+      )
+      .limit(1),
 
     db
       .select({ value: count() })
@@ -88,142 +104,361 @@ export default async function Home() {
     {
       label: "Students",
       value: studentCountResult[0]?.value ?? 0,
+      description: "Enrolled students",
+      icon: Users,
+      href: "/students",
     },
     {
       label: "Staff",
       value: staffCountResult[0]?.value ?? 0,
+      description: "Teaching & support staff",
+      icon: UsersRound,
+      href: "/staff",
     },
     {
       label: "Class Levels",
       value: classLevelCountResult[0]?.value ?? 0,
+      description: "Configured levels",
+      icon: GraduationCap,
+      href: "/academics/classes",
     },
     {
       label: "Streams",
       value: streamCountResult[0]?.value ?? 0,
+      description: "Active streams",
+      icon: Building2,
+      href: "/academics/classes",
     },
     {
       label: "Subjects",
       value: subjectCountResult[0]?.value ?? 0,
+      description: "Configured subjects",
+      icon: BookOpen,
+      href: "/academics/subjects",
     },
   ];
 
   return (
-    <main className="min-h-screen bg-slate-50">
-      <div className="mx-auto max-w-7xl px-6 py-8 lg:px-8">
-        <header className="mb-8">
-          <p className="text-sm font-medium text-slate-500">
-            SchoolOS Dashboard
-          </p>
+    <div className="space-y-6">
+      {/* PAGE HEADER */}
+      <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+        <div className="relative px-6 py-7 sm:px-8">
+          <div className="absolute right-0 top-0 h-40 w-40 translate-x-12 -translate-y-12 rounded-full bg-blue-50" />
+          <div className="absolute right-20 top-12 h-24 w-24 rounded-full bg-indigo-50" />
 
-          <h1 className="mt-1 text-3xl font-semibold tracking-tight text-slate-950">
-            {school.name}
-          </h1>
+          <div className="relative">
+            <div className="flex flex-col justify-between gap-6 lg:flex-row lg:items-end">
+              <div className="min-w-0">
+                <div className="mb-3 inline-flex items-center gap-2 rounded-md bg-blue-50 px-2.5 py-1.5 text-xs font-semibold text-blue-700">
+                  <Activity className="h-3.5 w-3.5" />
+                  SchoolOS Dashboard
+                </div>
 
-          <div className="mt-3 flex flex-wrap gap-x-6 gap-y-2 text-sm text-slate-600">
-            <span>
-              Academic Year:{" "}
-              <strong className="font-medium text-slate-900">
-                {currentYear?.name ?? "Not set"}
-              </strong>
-            </span>
+                <h1 className="max-w-3xl text-2xl font-bold tracking-tight text-slate-950 sm:text-3xl">
+                  {school.name}
+                </h1>
 
-            <span>
-              Term:{" "}
-              <strong className="font-medium text-slate-900">
-                {currentTerm?.name ?? "Not set"}
-              </strong>
-            </span>
+                <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-500">
+                  Manage your school&apos;s academic structure, people,
+                  assessments and results from one central workspace.
+                </p>
+              </div>
+
+              <div className="flex shrink-0 flex-wrap gap-3">
+                <Link
+                  href="/academics/classes"
+                  className="inline-flex items-center justify-center gap-2 rounded-lg bg-blue-700 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                >
+                  <GraduationCap className="h-4 w-4" />
+                  Manage Classes
+                </Link>
+
+                <Link
+                  href="/students"
+                  className="inline-flex items-center justify-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 shadow-sm transition-colors hover:bg-slate-50 hover:text-slate-950 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                >
+                  <Users className="h-4 w-4" />
+                  Students
+                </Link>
+              </div>
+            </div>
+
+            {/* Current academic context */}
+            <div className="mt-7 grid gap-3 sm:grid-cols-2 lg:max-w-2xl">
+              <div className="flex items-center gap-3 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3">
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-white text-blue-700 shadow-sm ring-1 ring-slate-200">
+                  <CalendarDays className="h-4 w-4" />
+                </div>
+
+                <div className="min-w-0">
+                  <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                    Academic Year
+                  </p>
+
+                  <p className="mt-0.5 truncate text-sm font-semibold text-slate-900">
+                    {currentYear?.name ?? "Not set"}
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-3 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3">
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-white text-indigo-700 shadow-sm ring-1 ring-slate-200">
+                  <ClipboardList className="h-4 w-4" />
+                </div>
+
+                <div className="min-w-0">
+                  <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                    Current Term
+                  </p>
+
+                  <p className="mt-0.5 truncate text-sm font-semibold text-slate-900">
+                    {currentTerm?.name ?? "Not set"}
+                  </p>
+                </div>
+              </div>
+            </div>
           </div>
-        </header>
+        </div>
+      </section>
 
-        <section
-          aria-label="School statistics"
-          className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5"
-        >
-          {stats.map((stat) => (
-            <div
-              key={stat.label}
-              className="rounded-xl border border-slate-200 bg-white p-5"
+      {/* STATISTICS */}
+      <section aria-label="School statistics">
+        <div className="mb-3 flex items-center justify-between">
+          <div>
+            <h2 className="text-sm font-bold text-slate-950">
+              School overview
+            </h2>
+
+            <p className="mt-0.5 text-xs text-slate-500">
+              Current configuration and population
+            </p>
+          </div>
+        </div>
+
+        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
+          {stats.map((stat) => {
+            const Icon = stat.icon;
+
+            return (
+              <Link
+                key={stat.label}
+                href={stat.href}
+                className="group rounded-xl border border-slate-200 bg-white p-5 shadow-sm transition-all hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+              >
+                <div className="flex items-start justify-between gap-4">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-50 text-blue-700">
+                    <Icon className="h-5 w-5" strokeWidth={2} />
+                  </div>
+
+                  <ArrowRight className="h-4 w-4 text-slate-300 transition-transform group-hover:translate-x-0.5 group-hover:text-blue-600" />
+                </div>
+
+                <p className="mt-5 text-3xl font-bold tracking-tight text-slate-950">
+                  {stat.value}
+                </p>
+
+                <p className="mt-1 text-sm font-semibold text-slate-800">
+                  {stat.label}
+                </p>
+
+                <p className="mt-1 text-xs text-slate-500">
+                  {stat.description}
+                </p>
+              </Link>
+            );
+          })}
+        </div>
+      </section>
+
+      {/* LOWER DASHBOARD */}
+      <section className="grid gap-6 lg:grid-cols-2">
+        {/* Academic structure */}
+        <div className="rounded-xl border border-slate-200 bg-white shadow-sm">
+          <div className="flex items-start justify-between border-b border-slate-100 px-6 py-5">
+            <div>
+              <div className="flex items-center gap-2">
+                <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-indigo-50 text-indigo-700">
+                  <GraduationCap className="h-4.5 w-4.5" />
+                </div>
+
+                <h2 className="text-sm font-bold text-slate-950">
+                  Academic structure
+                </h2>
+              </div>
+
+              <p className="mt-2 text-xs leading-5 text-slate-500">
+                The foundational academic structure currently configured for
+                this school.
+              </p>
+            </div>
+
+            <Link
+              href="/academics/classes"
+              className="inline-flex items-center gap-1 text-xs font-semibold text-blue-700 hover:text-blue-800"
             >
-              <p className="text-sm font-medium text-slate-500">
-                {stat.label}
-              </p>
+              View
+              <ArrowRight className="h-3.5 w-3.5" />
+            </Link>
+          </div>
 
-              <p className="mt-2 text-3xl font-semibold tracking-tight text-slate-950">
-                {stat.value}
-              </p>
+          <div className="divide-y divide-slate-100 px-6">
+            <div className="flex items-center justify-between py-4">
+              <div className="flex items-center gap-3">
+                <div className="h-2 w-2 rounded-full bg-blue-600" />
+
+                <span className="text-sm text-slate-600">
+                  Class levels
+                </span>
+              </div>
+
+              <span className="text-sm font-bold text-slate-950">
+                {classLevelCountResult[0]?.value ?? 0}
+              </span>
             </div>
-          ))}
-        </section>
 
-        <section className="mt-8 grid gap-6 lg:grid-cols-2">
-          <div className="rounded-xl border border-slate-200 bg-white p-6">
-            <h2 className="text-base font-semibold text-slate-950">
-              Academic structure
-            </h2>
+            <div className="flex items-center justify-between py-4">
+              <div className="flex items-center gap-3">
+                <div className="h-2 w-2 rounded-full bg-indigo-600" />
 
-            <p className="mt-1 text-sm text-slate-500">
-              The foundational structure currently configured for this school.
-            </p>
-
-            <div className="mt-6 space-y-4 text-sm">
-              <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-                <span className="text-slate-600">Class levels</span>
-                <span className="font-medium text-slate-950">
-                  {classLevelCountResult[0]?.value ?? 0}
+                <span className="text-sm text-slate-600">
+                  Streams
                 </span>
               </div>
 
-              <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-                <span className="text-slate-600">Streams</span>
-                <span className="font-medium text-slate-950">
-                  {streamCountResult[0]?.value ?? 0}
+              <span className="text-sm font-bold text-slate-950">
+                {streamCountResult[0]?.value ?? 0}
+              </span>
+            </div>
+
+            <div className="flex items-center justify-between py-4">
+              <div className="flex items-center gap-3">
+                <div className="h-2 w-2 rounded-full bg-slate-500" />
+
+                <span className="text-sm text-slate-600">
+                  Subjects
                 </span>
               </div>
 
-              <div className="flex items-center justify-between">
-                <span className="text-slate-600">Subjects</span>
-                <span className="font-medium text-slate-950">
-                  {subjectCountResult[0]?.value ?? 0}
-                </span>
+              <span className="text-sm font-bold text-slate-950">
+                {subjectCountResult[0]?.value ?? 0}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        {/* System status */}
+        <div className="rounded-xl border border-slate-200 bg-white shadow-sm">
+          <div className="border-b border-slate-100 px-6 py-5">
+            <div className="flex items-center gap-2">
+              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-emerald-50 text-emerald-700">
+                <CheckCircle2 className="h-4.5 w-4.5" />
+              </div>
+
+              <div>
+                <h2 className="text-sm font-bold text-slate-950">
+                  System status
+                </h2>
+
+                <p className="mt-0.5 text-xs text-slate-500">
+                  Current application environment
+                </p>
               </div>
             </div>
           </div>
 
-          <div className="rounded-xl border border-slate-200 bg-white p-6">
-            <h2 className="text-base font-semibold text-slate-950">
-              System status
-            </h2>
+          <div className="divide-y divide-slate-100 px-6">
+            <div className="flex items-center justify-between py-4">
+              <div className="flex items-center gap-3">
+                <span className="relative flex h-2.5 w-2.5">
+                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-60" />
+                  <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-emerald-500" />
+                </span>
 
-            <p className="mt-1 text-sm text-slate-500">
-              Current development environment.
-            </p>
-
-            <div className="mt-6 space-y-4 text-sm">
-              <div className="flex items-center justify-between">
-                <span className="text-slate-600">Database</span>
-                <span className="font-medium text-emerald-700">
-                  Connected
+                <span className="text-sm text-slate-600">
+                  Database
                 </span>
               </div>
 
-              <div className="flex items-center justify-between">
-                <span className="text-slate-600">School context</span>
-                <span className="font-medium text-emerald-700">
-                  Active
+              <span className="text-xs font-bold text-emerald-700">
+                Connected
+              </span>
+            </div>
+
+            <div className="flex items-center justify-between py-4">
+              <div className="flex items-center gap-3">
+                <span className="h-2.5 w-2.5 rounded-full bg-emerald-500" />
+
+                <span className="text-sm text-slate-600">
+                  School context
                 </span>
               </div>
 
-              <div className="flex items-center justify-between">
-                <span className="text-slate-600">Authentication</span>
-                <span className="font-medium text-amber-700">
-                  Development mode
+              <span className="text-xs font-bold text-emerald-700">
+                Active
+              </span>
+            </div>
+
+            <div className="flex items-center justify-between py-4">
+              <div className="flex items-center gap-3">
+                <span className="h-2.5 w-2.5 rounded-full bg-amber-500" />
+
+                <span className="text-sm text-slate-600">
+                  Authentication
                 </span>
               </div>
+
+              <span className="text-xs font-bold text-amber-700">
+                Development mode
+              </span>
             </div>
           </div>
-        </section>
-      </div>
-    </main>
+        </div>
+      </section>
+
+      {/* Quick actions */}
+      <section className="rounded-xl border border-slate-200 bg-slate-900 p-6 shadow-sm sm:p-7">
+        <div className="flex flex-col justify-between gap-5 lg:flex-row lg:items-center">
+          <div>
+            <p className="text-xs font-bold uppercase tracking-[0.12em] text-blue-400">
+              Quick actions
+            </p>
+
+            <h2 className="mt-1 text-lg font-bold tracking-tight text-white">
+              Continue managing your school
+            </h2>
+
+            <p className="mt-1 text-sm text-slate-400">
+              Jump directly into the areas you use most.
+            </p>
+          </div>
+
+          <div className="flex flex-wrap gap-2">
+            <Link
+              href="/students"
+              className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2 focus:ring-offset-slate-900"
+            >
+              <Users className="h-4 w-4" />
+              Students
+            </Link>
+
+            <Link
+              href="/assessments/results"
+              className="inline-flex items-center gap-2 rounded-lg bg-white px-4 py-2.5 text-sm font-semibold text-slate-900 transition-colors hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-slate-900"
+            >
+              <BarChart3 className="h-4 w-4" />
+              Results
+            </Link>
+
+            <Link
+              href="/academics/subjects"
+              className="inline-flex items-center gap-2 rounded-lg border border-slate-600 bg-transparent px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:border-slate-500 hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2 focus:ring-offset-slate-900"
+            >
+              <BookOpen className="h-4 w-4" />
+              Subjects
+            </Link>
+          </div>
+        </div>
+      </section>
+    </div>
   );
 }

@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { and, asc, eq } from "drizzle-orm";
+import { asc, eq } from "drizzle-orm";
 
 import { db } from "@/db";
 import {
@@ -143,3 +143,5 @@ export default async function AssessmentPeriodsPage() {
     </div>
   );
 }
+
+

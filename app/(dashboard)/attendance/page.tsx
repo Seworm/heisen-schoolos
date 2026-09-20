@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { asc, eq } from "drizzle-orm";
+import { asc, desc, eq } from "drizzle-orm";
 
 import { db } from "@/db";
 import {
@@ -11,11 +11,27 @@ import { requireCurrentSchool } from "@/lib/current-school";
 
 export const dynamic = "force-dynamic";
 
+type ClassWithStreams = {
+  id: string;
+  name: string;
+  category: string;
+  sortOrder: number;
+  streams: {
+    id: string;
+    name: string;
+  }[];
+};
+
 export default async function AttendancePage() {
   const school = await requireCurrentSchool();
 
   const [academicYear] = await db
-    .select()
+    .select({
+      id: academicYears.id,
+      name: academicYears.name,
+      startDate: academicYears.startDate,
+      endDate: academicYears.endDate,
+    })
     .from(academicYears)
     .where(
       eq(
@@ -24,7 +40,7 @@ export default async function AttendancePage() {
       ),
     )
     .orderBy(
-      asc(academicYears.startDate),
+      desc(academicYears.startDate),
     )
     .limit(1);
 
@@ -58,15 +74,7 @@ export default async function AttendancePage() {
 
   const classes = new Map<
     string,
-    {
-      id: string;
-      name: string;
-      category: string;
-      streams: {
-        id: string;
-        name: string;
-      }[];
-    }
+    ClassWithStreams
   >();
 
   for (const row of classRows) {
@@ -75,14 +83,18 @@ export default async function AttendancePage() {
         id: row.id,
         name: row.name,
         category: row.category,
+        sortOrder: row.sortOrder,
         streams: [],
       });
     }
 
-    if (row.streamId) {
+    if (
+      row.streamId &&
+      row.streamName
+    ) {
       classes.get(row.id)!.streams.push({
         id: row.streamId,
-        name: row.streamName!,
+        name: row.streamName,
       });
     }
   }
@@ -93,7 +105,6 @@ export default async function AttendancePage() {
 
   return (
     <div className="mx-auto max-w-6xl px-6 py-8 lg:px-8">
-      {/* Header */}
       <div className="mb-8">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div>
@@ -105,14 +116,14 @@ export default async function AttendancePage() {
               Attendance Register
             </h1>
 
-            <p className="mt-2 max-w-2xl text-sm text-slate-500">
+            <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-500">
               Select a class and stream to take or review
-              daily attendance.
+              daily student attendance.
             </p>
           </div>
 
           {academicYear ? (
-            <div className="rounded-lg border border-slate-200 bg-white px-4 py-3">
+            <div className="rounded-lg border border-slate-200 bg-white px-4 py-3 shadow-sm">
               <p className="text-xs font-medium uppercase tracking-wide text-slate-400">
                 Academic year
               </p>
@@ -120,60 +131,65 @@ export default async function AttendancePage() {
               <p className="mt-1 text-sm font-semibold text-slate-900">
                 {academicYear.name}
               </p>
+
+              <p className="mt-1 text-xs text-slate-500">
+                {academicYear.startDate} –{" "}
+                {academicYear.endDate}
+              </p>
             </div>
           ) : null}
         </div>
       </div>
 
-      {/* No academic year */}
       {!academicYear ? (
         <section className="rounded-xl border border-amber-200 bg-amber-50 p-6">
           <h2 className="font-semibold text-amber-950">
             No academic year configured
           </h2>
 
-          <p className="mt-2 text-sm text-amber-800">
+          <p className="mt-2 max-w-xl text-sm leading-6 text-amber-800">
             Create an academic year before taking
-            attendance.
+            attendance. Attendance records must belong to
+            an academic year.
           </p>
 
           <Link
             href="/academics/years/new"
-            className="mt-4 inline-flex rounded-lg bg-slate-950 px-4 py-2.5 text-sm font-semibold text-white hover:bg-slate-800"
+            className="mt-4 inline-flex rounded-lg bg-slate-950 px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-slate-800"
           >
             Create academic year
           </Link>
         </section>
       ) : classList.length === 0 ? (
-        /* No classes */
-        <section className="rounded-xl border border-slate-200 bg-white p-12 text-center">
-          <h2 className="font-semibold text-slate-950">
-            No classes configured
-          </h2>
+        <section className="rounded-xl border border-slate-200 bg-white p-12 text-center shadow-sm">
+          <div className="mx-auto max-w-md">
+            <h2 className="font-semibold text-slate-950">
+              No classes configured
+            </h2>
 
-          <p className="mt-2 text-sm text-slate-500">
-            Configure classes and streams before taking
-            attendance.
-          </p>
+            <p className="mt-2 text-sm leading-6 text-slate-500">
+              Configure classes and streams before taking
+              attendance.
+            </p>
 
-          <Link
-            href="/academics/classes"
-            className="mt-5 inline-flex rounded-lg bg-slate-950 px-4 py-2.5 text-sm font-semibold text-white hover:bg-slate-800"
-          >
-            Manage classes
-          </Link>
+            <Link
+              href="/academics/classes"
+              className="mt-5 inline-flex rounded-lg bg-slate-950 px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-slate-800"
+            >
+              Manage classes
+            </Link>
+          </div>
         </section>
       ) : (
-        /* Classes */
         <div className="space-y-4">
           {classList.map((classLevel) => (
             <section
               key={classLevel.id}
-              className="overflow-hidden rounded-xl border border-slate-200 bg-white"
+              className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm"
             >
-              <div className="flex flex-col gap-2 border-b border-slate-200 px-6 py-5 sm:flex-row sm:items-center sm:justify-between">
+              <div className="flex flex-col gap-3 border-b border-slate-200 px-6 py-5 sm:flex-row sm:items-center sm:justify-between">
                 <div>
-                  <div className="flex items-center gap-3">
+                  <div className="flex flex-wrap items-center gap-3">
                     <h2 className="font-semibold text-slate-950">
                       {classLevel.name}
                     </h2>
@@ -184,7 +200,8 @@ export default async function AttendancePage() {
                   </div>
 
                   <p className="mt-1 text-sm text-slate-500">
-                    Select a stream to take attendance.
+                    Select a stream to take or review
+                    attendance.
                   </p>
                 </div>
 
@@ -215,12 +232,14 @@ export default async function AttendancePage() {
                     (stream) => (
                       <Link
                         key={stream.id}
-                        href={`/attendance/take?streamId=${stream.id}`}
-                        className="group rounded-xl border border-slate-200 p-4 transition hover:border-slate-400 hover:bg-slate-50"
+                        href={`/attendance/take?streamId=${encodeURIComponent(
+                          stream.id,
+                        )}`}
+                        className="group rounded-xl border border-slate-200 p-4 transition hover:border-slate-400 hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2"
                       >
-                        <div className="flex items-center justify-between">
-                          <div>
-                            <p className="font-semibold text-slate-900">
+                        <div className="flex items-center justify-between gap-4">
+                          <div className="min-w-0">
+                            <p className="truncate font-semibold text-slate-900">
                               {classLevel.name}{" "}
                               {stream.name}
                             </p>
@@ -230,7 +249,10 @@ export default async function AttendancePage() {
                             </p>
                           </div>
 
-                          <span className="text-slate-400 transition group-hover:translate-x-0.5 group-hover:text-slate-700">
+                          <span
+                            aria-hidden="true"
+                            className="shrink-0 text-slate-400 transition-transform group-hover:translate-x-0.5 group-hover:text-slate-700"
+                          >
                             →
                           </span>
                         </div>

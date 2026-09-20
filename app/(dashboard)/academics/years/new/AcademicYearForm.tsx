@@ -1,5 +1,7 @@
 "use client";
 
+import Link from "next/link";
+
 import { useActionState } from "react";
 import { useFormStatus } from "react-dom";
 
@@ -91,19 +93,19 @@ export default function AcademicYearForm() {
           </span>
 
           <span className="mt-1 block text-xs text-slate-500">
-            This will replace the school's existing current
+            This will replace the school&apos;s existing current
             academic year.
           </span>
         </span>
       </label>
 
       <div className="flex justify-end gap-3 border-t border-slate-200 pt-5">
-        <a
+        <Link
           href="/academics/years"
           className="rounded-lg border border-slate-200 px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50"
         >
           Cancel
-        </a>
+        </Link>
 
         <SubmitButton />
       </div>
@@ -124,3 +126,5 @@ function SubmitButton() {
     </button>
   );
 }
+
+

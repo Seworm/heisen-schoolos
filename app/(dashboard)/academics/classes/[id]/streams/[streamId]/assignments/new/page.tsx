@@ -12,7 +12,11 @@ import {
   subjects,
 } from "@/db/schema";
 import { requireCurrentSchool } from "@/lib/current-school";
+
 import AssignmentForm from "./AssignmentForm";
+
+const UUID_REGEX =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
 type Props = {
   params: Promise<{
@@ -25,6 +29,11 @@ export default async function NewAssignmentPage({
   params,
 }: Props) {
   const { id, streamId } = await params;
+
+  if (!UUID_REGEX.test(id) || !UUID_REGEX.test(streamId)) {
+    notFound();
+  }
+
   const school = await requireCurrentSchool();
 
   const [streamResult] = await db
@@ -123,7 +132,8 @@ export default async function NewAssignmentPage({
         </h1>
 
         <p className="mt-2 text-sm text-slate-500">
-          Assign a teacher to {streamResult.classLevel.name}{" "}
+          Assign a teacher to{" "}
+          {streamResult.classLevel.name}{" "}
           {streamResult.stream.name}.
         </p>
       </div>

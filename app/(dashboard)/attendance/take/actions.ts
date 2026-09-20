@@ -28,11 +28,20 @@ const VALID_STATUSES = [
   "excused",
 ] as const;
 
-type AttendanceStatus =
-  (typeof VALID_STATUSES)[number];
+type AttendanceStatus = (typeof VALID_STATUSES)[number];
 
 function isValidDate(value: string) {
-  return /^\d{4}-\d{2}-\d{2}$/.test(value);
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) {
+    return false;
+  }
+
+  const date = new Date(`${value}T00:00:00Z`);
+
+  if (Number.isNaN(date.getTime())) {
+    return false;
+  }
+
+  return date.toISOString().slice(0, 10) === value;
 }
 
 function isAttendanceStatus(
@@ -41,6 +50,112 @@ function isAttendanceStatus(
   return (
     VALID_STATUSES as readonly string[]
   ).includes(value);
+}
+
+function isDateWithinRange(
+  value: string,
+  start: string,
+  end: string,
+) {
+  return value >= start && value <= end;
+}
+
+function readNote(
+  formData: FormData,
+  studentId: string,
+) {
+  const value = String(
+    formData.get(`note_${studentId}`) ?? "",
+  ).trim();
+
+  if (!value) {
+    return null;
+  }
+
+  return value.slice(0, 500);
+}
+
+async function getCurrentAcademicContext(
+  schoolId: string,
+) {
+  const [academicYear] = await db
+    .select({
+      id: academicYears.id,
+      name: academicYears.name,
+      startDate: academicYears.startDate,
+      endDate: academicYears.endDate,
+    })
+    .from(academicYears)
+    .where(
+      and(
+        eq(academicYears.schoolId, schoolId),
+        eq(academicYears.isCurrent, true),
+      ),
+    )
+    .limit(1);
+
+  if (!academicYear) {
+    return null;
+  }
+
+  const [term] = await db
+    .select({
+      id: terms.id,
+      name: terms.name,
+      startDate: terms.startDate,
+      endDate: terms.endDate,
+    })
+    .from(terms)
+    .where(
+      and(
+        eq(
+          terms.academicYearId,
+          academicYear.id,
+        ),
+        eq(terms.isCurrent, true),
+      ),
+    )
+    .limit(1);
+
+  if (!term) {
+    return null;
+  }
+
+  return {
+    academicYear,
+    term,
+  };
+}
+
+async function getSchoolStream(
+  schoolId: string,
+  streamId: string,
+) {
+  const [stream] = await db
+    .select({
+      id: streams.id,
+      name: streams.name,
+      classLevelId: classLevels.id,
+      className: classLevels.name,
+      classCategory: classLevels.category,
+    })
+    .from(streams)
+    .innerJoin(
+      classLevels,
+      eq(
+        streams.classLevelId,
+        classLevels.id,
+      ),
+    )
+    .where(
+      and(
+        eq(streams.id, streamId),
+        eq(classLevels.schoolId, schoolId),
+      ),
+    )
+    .limit(1);
+
+  return stream ?? null;
 }
 
 export async function saveAttendance(
@@ -61,10 +176,7 @@ export async function saveAttendance(
     };
   }
 
-  if (
-    !attendanceDate ||
-    !isValidDate(attendanceDate)
-  ) {
+  if (!isValidDate(attendanceDate)) {
     return {
       error: "A valid attendance date is required.",
     };
@@ -72,88 +184,50 @@ export async function saveAttendance(
 
   const school = await requireCurrentSchool();
 
-  /*
-   * ------------------------------------------------------------
-   * CURRENT ACADEMIC YEAR
-   * ------------------------------------------------------------
-   */
+  const context =
+    await getCurrentAcademicContext(
+      school.id,
+    );
 
-  const [academicYear] = await db
-    .select()
-    .from(academicYears)
-    .where(
-      and(
-        eq(academicYears.schoolId, school.id),
-        eq(academicYears.isCurrent, true),
-      ),
-    )
-    .limit(1);
-
-  if (!academicYear) {
+  if (!context) {
     return {
       error:
-        "No current academic year is configured.",
+        "A current academic year and current term must be configured before attendance can be taken.",
     };
   }
 
-  /*
-   * ------------------------------------------------------------
-   * CURRENT TERM
-   * ------------------------------------------------------------
-   */
+  const { academicYear, term } = context;
 
-  const [term] = await db
-    .select()
-    .from(terms)
-    .where(
-      and(
-        eq(
-          terms.academicYearId,
-          academicYear.id,
-        ),
-        eq(terms.isCurrent, true),
-      ),
+  if (
+    !isDateWithinRange(
+      attendanceDate,
+      academicYear.startDate,
+      academicYear.endDate,
     )
-    .limit(1);
-
-  if (!term) {
+  ) {
     return {
       error:
-        "No current term is configured for the current academic year.",
+        "The attendance date must fall within the current academic year.",
     };
   }
 
-  /*
-   * ------------------------------------------------------------
-   * VERIFY STREAM BELONGS TO CURRENT SCHOOL
-   *
-   * streams does not contain schoolId.
-   * Ownership is established through classLevels.
-   * ------------------------------------------------------------
-   */
+  if (
+    !isDateWithinRange(
+      attendanceDate,
+      term.startDate,
+      term.endDate,
+    )
+  ) {
+    return {
+      error:
+        "The attendance date must fall within the current term.",
+    };
+  }
 
-  const [stream] = await db
-    .select({
-      id: streams.id,
-    })
-    .from(streams)
-    .innerJoin(
-      classLevels,
-      eq(
-        streams.classLevelId,
-        classLevels.id,
-      ),
-    )
-    .where(
-      and(
-        eq(streams.id, streamId),
-        eq(
-          classLevels.schoolId,
-          school.id,
-        ),
-      ),
-    )
-    .limit(1);
+  const stream = await getSchoolStream(
+    school.id,
+    streamId,
+  );
 
   if (!stream) {
     return {
@@ -161,12 +235,6 @@ export async function saveAttendance(
         "The selected stream does not belong to this school.",
     };
   }
-
-  /*
-   * ------------------------------------------------------------
-   * GET ACTIVE STUDENTS CURRENTLY PLACED IN THE STREAM
-   * ------------------------------------------------------------
-   */
 
   const studentsInStream = await db
     .select({
@@ -219,62 +287,56 @@ export async function saveAttendance(
     };
   }
 
-  /*
-   * ------------------------------------------------------------
-   * VALID STUDENT IDs
-   * ------------------------------------------------------------
-   */
-
   const validStudentIds = new Set(
     studentsInStream.map(
       (student) => student.id,
     ),
   );
 
-  /*
-   * ------------------------------------------------------------
-   * READ AND VALIDATE SUBMITTED ATTENDANCE
-   * ------------------------------------------------------------
-   */
-
-  const submittedStatuses = new Map<
-    string,
-    AttendanceStatus
-  >();
+  const submittedRecords: {
+    studentId: string;
+    status: AttendanceStatus;
+    note: string | null;
+  }[] = [];
 
   for (const student of studentsInStream) {
-    const value = String(
+    const status = String(
       formData.get(
         `status_${student.id}`,
-      ) ?? "present",
+      ) ?? "",
     ).trim();
 
-    if (!isAttendanceStatus(value)) {
+    if (!isAttendanceStatus(status)) {
       return {
         error:
           "One or more attendance statuses are invalid.",
       };
     }
 
-    submittedStatuses.set(
-      student.id,
-      value,
-    );
+    submittedRecords.push({
+      studentId: student.id,
+      status,
+      note: readNote(
+        formData,
+        student.id,
+      ),
+    });
   }
 
-  /*
-   * Reject unexpected status_* fields.
-   * This prevents a client from submitting attendance
-   * for a student who does not belong to this register.
-   */
-
   for (const [key] of formData.entries()) {
-    if (!key.startsWith("status_")) {
+    if (
+      !key.startsWith("status_") &&
+      !key.startsWith("note_")
+    ) {
       continue;
     }
 
+    const prefix = key.startsWith("status_")
+      ? "status_"
+      : "note_";
+
     const studentId = key.slice(
-      "status_".length,
+      prefix.length,
     );
 
     if (!validStudentIds.has(studentId)) {
@@ -285,21 +347,10 @@ export async function saveAttendance(
     }
   }
 
-  /*
-   * ------------------------------------------------------------
-   * SAVE ATTENDANCE
-   * ------------------------------------------------------------
-   */
+  let sessionId: string | null = null;
 
   try {
     await db.transaction(async (tx) => {
-      /*
-       * Serialize attendance saves for the same
-       * stream/date combination.
-       *
-       * This prevents two administrators from creating
-       * duplicate sessions simultaneously.
-       */
       await tx.execute(sql`
         SELECT pg_advisory_xact_lock(
           hashtext(
@@ -308,15 +359,13 @@ export async function saveAttendance(
         )
       `);
 
-      /*
-       * --------------------------------------------------------
-       * FIND EXISTING SESSION
-       * --------------------------------------------------------
-       */
-
       const [existingSession] = await tx
         .select({
           id: attendanceSessions.id,
+          status: attendanceSessions.status,
+          academicYearId:
+            attendanceSessions.academicYearId,
+          termId: attendanceSessions.termId,
         })
         .from(attendanceSessions)
         .where(
@@ -337,31 +386,47 @@ export async function saveAttendance(
         )
         .limit(1);
 
-      let sessionId: string;
+      if (
+        existingSession?.status ===
+        "completed"
+      ) {
+        throw new Error(
+          "ATTENDANCE_ALREADY_COMPLETED",
+        );
+      }
 
-      /*
-       * --------------------------------------------------------
-       * CREATE OR REOPEN SESSION
-       * --------------------------------------------------------
-       */
+      if (
+        existingSession?.status ===
+        "cancelled"
+      ) {
+        throw new Error(
+          "ATTENDANCE_ALREADY_CANCELLED",
+        );
+      }
 
       if (existingSession) {
+        if (
+          existingSession.academicYearId !==
+            academicYear.id ||
+          existingSession.termId !== term.id
+        ) {
+          throw new Error(
+            "ATTENDANCE_CONTEXT_MISMATCH",
+          );
+        }
+
         sessionId = existingSession.id;
 
         await tx
           .update(attendanceSessions)
           .set({
-            academicYearId:
-              academicYear.id,
-            termId: term.id,
-            status: "open",
             updatedAt: new Date(),
           })
           .where(
             and(
               eq(
                 attendanceSessions.id,
-                sessionId,
+                existingSession.id,
               ),
               eq(
                 attendanceSessions.schoolId,
@@ -387,22 +452,18 @@ export async function saveAttendance(
 
         if (!newSession) {
           throw new Error(
-            "Attendance session could not be created.",
+            "ATTENDANCE_SESSION_CREATE_FAILED",
           );
         }
 
         sessionId = newSession.id;
       }
 
-      /*
-       * --------------------------------------------------------
-       * REPLACE EXISTING RECORDS
-       * --------------------------------------------------------
-       *
-       * The attendance register represents the complete
-       * state for this session, so replacing its records
-       * makes updates deterministic and avoids stale records.
-       */
+      if (!sessionId) {
+        throw new Error(
+          "ATTENDANCE_SESSION_ID_MISSING",
+        );
+      }
 
       await tx
         .delete(attendanceRecords)
@@ -413,39 +474,27 @@ export async function saveAttendance(
           ),
         );
 
-      /*
-       * --------------------------------------------------------
-       * INSERT ATTENDANCE RECORDS
-       * --------------------------------------------------------
-       */
-
-      const recordsToInsert = Array.from(
-        submittedStatuses.entries(),
-      ).map(
-        ([studentId, status]) => ({
-          attendanceSessionId:
-            sessionId,
-          studentId,
-          status,
-        }),
-      );
-
-      if (recordsToInsert.length > 0) {
-        await tx
-          .insert(attendanceRecords)
-          .values(recordsToInsert);
-      }
-
-      /*
-       * --------------------------------------------------------
-       * COMPLETE SESSION
-       * --------------------------------------------------------
-       */
+      await tx
+        .insert(attendanceRecords)
+        .values(
+          submittedRecords.map(
+            ({
+              studentId,
+              status,
+              note,
+            }) => ({
+              attendanceSessionId:
+                sessionId!,
+              studentId,
+              status,
+              note,
+            }),
+          ),
+        );
 
       await tx
         .update(attendanceSessions)
         .set({
-          status: "completed",
           updatedAt: new Date(),
         })
         .where(
@@ -467,24 +516,286 @@ export async function saveAttendance(
       error,
     );
 
+    if (
+      error instanceof Error &&
+      error.message ===
+        "ATTENDANCE_ALREADY_COMPLETED"
+    ) {
+      return {
+        error:
+          "This attendance session has already been completed and can no longer be edited.",
+      };
+    }
+
+    if (
+      error instanceof Error &&
+      error.message ===
+        "ATTENDANCE_ALREADY_CANCELLED"
+    ) {
+      return {
+        error:
+          "This attendance session has been cancelled and can no longer be edited.",
+      };
+    }
+
+    if (
+      error instanceof Error &&
+      error.message ===
+        "ATTENDANCE_CONTEXT_MISMATCH"
+    ) {
+      return {
+        error:
+          "This attendance session belongs to a different academic term.",
+      };
+    }
+
     return {
       error:
         "Attendance could not be saved. Please try again.",
     };
   }
 
-  /*
-   * IMPORTANT:
-   *
-   * redirect() must remain outside the try/catch.
-   * Next.js implements redirect by throwing internally.
-   */
-
   redirect(
-    `/attendance/take?streamId=${encodeURIComponent(
-      streamId,
-    )}&date=${encodeURIComponent(
-      attendanceDate,
+    `/attendance/${encodeURIComponent(
+      sessionId!,
     )}`,
   );
+}
+
+export async function completeAttendance(
+  _previousState: ActionState,
+  formData: FormData,
+): Promise<ActionState> {
+  const sessionId = String(
+    formData.get("sessionId") ?? "",
+  ).trim();
+
+  if (!sessionId) {
+    return {
+      error: "Attendance session is required.",
+    };
+  }
+
+  const school = await requireCurrentSchool();
+
+  try {
+    const result =
+      await db.transaction(async (tx) => {
+        const [session] = await tx
+          .select({
+            id: attendanceSessions.id,
+            status:
+              attendanceSessions.status,
+          })
+          .from(attendanceSessions)
+          .where(
+            and(
+              eq(
+                attendanceSessions.id,
+                sessionId,
+              ),
+              eq(
+                attendanceSessions.schoolId,
+                school.id,
+              ),
+            ),
+          )
+          .limit(1);
+
+        if (!session) {
+          throw new Error(
+            "ATTENDANCE_SESSION_NOT_FOUND",
+          );
+        }
+
+        if (session.status === "completed") {
+          throw new Error(
+            "ATTENDANCE_ALREADY_COMPLETED",
+          );
+        }
+
+        if (session.status === "cancelled") {
+          throw new Error(
+            "ATTENDANCE_ALREADY_CANCELLED",
+          );
+        }
+
+        const [recordCount] = await tx
+          .select({
+            count: sql<number>`count(*)`,
+          })
+          .from(attendanceRecords)
+          .where(
+            eq(
+              attendanceRecords.attendanceSessionId,
+              sessionId,
+            ),
+          );
+
+        if (Number(recordCount?.count ?? 0) === 0) {
+          throw new Error(
+            "ATTENDANCE_NO_RECORDS",
+          );
+        }
+
+        const [updated] = await tx
+          .update(attendanceSessions)
+          .set({
+            status: "completed",
+            updatedAt: new Date(),
+          })
+          .where(
+            and(
+              eq(
+                attendanceSessions.id,
+                sessionId,
+              ),
+              eq(
+                attendanceSessions.schoolId,
+                school.id,
+              ),
+              eq(
+                attendanceSessions.status,
+                "open",
+              ),
+            ),
+          )
+          .returning({
+            id: attendanceSessions.id,
+          });
+
+        return updated?.id ?? null;
+      });
+
+    if (!result) {
+      return {
+        error:
+          "Attendance could not be completed.",
+      };
+    }
+  } catch (error) {
+    console.error(
+      "Failed to complete attendance:",
+      error,
+    );
+
+    if (
+      error instanceof Error &&
+      error.message ===
+        "ATTENDANCE_SESSION_NOT_FOUND"
+    ) {
+      return {
+        error:
+          "Attendance session was not found.",
+      };
+    }
+
+    if (
+      error instanceof Error &&
+      error.message ===
+        "ATTENDANCE_NO_RECORDS"
+    ) {
+      return {
+        error:
+          "Attendance cannot be completed because no attendance records have been saved.",
+      };
+    }
+
+    if (
+      error instanceof Error &&
+      error.message ===
+        "ATTENDANCE_ALREADY_COMPLETED"
+    ) {
+      return {
+        error:
+          "This attendance session is already completed.",
+      };
+    }
+
+    if (
+      error instanceof Error &&
+      error.message ===
+        "ATTENDANCE_ALREADY_CANCELLED"
+    ) {
+      return {
+        error:
+          "This attendance session has been cancelled.",
+      };
+    }
+
+    return {
+      error:
+        "Attendance could not be completed. Please try again.",
+    };
+  }
+
+  redirect(
+    `/attendance/${encodeURIComponent(
+      sessionId,
+    )}`,
+  );
+}
+
+export async function cancelAttendance(
+  _previousState: ActionState,
+  formData: FormData,
+): Promise<ActionState> {
+  const sessionId = String(
+    formData.get("sessionId") ?? "",
+  ).trim();
+
+  if (!sessionId) {
+    return {
+      error: "Attendance session is required.",
+    };
+  }
+
+  const school = await requireCurrentSchool();
+
+  try {
+    const [updated] = await db
+      .update(attendanceSessions)
+      .set({
+        status: "cancelled",
+        updatedAt: new Date(),
+      })
+      .where(
+        and(
+          eq(
+            attendanceSessions.id,
+            sessionId,
+          ),
+          eq(
+            attendanceSessions.schoolId,
+            school.id,
+          ),
+          eq(
+            attendanceSessions.status,
+            "open",
+          ),
+        ),
+      )
+      .returning({
+        id: attendanceSessions.id,
+      });
+
+    if (!updated) {
+      return {
+        error:
+          "Only an open attendance session can be cancelled.",
+      };
+    }
+  } catch (error) {
+    console.error(
+      "Failed to cancel attendance:",
+      error,
+    );
+
+    return {
+      error:
+        "Attendance could not be cancelled. Please try again.",
+    };
+  }
+
+  redirect("/attendance");
 }

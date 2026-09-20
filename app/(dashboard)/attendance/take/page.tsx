@@ -28,18 +28,34 @@ type AttendanceTakePageProps = {
 };
 
 function isValidDate(value: string) {
-  return /^\d{4}-\d{2}-\d{2}$/.test(value);
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) {
+    return false;
+  }
+
+  const date = new Date(`${value}T00:00:00Z`);
+
+  return (
+    !Number.isNaN(date.getTime()) &&
+    date.toISOString().slice(0, 10) ===
+      value
+  );
+}
+
+function isWithin(
+  value: string,
+  start: string,
+  end: string,
+) {
+  return value >= start && value <= end;
 }
 
 export default async function AttendanceTakePage({
   searchParams,
 }: AttendanceTakePageProps) {
   const school = await requireCurrentSchool();
-
   const params = await searchParams;
 
   const streamId = params.streamId;
-  const requestedDate = params.date;
 
   if (!streamId) {
     return (
@@ -54,7 +70,8 @@ export default async function AttendanceTakePage({
           </h1>
 
           <p className="mt-2 text-sm text-slate-500">
-            Choose a class and stream before taking attendance.
+            Choose a class and stream before
+            taking attendance.
           </p>
 
           <Link
@@ -68,18 +85,24 @@ export default async function AttendanceTakePage({
     );
   }
 
-  const attendanceDate =
-    requestedDate && isValidDate(requestedDate)
-      ? requestedDate
-      : getGhanaDate();
-
   const [academicYear] = await db
-    .select()
+    .select({
+      id: academicYears.id,
+      name: academicYears.name,
+      startDate: academicYears.startDate,
+      endDate: academicYears.endDate,
+    })
     .from(academicYears)
     .where(
       and(
-        eq(academicYears.schoolId, school.id),
-        eq(academicYears.isCurrent, true),
+        eq(
+          academicYears.schoolId,
+          school.id,
+        ),
+        eq(
+          academicYears.isCurrent,
+          true,
+        ),
       ),
     )
     .limit(1);
@@ -97,12 +120,13 @@ export default async function AttendanceTakePage({
           </h1>
 
           <p className="mt-2 text-sm text-amber-800">
-            Set an academic year as current before taking attendance.
+            Set an academic year as current before
+            taking attendance.
           </p>
 
           <Link
             href="/academics/years"
-            className="mt-6 inline-flex rounded-lg bg-slate-950 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-800"
+            className="mt-6 inline-flex rounded-lg bg-slate-950 px-4 py-2.5 text-sm font-semibold text-white"
           >
             Manage academic years
           </Link>
@@ -112,11 +136,19 @@ export default async function AttendanceTakePage({
   }
 
   const [term] = await db
-    .select()
+    .select({
+      id: terms.id,
+      name: terms.name,
+      startDate: terms.startDate,
+      endDate: terms.endDate,
+    })
     .from(terms)
     .where(
       and(
-        eq(terms.academicYearId, academicYear.id),
+        eq(
+          terms.academicYearId,
+          academicYear.id,
+        ),
         eq(terms.isCurrent, true),
       ),
     )
@@ -135,13 +167,13 @@ export default async function AttendanceTakePage({
           </h1>
 
           <p className="mt-2 text-sm text-amber-800">
-            Set a term as current for the active academic year before
-            taking attendance.
+            Set a current term before taking
+            attendance.
           </p>
 
           <Link
             href={`/academics/years/${academicYear.id}`}
-            className="mt-6 inline-flex rounded-lg bg-slate-950 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-800"
+            className="mt-6 inline-flex rounded-lg bg-slate-950 px-4 py-2.5 text-sm font-semibold text-white"
           >
             Manage terms
           </Link>
@@ -161,12 +193,18 @@ export default async function AttendanceTakePage({
     .from(streams)
     .innerJoin(
       classLevels,
-      eq(streams.classLevelId, classLevels.id),
+      eq(
+        streams.classLevelId,
+        classLevels.id,
+      ),
     )
     .where(
       and(
         eq(streams.id, streamId),
-        eq(classLevels.schoolId, school.id),
+        eq(
+          classLevels.schoolId,
+          school.id,
+        ),
       ),
     )
     .limit(1);
@@ -184,13 +222,13 @@ export default async function AttendanceTakePage({
           </h1>
 
           <p className="mt-2 text-sm text-red-800">
-            The selected stream does not belong to this school or no
-            longer exists.
+            The selected stream does not belong to
+            this school or no longer exists.
           </p>
 
           <Link
             href="/attendance"
-            className="mt-6 inline-flex rounded-lg bg-slate-950 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-800"
+            className="mt-6 inline-flex rounded-lg bg-slate-950 px-4 py-2.5 text-sm font-semibold text-white"
           >
             Back to attendance
           </Link>
@@ -199,10 +237,31 @@ export default async function AttendanceTakePage({
     );
   }
 
+  const requestedDate = params.date;
+
+  const attendanceDate =
+    requestedDate &&
+    isValidDate(requestedDate)
+      ? requestedDate
+      : getGhanaDate();
+
+  const dateIsValid =
+    isWithin(
+      attendanceDate,
+      academicYear.startDate,
+      academicYear.endDate,
+    ) &&
+    isWithin(
+      attendanceDate,
+      term.startDate,
+      term.endDate,
+    );
+
   const studentRows = await db
     .select({
       id: students.id,
-      studentNumber: students.studentNumber,
+      studentNumber:
+        students.studentNumber,
       firstName: students.firstName,
       middleName: students.middleName,
       lastName: students.lastName,
@@ -218,18 +277,33 @@ export default async function AttendanceTakePage({
     )
     .innerJoin(
       students,
-      eq(studentEnrollments.studentId, students.id),
+      eq(
+        studentEnrollments.studentId,
+        students.id,
+      ),
     )
     .where(
       and(
-        eq(studentPlacements.streamId, streamId),
-        eq(studentPlacements.status, "active"),
+        eq(
+          studentPlacements.streamId,
+          streamId,
+        ),
+        eq(
+          studentPlacements.status,
+          "active",
+        ),
         eq(
           studentEnrollments.academicYearId,
           academicYear.id,
         ),
-        eq(studentEnrollments.status, "active"),
-        eq(students.schoolId, school.id),
+        eq(
+          studentEnrollments.status,
+          "active",
+        ),
+        eq(
+          students.schoolId,
+          school.id,
+        ),
       ),
     )
     .orderBy(
@@ -239,13 +313,24 @@ export default async function AttendanceTakePage({
     );
 
   const [session] = await db
-    .select()
+    .select({
+      id: attendanceSessions.id,
+      status: attendanceSessions.status,
+      academicYearId:
+        attendanceSessions.academicYearId,
+      termId: attendanceSessions.termId,
+    })
     .from(attendanceSessions)
     .where(
       and(
-        eq(attendanceSessions.id, attendanceSessions.id),
-        eq(attendanceSessions.schoolId, school.id),
-        eq(attendanceSessions.streamId, streamId),
+        eq(
+          attendanceSessions.schoolId,
+          school.id,
+        ),
+        eq(
+          attendanceSessions.streamId,
+          streamId,
+        ),
         eq(
           attendanceSessions.attendanceDate,
           attendanceDate,
@@ -267,7 +352,8 @@ export default async function AttendanceTakePage({
   if (session) {
     records = await db
       .select({
-        studentId: attendanceRecords.studentId,
+        studentId:
+          attendanceRecords.studentId,
         status: attendanceRecords.status,
         note: attendanceRecords.note,
       })
@@ -278,6 +364,42 @@ export default async function AttendanceTakePage({
           session.id,
         ),
       );
+  }
+
+  if (
+    session &&
+    session.status === "completed"
+  ) {
+    return (
+      <div className="mx-auto max-w-6xl px-6 py-8 lg:px-8">
+        <div className="mb-6">
+          <Link
+            href="/attendance"
+            className="text-sm font-medium text-slate-500 hover:text-slate-900"
+          >
+            ← Back to attendance
+          </Link>
+        </div>
+
+        <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-6">
+          <p className="text-sm font-semibold text-emerald-800">
+            Attendance completed
+          </p>
+
+          <p className="mt-1 text-sm text-emerald-700">
+            This attendance session has already
+            been completed and is read-only.
+          </p>
+
+          <Link
+            href={`/attendance/${session.id}`}
+            className="mt-4 inline-flex rounded-lg bg-slate-950 px-4 py-2.5 text-sm font-semibold text-white"
+          >
+            View attendance
+          </Link>
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -308,7 +430,8 @@ export default async function AttendanceTakePage({
           </div>
 
           <h1 className="mt-2 text-2xl font-semibold tracking-tight text-slate-950">
-            {streamResult.className} {streamResult.name}
+            {streamResult.className}{" "}
+            {streamResult.name}
           </h1>
 
           <p className="mt-2 text-sm text-slate-500">
@@ -316,27 +439,72 @@ export default async function AttendanceTakePage({
           </p>
         </div>
 
-        <div className="rounded-xl border border-slate-200 bg-white px-5 py-4">
-          <p className="text-xs font-medium uppercase tracking-wide text-slate-400">
-            Attendance date
-          </p>
+        <form
+          method="get"
+          className="flex items-end gap-2"
+        >
+          <input
+            type="hidden"
+            name="streamId"
+            value={streamId}
+          />
 
-          <p className="mt-1 text-sm font-semibold text-slate-900">
-            {attendanceDate}
-          </p>
-        </div>
+          <div>
+            <label
+              htmlFor="attendanceDate"
+              className="mb-1 block text-xs font-medium text-slate-500"
+            >
+              Attendance date
+            </label>
+
+            <input
+              id="attendanceDate"
+              name="date"
+              type="date"
+              value={attendanceDate}
+              min={term.startDate}
+              max={term.endDate}
+              className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-slate-400 focus:ring-2 focus:ring-slate-100"
+            />
+          </div>
+
+          <button
+            type="submit"
+            className="rounded-lg bg-slate-950 px-4 py-2.5 text-sm font-semibold text-white hover:bg-slate-800"
+          >
+            Load
+          </button>
+        </form>
       </div>
 
-      <AttendanceRegister
-        streamId={streamId}
-        attendanceDate={attendanceDate}
-        streamName={`${streamResult.className} ${streamResult.name}`}
-        academicYearName={academicYear.name}
-        termName={term.name}
-        students={studentRows}
-        records={records}
-        sessionStatus={session?.status ?? null}
-      />
+      {!dateIsValid ? (
+        <div className="mb-5 rounded-xl border border-amber-200 bg-amber-50 p-5">
+          <p className="font-semibold text-amber-950">
+            Date outside current term
+          </p>
+
+          <p className="mt-1 text-sm text-amber-800">
+            Select a date between{" "}
+            {term.startDate} and{" "}
+            {term.endDate}.
+          </p>
+        </div>
+      ) : (
+        <AttendanceRegister
+          streamId={streamId}
+          attendanceDate={attendanceDate}
+          streamName={`${streamResult.className} ${streamResult.name}`}
+          academicYearName={
+            academicYear.name
+          }
+          termName={term.name}
+          students={studentRows}
+          records={records}
+          sessionStatus={
+            session?.status ?? null
+          }
+        />
+      )}
     </div>
   );
 }

@@ -131,3 +131,5 @@ export async function createAssessmentType(
 
   redirect("/assessments/types");
 }
+
+

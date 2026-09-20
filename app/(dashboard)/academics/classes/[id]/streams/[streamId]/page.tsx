@@ -15,20 +15,25 @@ import { requireCurrentSchool } from "@/lib/current-school";
 
 import DeleteAssignmentButton from "./assignments/DeleteAssignmentButton";
 
+const UUID_REGEX =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
 type Props = {
   params: Promise<{
     id: string;
     streamId: string;
   }>;
 };
-
 export default async function StreamDetailPage({
   params,
 }: Props) {
   const { id, streamId } = await params;
 
-  const school = await requireCurrentSchool();
+if (!UUID_REGEX.test(id) || !UUID_REGEX.test(streamId)) {
+  notFound();
+}
 
+const school = await requireCurrentSchool();
   /*
    * Load stream and verify that it belongs to
    * the current school and requested class.

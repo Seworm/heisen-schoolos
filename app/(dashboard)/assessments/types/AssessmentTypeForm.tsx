@@ -1,5 +1,7 @@
 "use client";
 
+import Link from "next/link";
+
 import { useActionState } from "react";
 
 import { createAssessmentType } from "./actions";
@@ -125,12 +127,12 @@ export default function AssessmentTypeForm() {
       </div>
 
       <div className="flex items-center justify-end gap-3 border-t border-slate-200 pt-6">
-        <a
+        <Link
           href="/assessments/types"
           className="rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
         >
           Cancel
-        </a>
+        </Link>
 
         <button
           type="submit"
@@ -145,3 +147,5 @@ export default function AssessmentTypeForm() {
     </form>
   );
 }
+
+

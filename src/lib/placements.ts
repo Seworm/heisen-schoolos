@@ -6,7 +6,6 @@ import {
   classLevels,
   studentEnrollments,
   studentPlacements,
-  students,
   streams,
 } from "@/db/schema";
 import { requireCurrentSchool } from "@/lib/current-school";
@@ -313,3 +312,4 @@ export async function transferStudentPlacement(
     };
   }
 }
+

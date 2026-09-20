@@ -135,7 +135,7 @@ export default async function StaffPage() {
 
                 <p className="mt-2 text-sm leading-6 text-slate-500">
                   Add your first staff member to begin building the
-                  school's staff directory.
+                  school&apos;s staff directory.
                 </p>
 
                 <Link
@@ -250,3 +250,5 @@ export default async function StaffPage() {
     </main>
   );
 }
+
+

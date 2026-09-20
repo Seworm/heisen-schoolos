@@ -127,111 +127,32 @@ export async function activateGradingScheme(
 
       /*
        * ----------------------------------------------------------
-       * 4. Validate assessment types and
-       *    calculate Class Score / Exam weights.
+       * 4. Validate assessment types and overall weighting.
        * ----------------------------------------------------------
        */
-      let classScoreWeight = 0;
-      let examinationWeight = 0;
-
-      const seenAssessmentTypes =
-        new Set<string>();
+      const seenAssessmentTypes = new Set<string>();
+      let totalWeight = 0;
 
       for (const item of items) {
-        if (
-          seenAssessmentTypes.has(
-            item.assessmentTypeId,
-          )
-        ) {
-          throw new Error(
-            "Each assessment type can only appear once in a grading scheme.",
-          );
+        if (seenAssessmentTypes.has(item.assessmentTypeId)) {
+          throw new Error("Each assessment type can only appear once in a grading scheme.");
+        }
+        seenAssessmentTypes.add(item.assessmentTypeId);
+
+        const weight = Number(item.weightPercent);
+        if (!Number.isFinite(weight) || weight < 0 || weight > 100) {
+          throw new Error("Every assessment weight must be between 0% and 100%.");
         }
 
-        seenAssessmentTypes.add(
-          item.assessmentTypeId,
-        );
-
-        const weight = Number(
-          item.weightPercent,
-        );
-
-        if (
-          !Number.isFinite(weight) ||
-          weight <= 0 ||
-          weight > 100
-        ) {
-          throw new Error(
-            "Every assessment weight must be greater than 0% and no more than 100%.",
-          );
+        if (!categoryMap.has(item.assessmentTypeId)) {
+          throw new Error("One or more assessment types do not belong to this school.");
         }
-
-        const category =
-          categoryMap.get(
-            item.assessmentTypeId,
-          );
-
-        if (!category) {
-          throw new Error(
-            "One or more assessment types do not belong to this school.",
-          );
-        }
-
-        if (
-          category ===
-          "continuous_assessment"
-        ) {
-          classScoreWeight += weight;
-        } else if (
-          category === "examination"
-        ) {
-          examinationWeight +=
-            weight;
-        } else {
-          throw new Error(
-            "Unsupported assessment category in grading scheme.",
-          );
-        }
+        totalWeight += weight;
       }
 
-      classScoreWeight =
-        Math.round(
-          classScoreWeight * 100,
-        ) / 100;
-
-      examinationWeight =
-        Math.round(
-          examinationWeight * 100,
-        ) / 100;
-
-      /*
-       * ----------------------------------------------------------
-       * 5. Enforce the 50:50 model.
-       * ----------------------------------------------------------
-       */
-      if (classScoreWeight !== 50) {
-        throw new Error(
-          `Class Score components must total exactly 50%. Current total is ${classScoreWeight}%.`,
-        );
-      }
-
-      if (examinationWeight !== 50) {
-        throw new Error(
-          `Examination components must total exactly 50%. Current total is ${examinationWeight}%.`,
-        );
-      }
-
-      /*
-       * Overall weight must therefore be exactly 100%.
-       */
-      const totalWeight =
-        classScoreWeight +
-        examinationWeight;
-
-      if (totalWeight !== 100) {
-        throw new Error(
-          "All grading components must total exactly 100%.",
-        );
+      totalWeight = Math.round(totalWeight * 100) / 100;
+      if (Math.abs(totalWeight - 100) > 0.001) {
+        throw new Error(`Assessment weights must total exactly 100%. Current total is ${totalWeight}%.`);
       }
 
       /*

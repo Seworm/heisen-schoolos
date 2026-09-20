@@ -762,3 +762,4 @@ function GradeBadge({
     </span>
   );
 }
+

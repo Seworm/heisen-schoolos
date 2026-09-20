@@ -62,7 +62,7 @@ export default async function StaffEditPage({
           </h1>
 
           <p className="mt-2 text-sm text-slate-500">
-            Update the staff member's information.
+            Update the staff member&apos;s information.
           </p>
         </div>
 

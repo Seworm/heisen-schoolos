@@ -254,12 +254,6 @@ export default async function AssessmentPage({
     assessment.maxScore,
   );
 
-  const scoreMap = new Map(
-    scores.map((score) => [
-      score.studentId,
-      Number(score.score),
-    ]),
-  );
 
   const results = scores
     .map((score) => {
@@ -744,3 +738,4 @@ export default async function AssessmentPage({
     </div>
   );
 }
+

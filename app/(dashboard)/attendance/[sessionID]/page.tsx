@@ -3,19 +3,23 @@ import { and, asc, eq } from "drizzle-orm";
 
 import { db } from "@/db";
 import {
+  academicYears,
   attendanceRecords,
   attendanceSessions,
   classLevels,
-  students,
   streams,
+  students,
+  terms,
 } from "@/db/schema";
 import { requireCurrentSchool } from "@/lib/current-school";
+
+import AttendanceSessionActions from "./AttendanceSessionActions";
 
 export const dynamic = "force-dynamic";
 
 type AttendanceSessionPageProps = {
   params: Promise<{
-    sessionId: string;
+    sessionID: string;
   }>;
 };
 
@@ -23,8 +27,7 @@ export default async function AttendanceSessionPage({
   params,
 }: AttendanceSessionPageProps) {
   const school = await requireCurrentSchool();
-
-  const { sessionId } = await params;
+  const { sessionID } = await params;
 
   const [session] = await db
     .select({
@@ -32,11 +35,36 @@ export default async function AttendanceSessionPage({
       attendanceDate:
         attendanceSessions.attendanceDate,
       status: attendanceSessions.status,
+
+      academicYearId:
+        attendanceSessions.academicYearId,
+      academicYearName:
+        academicYears.name,
+
+      termId: attendanceSessions.termId,
+      termName: terms.name,
+
+      streamId: attendanceSessions.streamId,
+      streamName: streams.name,
+
       className: classLevels.name,
       classCategory: classLevels.category,
-      streamName: streams.name,
     })
     .from(attendanceSessions)
+    .innerJoin(
+      academicYears,
+      eq(
+        attendanceSessions.academicYearId,
+        academicYears.id,
+      ),
+    )
+    .innerJoin(
+      terms,
+      eq(
+        attendanceSessions.termId,
+        terms.id,
+      ),
+    )
     .innerJoin(
       streams,
       eq(
@@ -55,10 +83,14 @@ export default async function AttendanceSessionPage({
       and(
         eq(
           attendanceSessions.id,
-          sessionId,
+          sessionID,
         ),
         eq(
           attendanceSessions.schoolId,
+          school.id,
+        ),
+        eq(
+          classLevels.schoolId,
           school.id,
         ),
       ),
@@ -74,17 +106,17 @@ export default async function AttendanceSessionPage({
           </p>
 
           <h1 className="mt-1 text-2xl font-semibold text-red-950">
-            Attendance session not found
+            Session not found
           </h1>
 
           <p className="mt-2 text-sm text-red-800">
-            The requested attendance session does not exist or does
-            not belong to this school.
+            The attendance session does not exist
+            or does not belong to this school.
           </p>
 
           <Link
             href="/attendance"
-            className="mt-6 inline-flex rounded-lg bg-slate-950 px-4 py-2.5 text-sm font-semibold text-white hover:bg-slate-800"
+            className="mt-6 inline-flex rounded-lg bg-slate-950 px-4 py-2.5 text-sm font-semibold text-white"
           >
             Back to attendance
           </Link>
@@ -95,12 +127,13 @@ export default async function AttendanceSessionPage({
 
   const records = await db
     .select({
-      studentId: students.id,
-      studentNumber: students.studentNumber,
+      id: attendanceRecords.id,
+      studentId: attendanceRecords.studentId,
+      studentNumber:
+        students.studentNumber,
       firstName: students.firstName,
       middleName: students.middleName,
       lastName: students.lastName,
-      gender: students.gender,
       status: attendanceRecords.status,
       note: attendanceRecords.note,
     })
@@ -124,137 +157,152 @@ export default async function AttendanceSessionPage({
       asc(students.studentNumber),
     );
 
-  const presentCount = records.filter(
-    (record) => record.status === "present",
-  ).length;
+  const counts = records.reduce(
+    (result, record) => {
+      result[record.status] += 1;
+      return result;
+    },
+    {
+      present: 0,
+      absent: 0,
+      late: 0,
+      excused: 0,
+    },
+  );
 
-  const absentCount = records.filter(
-    (record) => record.status === "absent",
-  ).length;
+  const total = records.length;
 
-  const lateCount = records.filter(
-    (record) => record.status === "late",
-  ).length;
-
-  const excusedCount = records.filter(
-    (record) => record.status === "excused",
-  ).length;
+  const attendanceRate =
+    total > 0
+      ? Math.round(
+          ((counts.present +
+            counts.late) /
+            total) *
+            100,
+        )
+      : 0;
 
   return (
     <div className="mx-auto max-w-6xl px-6 py-8 lg:px-8">
-      <div className="mb-6">
+      <div className="mb-6 flex items-center justify-between gap-4">
         <Link
           href="/attendance"
           className="text-sm font-medium text-slate-500 transition hover:text-slate-900"
         >
           ← Back to attendance
         </Link>
-      </div>
 
-      <div className="mb-8 flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
-        <div>
-          <div className="flex flex-wrap items-center gap-2">
-            <span className="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium capitalize text-slate-600">
-              {session.classCategory}
-            </span>
-
-            <span
-              className={
-                session.status === "completed"
-                  ? "rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-medium text-emerald-700"
-                  : session.status === "open"
-                    ? "rounded-full bg-amber-50 px-2.5 py-1 text-xs font-medium text-amber-700"
-                    : "rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-500"
-              }
-            >
-              {session.status}
-            </span>
-          </div>
-
-          <h1 className="mt-2 text-2xl font-semibold tracking-tight text-slate-950">
-            {session.className} {session.streamName}
-          </h1>
-
-          <p className="mt-2 text-sm text-slate-500">
-            Attendance for {session.attendanceDate}
-          </p>
-        </div>
-
-        <Link
-          href={`/attendance/take?streamId=${session.id}`}
-          className="inline-flex items-center justify-center rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-900 transition hover:bg-slate-50"
+        <span
+          className={[
+            "rounded-full px-3 py-1 text-xs font-semibold capitalize",
+            session.status ===
+            "completed"
+              ? "bg-emerald-50 text-emerald-700"
+              : session.status ===
+                  "cancelled"
+                ? "bg-red-50 text-red-700"
+                : "bg-amber-50 text-amber-700",
+          ].join(" ")}
         >
-          Open register
-        </Link>
+          {session.status}
+        </span>
       </div>
 
-      <div className="mb-6 grid gap-3 sm:grid-cols-4">
+      <div className="mb-8">
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium capitalize text-slate-600">
+            {session.classCategory}
+          </span>
+
+          <span className="text-sm text-slate-400">
+            {session.academicYearName}
+          </span>
+
+          <span className="text-sm text-slate-400">
+            {session.termName}
+          </span>
+        </div>
+
+        <h1 className="mt-2 text-2xl font-semibold tracking-tight text-slate-950">
+          {session.className}{" "}
+          {session.streamName}
+        </h1>
+
+        <p className="mt-2 text-sm text-slate-500">
+          Attendance for{" "}
+          {session.attendanceDate}
+        </p>
+      </div>
+
+      <div className="mb-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
         <div className="rounded-xl border border-slate-200 bg-white p-4">
           <p className="text-xs font-medium uppercase tracking-wide text-slate-400">
-            Students
+            Recorded
           </p>
-
           <p className="mt-1 text-2xl font-semibold text-slate-950">
-            {records.length}
+            {total}
           </p>
         </div>
 
-        <div className="rounded-xl border border-slate-200 bg-white p-4">
-          <p className="text-xs font-medium uppercase tracking-wide text-slate-400">
+        <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-4">
+          <p className="text-xs font-medium uppercase tracking-wide text-emerald-700">
             Present
           </p>
-
-          <p className="mt-1 text-2xl font-semibold text-emerald-700">
-            {presentCount}
+          <p className="mt-1 text-2xl font-semibold text-emerald-800">
+            {counts.present}
           </p>
         </div>
 
-        <div className="rounded-xl border border-slate-200 bg-white p-4">
-          <p className="text-xs font-medium uppercase tracking-wide text-slate-400">
+        <div className="rounded-xl border border-red-200 bg-red-50 p-4">
+          <p className="text-xs font-medium uppercase tracking-wide text-red-700">
             Absent
           </p>
+          <p className="mt-1 text-2xl font-semibold text-red-800">
+            {counts.absent}
+          </p>
+        </div>
 
-          <p className="mt-1 text-2xl font-semibold text-red-700">
-            {absentCount}
+        <div className="rounded-xl border border-amber-200 bg-amber-50 p-4">
+          <p className="text-xs font-medium uppercase tracking-wide text-amber-700">
+            Late
+          </p>
+          <p className="mt-1 text-2xl font-semibold text-amber-800">
+            {counts.late}
           </p>
         </div>
 
         <div className="rounded-xl border border-slate-200 bg-white p-4">
           <p className="text-xs font-medium uppercase tracking-wide text-slate-400">
-            Late / Excused
+            Attendance rate
           </p>
-
-          <p className="mt-1 text-2xl font-semibold text-amber-700">
-            {lateCount + excusedCount}
+          <p className="mt-1 text-2xl font-semibold text-slate-950">
+            {attendanceRate}%
           </p>
         </div>
+      </div>
+
+      <div className="mb-6">
+        <AttendanceSessionActions
+          sessionId={session.id}
+          status={session.status}
+          streamId={session.streamId}
+          attendanceDate={
+            session.attendanceDate
+          }
+        />
       </div>
 
       <div className="overflow-hidden rounded-xl border border-slate-200 bg-white">
-        <div className="border-b border-slate-200 bg-slate-50 px-5 py-4">
-          <h2 className="text-sm font-semibold text-slate-950">
-            Attendance register
-          </h2>
-
-          <p className="mt-1 text-xs text-slate-500">
-            Recorded attendance for this session.
-          </p>
+        <div className="border-b border-slate-200 bg-slate-50 px-5 py-3 text-xs font-semibold uppercase tracking-wide text-slate-500 md:grid md:grid-cols-[60px_minmax(0,1fr)_150px_minmax(160px,260px)] md:gap-4">
+          <div>#</div>
+          <div>Student</div>
+          <div>Status</div>
+          <div>Note</div>
         </div>
 
-        {records.length === 0 ? (
-          <div className="p-10 text-center">
-            <h3 className="font-semibold text-slate-950">
-              No attendance records
-            </h3>
-
-            <p className="mt-2 text-sm text-slate-500">
-              This session does not contain any student attendance
-              records.
-            </p>
-          </div>
-        ) : (
-          <div className="divide-y divide-slate-100">
-            {records.map((record, index) => {
+        <div className="divide-y divide-slate-100">
+          {records.map(
+            (record, index) => {
               const fullName = [
                 record.firstName,
                 record.middleName,
@@ -265,14 +313,14 @@ export default async function AttendanceSessionPage({
 
               return (
                 <div
-                  key={record.studentId}
-                  className="grid gap-3 px-5 py-4 sm:grid-cols-[60px_minmax(0,1fr)_120px] sm:items-center"
+                  key={record.id}
+                  className="px-5 py-4 md:grid md:grid-cols-[60px_minmax(0,1fr)_150px_minmax(160px,260px)] md:items-center md:gap-4"
                 >
                   <div className="text-sm text-slate-400">
                     {index + 1}
                   </div>
 
-                  <div>
+                  <div className="mt-2 md:mt-0">
                     <p className="font-medium text-slate-950">
                       {fullName}
                     </p>
@@ -282,26 +330,34 @@ export default async function AttendanceSessionPage({
                     </p>
                   </div>
 
-                  <div>
+                  <div className="mt-3 md:mt-0">
                     <span
-                      className={
-                        record.status === "present"
-                          ? "inline-flex rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-700"
-                          : record.status === "absent"
-                            ? "inline-flex rounded-full bg-red-50 px-2.5 py-1 text-xs font-semibold text-red-700"
-                            : record.status === "late"
-                              ? "inline-flex rounded-full bg-amber-50 px-2.5 py-1 text-xs font-semibold text-amber-700"
-                              : "inline-flex rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-600"
-                      }
+                      className={[
+                        "inline-flex rounded-full px-2.5 py-1 text-xs font-semibold capitalize",
+                        record.status ===
+                        "present"
+                          ? "bg-emerald-50 text-emerald-700"
+                          : record.status ===
+                              "absent"
+                            ? "bg-red-50 text-red-700"
+                            : record.status ===
+                                "late"
+                              ? "bg-amber-50 text-amber-700"
+                              : "bg-slate-100 text-slate-700",
+                      ].join(" ")}
                     >
                       {record.status}
                     </span>
                   </div>
+
+                  <div className="mt-3 text-sm text-slate-500 md:mt-0">
+                    {record.note || "—"}
+                  </div>
                 </div>
               );
-            })}
-          </div>
-        )}
+            },
+          )}
+        </div>
       </div>
     </div>
   );

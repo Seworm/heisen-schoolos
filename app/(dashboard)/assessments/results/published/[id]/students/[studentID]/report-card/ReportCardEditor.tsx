@@ -54,8 +54,6 @@ const promotionOptions = [
 
 export default function ReportCardEditor({
   reportCardId,
-  publicationId,
-  studentSnapshotId,
   initialClassTeacherRemark,
   initialHeadteacherRemark,
   initialPromotionStatus,
