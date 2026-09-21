@@ -160,14 +160,14 @@ export function SchoolSidebar() {
   }
 
   return (
-    <aside className="sticky top-0 hidden h-screen w-[270px] shrink-0 border-r border-slate-800 bg-[#0B1220] text-white lg:flex lg:flex-col">
+    <aside className="sticky top-0 hidden h-screen w-[270px] shrink-0 border-r border-slate-800 bg-[#111111] text-white lg:flex lg:flex-col">
       {/* Brand */}
       <div className="flex h-20 shrink-0 items-center border-b border-slate-800 px-5">
         <Link
           href="/dashboard"
-          className="flex min-w-0 items-center gap-3 rounded-lg outline-none transition-opacity hover:opacity-90 focus-visible:ring-2 focus-visible:ring-blue-500"
+          className="flex min-w-0 items-center gap-3 rounded-lg outline-none transition-opacity hover:opacity-90 focus-visible:ring-2 focus-visible:ring-[#fcd116]"
         >
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-600 shadow-lg shadow-blue-950/30">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#006b3f] shadow-lg shadow-black/30">
             <GraduationCap className="h-5 w-5 text-white" strokeWidth={2.2} />
           </div>
 
@@ -216,9 +216,9 @@ export function SchoolSidebar() {
                           href={item.href}
                           className={[
                             "group flex items-center gap-3 rounded-lg px-3 py-2.5 text-[13px] font-medium transition-all",
-                            "outline-none focus-visible:ring-2 focus-visible:ring-blue-500",
+                            "outline-none focus-visible:ring-2 focus-visible:ring-[#fcd116]",
                             active
-                              ? "bg-blue-600 text-white shadow-md shadow-blue-950/30"
+                              ? "bg-[#006b3f] text-white shadow-md shadow-black/30"
                               : "text-slate-300 hover:bg-slate-800 hover:text-white",
                           ].join(" ")}
                         >

@@ -32,7 +32,7 @@ export function SchoolTopbar({ school }: SchoolTopbarProps) {
         <button
           type="button"
           aria-label="Open navigation"
-          className="flex h-10 w-10 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-600 transition-colors hover:bg-slate-50 hover:text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500 lg:hidden"
+          className="flex h-10 w-10 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-600 transition-colors hover:bg-slate-50 hover:text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#006b3f] lg:hidden"
         >
           <Menu className="h-5 w-5" />
         </button>
@@ -55,7 +55,7 @@ export function SchoolTopbar({ school }: SchoolTopbarProps) {
         <button
           type="button"
           aria-label="Search"
-          className="hidden h-10 items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 text-sm font-medium text-slate-500 transition-colors hover:border-slate-300 hover:bg-slate-50 hover:text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500 md:flex"
+          className="hidden h-10 items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 text-sm font-medium text-slate-500 transition-colors hover:border-slate-300 hover:bg-slate-50 hover:text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#006b3f] md:flex"
         >
           <Search className="h-4 w-4" />
           <span>Search</span>
@@ -68,7 +68,7 @@ export function SchoolTopbar({ school }: SchoolTopbarProps) {
         <button
           type="button"
           aria-label="Search"
-          className="flex h-10 w-10 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-600 transition-colors hover:bg-slate-50 hover:text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500 md:hidden"
+          className="flex h-10 w-10 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-600 transition-colors hover:bg-slate-50 hover:text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#006b3f] md:hidden"
         >
           <Search className="h-4 w-4" />
         </button>
@@ -77,11 +77,11 @@ export function SchoolTopbar({ school }: SchoolTopbarProps) {
         <button
           type="button"
           aria-label="Notifications"
-          className="relative flex h-10 w-10 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-600 transition-colors hover:bg-slate-50 hover:text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="relative flex h-10 w-10 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-600 transition-colors hover:bg-slate-50 hover:text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#006b3f]"
         >
           <Bell className="h-[18px] w-[18px]" strokeWidth={2} />
 
-          <span className="absolute right-2 top-2 h-2 w-2 rounded-full bg-blue-600 ring-2 ring-white" />
+          <span className="absolute right-2 top-2 h-2 w-2 rounded-full bg-[#ce1126] ring-2 ring-white" />
         </button>
 
         {/* Divider */}
@@ -93,7 +93,7 @@ export function SchoolTopbar({ school }: SchoolTopbarProps) {
             type="button"
             onClick={() => setProfileOpen((open) => !open)}
             aria-expanded={profileOpen}
-            className="flex h-10 items-center gap-2 rounded-lg border border-slate-200 bg-white px-2 transition-colors hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-blue-500 sm:px-2.5"
+            className="flex h-10 items-center gap-2 rounded-lg border border-slate-200 bg-white px-2 transition-colors hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-[#006b3f] sm:px-2.5"
           >
             <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-slate-900 text-white">
               <User className="h-4 w-4" strokeWidth={2} />
@@ -160,4 +160,3 @@ export function SchoolTopbar({ school }: SchoolTopbarProps) {
     </header>
   );
 }
-

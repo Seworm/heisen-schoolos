@@ -78,7 +78,7 @@ export function SchoolSidebar({ isPlatformAdmin = false }: { isPlatformAdmin?: b
                 : "border-white/10 bg-white/[0.04] text-slate-300 hover:bg-white/[0.08] hover:text-white"
             }`}
           >
-            <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-violet-400/15 text-violet-300">
+            <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#fcd116]/15 text-[#fcd116]">
               <Building2 className="h-4 w-4" />
             </span>
             <span>All schools</span>

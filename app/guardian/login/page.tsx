@@ -55,9 +55,14 @@ export default function GuardianLoginPage() {
   }
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-slate-50 px-4">
-      <form onSubmit={submit} className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-8 shadow-sm">
-        <p className="text-sm font-medium text-slate-500">Heisen SchoolOS</p>
+    <main className="relative flex min-h-screen items-center justify-center overflow-hidden bg-[#f8faf7] px-4 py-10">
+      <div className="pointer-events-none absolute -left-24 -top-24 h-72 w-72 rounded-full bg-[#fcd116]/25 blur-3xl" />
+      <div className="pointer-events-none absolute -bottom-32 -right-24 h-80 w-80 rounded-full bg-[#006b3f]/15 blur-3xl" />
+      <form onSubmit={submit} className="relative w-full max-w-md rounded-2xl border border-[#dfe7df] bg-white p-8 shadow-[0_20px_60px_rgba(0,61,34,0.12)]">
+        <div className="mb-6 flex items-center gap-3">
+          <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#006b3f] text-lg font-bold text-[#fcd116]">H</span>
+          <p className="text-sm font-bold tracking-wide text-[#006b3f]">Heisen SchoolOS</p>
+        </div>
         <h1 className="mt-1 text-2xl font-semibold">Parent / Guardian Portal</h1>
         <p className="mt-2 text-sm text-slate-500">
           Sign in with your registered email and phone number to view your child&apos;s academic information.
@@ -72,7 +77,7 @@ export default function GuardianLoginPage() {
               onChange={(event) => setPassword(event.target.value)}
               required
               autoComplete="current-password"
-              className="mt-1.5 w-full rounded-lg border border-slate-300 px-3 py-2.5 outline-none focus:border-slate-500"
+              className="mt-1.5 w-full rounded-lg border border-slate-300 px-3 py-2.5 outline-none transition focus:border-[#006b3f] focus:ring-2 focus:ring-[#fcd116]/60"
             />
           </label>
 
@@ -85,7 +90,7 @@ export default function GuardianLoginPage() {
               required
               autoComplete="email"
               placeholder="parent@email.com"
-              className="mt-1.5 w-full rounded-lg border border-slate-300 px-3 py-2.5 outline-none focus:border-slate-500"
+              className="mt-1.5 w-full rounded-lg border border-slate-300 px-3 py-2.5 outline-none transition focus:border-[#006b3f] focus:ring-2 focus:ring-[#fcd116]/60"
             />
           </label>
 
@@ -98,7 +103,7 @@ export default function GuardianLoginPage() {
               required
               autoComplete="tel"
               placeholder="024 123 4567"
-              className="mt-1.5 w-full rounded-lg border border-slate-300 px-3 py-2.5 outline-none focus:border-slate-500"
+              className="mt-1.5 w-full rounded-lg border border-slate-300 px-3 py-2.5 outline-none transition focus:border-[#006b3f] focus:ring-2 focus:ring-[#fcd116]/60"
             />
           </label>
 
@@ -109,7 +114,7 @@ export default function GuardianLoginPage() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full rounded-lg bg-slate-950 px-4 py-2.5 font-medium text-white disabled:opacity-50"
+            className="w-full rounded-lg bg-[#006b3f] px-4 py-2.5 font-semibold text-white transition hover:bg-[#005530] focus:outline-none focus:ring-2 focus:ring-[#fcd116] focus:ring-offset-2 disabled:opacity-50"
           >
             {loading ? "Signing in…" : "Sign in"}
           </button>

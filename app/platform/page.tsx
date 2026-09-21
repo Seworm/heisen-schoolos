@@ -36,7 +36,7 @@ export default async function PlatformPage() {
 
   return (
     <main className="mx-auto max-w-7xl px-4 py-7 sm:px-6 lg:px-8">
-      <section className="relative overflow-hidden rounded-3xl bg-[#111827] px-6 py-8 text-white shadow-2xl shadow-slate-300/40 sm:px-8">
+      <section className="relative overflow-hidden rounded-3xl bg-[#111111] px-6 py-8 text-white shadow-2xl shadow-slate-300/40 sm:px-8">
         <div className="absolute -right-16 -top-24 h-64 w-64 rounded-full bg-violet-500/20 blur-3xl" />
         <div className="absolute bottom-[-5rem] right-1/3 h-48 w-48 rounded-full bg-cyan-400/10 blur-3xl" />
         <div className="relative flex flex-wrap items-end justify-between gap-6">

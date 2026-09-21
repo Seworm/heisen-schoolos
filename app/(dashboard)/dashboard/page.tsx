@@ -150,13 +150,13 @@ export default async function Home() {
       {/* PAGE HEADER */}
       <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
         <div className="relative px-6 py-7 sm:px-8">
-          <div className="absolute right-0 top-0 h-40 w-40 translate-x-12 -translate-y-12 rounded-full bg-blue-50" />
-          <div className="absolute right-20 top-12 h-24 w-24 rounded-full bg-indigo-50" />
+          <div className="absolute right-0 top-0 h-40 w-40 translate-x-12 -translate-y-12 rounded-full bg-[#fff8d9]" />
+          <div className="absolute right-20 top-12 h-24 w-24 rounded-full bg-[#e8f3ed]" />
 
           <div className="relative">
             <div className="flex flex-col justify-between gap-6 lg:flex-row lg:items-end">
               <div className="min-w-0">
-                <div className="mb-3 inline-flex items-center gap-2 rounded-md bg-blue-50 px-2.5 py-1.5 text-xs font-semibold text-blue-700">
+                <div className="mb-3 inline-flex items-center gap-2 rounded-md bg-[#e8f3ed] px-2.5 py-1.5 text-xs font-bold text-[#006b3f]">
                   <Activity className="h-3.5 w-3.5" />
                   SchoolOS Dashboard
                 </div>
@@ -174,7 +174,7 @@ export default async function Home() {
               <div className="flex shrink-0 flex-wrap gap-3">
                 <Link
                   href="/academics/classes"
-                  className="inline-flex items-center justify-center gap-2 rounded-lg bg-blue-700 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                  className="inline-flex items-center justify-center gap-2 rounded-lg bg-[#006b3f] px-4 py-2.5 text-sm font-bold text-white shadow-sm transition-colors hover:bg-[#005530] focus:outline-none focus:ring-2 focus:ring-[#fcd116] focus:ring-offset-2"
                 >
                   <GraduationCap className="h-4 w-4" />
                   Manage Classes
@@ -182,7 +182,7 @@ export default async function Home() {
 
                 <Link
                   href="/students"
-                  className="inline-flex items-center justify-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 shadow-sm transition-colors hover:bg-slate-50 hover:text-slate-950 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                  className="inline-flex items-center justify-center gap-2 rounded-lg border border-[#006b3f]/25 bg-white px-4 py-2.5 text-sm font-bold text-[#006b3f] shadow-sm transition-colors hover:bg-[#fff8d9] hover:text-[#003d22] focus:outline-none focus:ring-2 focus:ring-[#fcd116] focus:ring-offset-2"
                 >
                   <Users className="h-4 w-4" />
                   Students
@@ -250,14 +250,14 @@ export default async function Home() {
               <Link
                 key={stat.label}
                 href={stat.href}
-                className="group rounded-xl border border-slate-200 bg-white p-5 shadow-sm transition-all hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                className="group rounded-xl border border-slate-200 bg-white p-5 shadow-sm transition-all hover:-translate-y-0.5 hover:border-[#006b3f]/30 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-[#fcd116] focus:ring-offset-2"
               >
                 <div className="flex items-start justify-between gap-4">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-50 text-blue-700">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[#e8f3ed] text-[#006b3f]">
                     <Icon className="h-5 w-5" strokeWidth={2} />
                   </div>
 
-                  <ArrowRight className="h-4 w-4 text-slate-300 transition-transform group-hover:translate-x-0.5 group-hover:text-blue-600" />
+                  <ArrowRight className="h-4 w-4 text-slate-300 transition-transform group-hover:translate-x-0.5 group-hover:text-[#006b3f]" />
                 </div>
 
                 <p className="mt-5 text-3xl font-bold tracking-tight text-slate-950">
@@ -284,7 +284,7 @@ export default async function Home() {
           <div className="flex items-start justify-between border-b border-slate-100 px-6 py-5">
             <div>
               <div className="flex items-center gap-2">
-                <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-indigo-50 text-indigo-700">
+                <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-[#fff8d9] text-[#111111]">
                   <GraduationCap className="h-4.5 w-4.5" />
                 </div>
 
@@ -301,7 +301,7 @@ export default async function Home() {
 
             <Link
               href="/academics/classes"
-              className="inline-flex items-center gap-1 text-xs font-semibold text-blue-700 hover:text-blue-800"
+              className="inline-flex items-center gap-1 text-xs font-bold text-[#006b3f] hover:text-[#ce1126]"
             >
               View
               <ArrowRight className="h-3.5 w-3.5" />
@@ -311,7 +311,7 @@ export default async function Home() {
           <div className="divide-y divide-slate-100 px-6">
             <div className="flex items-center justify-between py-4">
               <div className="flex items-center gap-3">
-                <div className="h-2 w-2 rounded-full bg-blue-600" />
+                <div className="h-2 w-2 rounded-full bg-[#006b3f]" />
 
                 <span className="text-sm text-slate-600">
                   Class levels
@@ -325,7 +325,7 @@ export default async function Home() {
 
             <div className="flex items-center justify-between py-4">
               <div className="flex items-center gap-3">
-                <div className="h-2 w-2 rounded-full bg-indigo-600" />
+                <div className="h-2 w-2 rounded-full bg-[#ce1126]" />
 
                 <span className="text-sm text-slate-600">
                   Streams
@@ -423,18 +423,18 @@ export default async function Home() {
       </section>
 
       {/* Quick actions */}
-      <section className="rounded-xl border border-slate-200 bg-slate-900 p-6 shadow-sm sm:p-7">
+      <section className="rounded-2xl border border-[#006b3f]/20 bg-[#e8f3ed] p-6 shadow-sm sm:p-7">
         <div className="flex flex-col justify-between gap-5 lg:flex-row lg:items-center">
           <div>
-            <p className="text-xs font-bold uppercase tracking-[0.12em] text-blue-400">
+            <p className="text-xs font-bold uppercase tracking-[0.12em] text-[#006b3f]">
               Quick actions
             </p>
 
-            <h2 className="mt-1 text-lg font-bold tracking-tight text-white">
+            <h2 className="mt-1 text-lg font-bold tracking-tight text-[#111111]">
               Continue managing your school
             </h2>
 
-            <p className="mt-1 text-sm text-slate-400">
+            <p className="mt-1 text-sm text-slate-600">
               Jump directly into the areas you use most.
             </p>
           </div>
@@ -442,7 +442,7 @@ export default async function Home() {
           <div className="flex flex-wrap gap-2">
             <Link
               href="/students"
-              className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2 focus:ring-offset-slate-900"
+              className="inline-flex items-center gap-2 rounded-lg bg-[#006b3f] px-4 py-2.5 text-sm font-bold text-white transition-colors hover:bg-[#005530] focus:outline-none focus:ring-2 focus:ring-[#fcd116] focus:ring-offset-2"
             >
               <Users className="h-4 w-4" />
               Students
@@ -450,7 +450,7 @@ export default async function Home() {
 
             <Link
               href="/assessments/results"
-              className="inline-flex items-center gap-2 rounded-lg bg-white px-4 py-2.5 text-sm font-semibold text-slate-900 transition-colors hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-slate-900"
+              className="inline-flex items-center gap-2 rounded-lg bg-white px-4 py-2.5 text-sm font-bold text-[#111111] transition-colors hover:bg-[#fff8d9] focus:outline-none focus:ring-2 focus:ring-[#fcd116] focus:ring-offset-2"
             >
               <BarChart3 className="h-4 w-4" />
               Results
@@ -458,7 +458,7 @@ export default async function Home() {
 
             <Link
               href="/academics/subjects"
-              className="inline-flex items-center gap-2 rounded-lg border border-slate-600 bg-transparent px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:border-slate-500 hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2 focus:ring-offset-slate-900"
+              className="inline-flex items-center gap-2 rounded-lg border border-[#006b3f]/35 bg-white/70 px-4 py-2.5 text-sm font-bold text-[#006b3f] transition-colors hover:border-[#006b3f] hover:bg-white focus:outline-none focus:ring-2 focus:ring-[#fcd116] focus:ring-offset-2"
             >
               <BookOpen className="h-4 w-4" />
               Subjects
