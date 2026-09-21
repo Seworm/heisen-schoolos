@@ -38,115 +38,111 @@ export default function NewInvoiceForm({
 
   return (
     <form
-  action={async (formData) => {
-    await generateInvoiceAction(formData);
-  }}
-  className="space-y-6"
->
+      action={async (formData) => {
+        await generateInvoiceAction(formData);
+      }}
+      className="finance-form"
+    >
       <input
         type="hidden"
         name="action"
         value="generateInvoice"
       />
 
-      <section className="rounded-xl border bg-card p-5 shadow-sm">
-        <div className="mb-5">
-          <h2 className="font-semibold">Invoice source</h2>
-          <p className="mt-1 text-sm text-muted-foreground">
+      <section className="finance-card">
+        <div className="finance-card-header">
+          <h2 className="finance-card-title">Invoice source</h2>
+          <p className="finance-card-description">
             Select an existing fee assignment. The invoice will be
             generated from its fee structure.
           </p>
         </div>
+        <div className="finance-card-body">
+          {assignments.length === 0 ? (
+            <div className="finance-empty">
+              <FileText className="mx-auto h-8 w-8 text-muted-foreground" />
 
-        {assignments.length === 0 ? (
-          <div className="rounded-lg border border-dashed p-6 text-center">
-            <FileText className="mx-auto h-8 w-8 text-muted-foreground" />
+              <p className="mt-3 font-medium">
+                No fee assignments available
+              </p>
 
-            <p className="mt-3 font-medium">
-              No fee assignments available
-            </p>
+              <p className="mt-1 text-sm text-muted-foreground">
+                Assign a fee structure to a student before generating
+                an invoice.
+              </p>
 
-            <p className="mt-1 text-sm text-muted-foreground">
-              Assign a fee structure to a student before generating
-              an invoice.
-            </p>
-
-            <Link
-              href="/finance/fee-structures"
-              className="mt-4 inline-flex items-center gap-2 text-sm font-medium text-primary hover:underline"
-            >
-              View fee structures
-            </Link>
-          </div>
-        ) : (
-          <div className="space-y-5">
-            <label className="block">
-              <span className="mb-1.5 block text-sm font-medium">
-                Fee assignment
-                <span className="ml-1 text-destructive">*</span>
-              </span>
-
-              <select
-                name="feeAssignmentId"
-                required
-                value={assignmentId}
-                onChange={(event) =>
-                  setAssignmentId(event.target.value)
-                }
-                className="input-field"
+              <Link
+                href="/finance/fee-structures"
+                className="mt-4 inline-flex items-center gap-2 text-sm font-medium text-primary hover:underline"
               >
-                <option value="">
-                  Select student fee assignment
-                </option>
+                View fee structures
+              </Link>
+            </div>
+          ) : (
+            <div className="space-y-5">
+              <label className="block">
+                <span className="mb-1.5 block text-sm font-medium">
+                  Fee assignment
+                  <span className="ml-1 text-destructive">*</span>
+                </span>
 
-                {assignments.map((assignment) => (
-                  <option
-                    key={assignment.id}
-                    value={assignment.id}
-                  >
-                    {assignment.studentName} ·{" "}
-                    {assignment.feeStructureName}
-                    {assignment.termName
-                      ? ` · ${assignment.termName}`
-                      : ""}
-                  </option>
-                ))}
-              </select>
-            </label>
-
-            {selectedAssignment && (
-              <div className="grid gap-3 rounded-lg bg-muted/40 p-4 sm:grid-cols-3">
-                <Info
-                  label="Student ID"
-                  value={selectedAssignment.studentId}
-                />
-
-                <Info
-                  label="Academic year"
-                  value={
-                    selectedAssignment.academicYearName || "—"
+                <select
+                  name="feeAssignmentId"
+                  required
+                  value={assignmentId}
+                  onChange={(event) =>
+                    setAssignmentId(event.target.value)
                   }
-                />
+                  className="finance-control"
+                >
+                  <option value="">
+                    Select student fee assignment
+                  </option>
 
-                <Info
-                  label="Term"
-                  value={selectedAssignment.termName || "—"}
-                />
-              </div>
+                  {assignments.map((assignment) => (
+                    <option key={assignment.id} value={assignment.id}>
+                      {assignment.studentName} ·{" "}
+                      {assignment.feeStructureName}
+                      {assignment.termName
+                        ? ` · ${assignment.termName}`
+                        : ""}
+                    </option>
+                  ))}
+                </select>
+              </label>
+
+              {selectedAssignment && (
+                <div className="finance-selection sm:grid-cols-3">
+                  <Info
+                    label="Student ID"
+                    value={selectedAssignment.studentId}
+                  />
+
+                  <Info
+                    label="Academic year"
+                    value={selectedAssignment.academicYearName || "—"}
+                  />
+
+                  <Info
+                    label="Term"
+                    value={selectedAssignment.termName || "—"}
+                  />
+                </div>
             )}
-          </div>
-        )}
+            </div>
+          )}
+        </div>
       </section>
 
-      <section className="rounded-xl border bg-card p-5 shadow-sm">
-        <div className="mb-5">
-          <h2 className="font-semibold">Invoice details</h2>
-          <p className="mt-1 text-sm text-muted-foreground">
+      <section className="finance-card">
+        <div className="finance-card-header">
+          <h2 className="finance-card-title">Invoice details</h2>
+          <p className="finance-card-description">
             Set the invoice dates and any optional notes.
           </p>
         </div>
 
-        <div className="grid gap-5 md:grid-cols-2">
+        <div className="finance-card-body grid gap-5 md:grid-cols-2">
           <label className="block">
             <span className="mb-1.5 block text-sm font-medium">
               Issue date
@@ -161,7 +157,7 @@ export default function NewInvoiceForm({
               onChange={(event) =>
                 setIssueDate(event.target.value)
               }
-              className="input-field"
+              className="finance-control"
             />
           </label>
 
@@ -178,7 +174,7 @@ export default function NewInvoiceForm({
               onChange={(event) =>
                 setDueDate(event.target.value)
               }
-              className="input-field"
+              className="finance-control"
             />
           </label>
 
@@ -195,16 +191,16 @@ export default function NewInvoiceForm({
                 setNotes(event.target.value)
               }
               placeholder="Optional invoice notes..."
-              className="input-field resize-none"
+              className="finance-control resize-none"
             />
           </label>
         </div>
       </section>
 
-      <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+      <div className="finance-actions">
         <Link
           href="/finance/invoices"
-          className="inline-flex items-center justify-center gap-2 rounded-lg border bg-background px-4 py-2.5 text-sm font-medium shadow-sm transition hover:bg-muted"
+          className="btn btn-secondary"
         >
           <ArrowLeft className="h-4 w-4" />
           Cancel
@@ -213,29 +209,13 @@ export default function NewInvoiceForm({
         <button
           type="submit"
           disabled={!assignmentId}
-          className="inline-flex items-center justify-center gap-2 rounded-lg bg-primary px-5 py-2.5 text-sm font-medium text-primary-foreground shadow-sm transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
+          className="btn btn-primary"
         >
           <Check className="h-4 w-4" />
           Generate invoice
         </button>
       </div>
 
-      <style jsx>{`
-        .input-field {
-          width: 100%;
-          border-radius: 0.5rem;
-          border: 1px solid hsl(var(--border));
-          background: hsl(var(--background));
-          padding: 0.625rem 0.75rem;
-          font-size: 0.875rem;
-          outline: none;
-        }
-
-        .input-field:focus {
-          border-color: hsl(var(--ring));
-          box-shadow: 0 0 0 2px hsl(var(--ring) / 0.15);
-        }
-      `}</style>
     </form>
   );
 }
@@ -249,9 +229,8 @@ function Info({
 }) {
   return (
     <div>
-      <p className="text-xs text-muted-foreground">{label}</p>
-      <p className="mt-1 text-sm font-medium">{value}</p>
+      <p className="finance-selection-label">{label}</p>
+      <p className="finance-selection-value">{value}</p>
     </div>
   );
 }
-

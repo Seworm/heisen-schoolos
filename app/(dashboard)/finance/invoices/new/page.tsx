@@ -63,29 +63,24 @@ export default async function NewInvoicePage() {
   }));
 
   return (
-    <main className="space-y-8 p-6 lg:p-8">
-      <section>
-        <Link
-          href="/finance/invoices"
-          className="inline-flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground"
-        >
-          <ArrowLeft className="h-4 w-4" />
-          Back to invoices
-        </Link>
+    <main className="finance-page">
+      <Link href="/finance/invoices" className="finance-breadcrumb">
+        <ArrowLeft className="h-4 w-4" />
+        Back to invoices
+      </Link>
 
-        <div className="mt-5 flex items-start gap-3">
-          <div className="rounded-xl bg-muted p-3">
+      <section className="finance-header">
+        <div className="finance-header-content">
+          <div className="finance-header-icon">
             <FileText className="h-6 w-6" />
           </div>
-
           <div>
-            <h1 className="text-3xl font-semibold tracking-tight">
-              New Invoice
-            </h1>
-
-            <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
-              Generate an invoice from an existing student fee
-              assignment.
+            <p className="text-xs font-bold uppercase tracking-[0.14em] text-primary">
+              Finance workflow
+            </p>
+            <h1 className="page-title mt-1">Create invoice</h1>
+            <p className="page-description max-w-2xl">
+              Generate an invoice from an existing student fee assignment.
             </p>
           </div>
         </div>
