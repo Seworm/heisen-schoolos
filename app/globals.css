@@ -335,11 +335,21 @@ body {
 .bg-blue-500,
 .bg-blue-600,
 .bg-blue-700,
+.bg-emerald-500,
+.bg-emerald-600,
+.bg-emerald-700,
 .bg-indigo-500,
 .bg-indigo-600,
 .bg-cyan-500,
 .bg-cyan-600 {
   background-color: #006b3f !important;
+}
+
+.hover\:bg-blue-700:hover,
+.hover\:bg-blue-800:hover,
+.hover\:bg-emerald-700:hover,
+.hover\:bg-emerald-800:hover {
+  background-color: #005530 !important;
 }
 
 .bg-violet-500,
@@ -361,11 +371,60 @@ body {
   color: #006b3f !important;
 }
 
+.text-amber-500,
+.text-amber-600,
+.text-amber-700,
+.text-yellow-600,
+.text-yellow-700 {
+  color: #8c6900 !important;
+}
+
 .text-emerald-500,
 .text-emerald-600,
 .text-emerald-700,
 .text-emerald-800 {
   color: #006b3f !important;
+}
+
+/* Keep dark utility buttons readable even when legacy text utilities conflict. */
+button[class*="bg-black"],
+button[class*="bg-slate-950"],
+button[class*="bg-slate-900"],
+button[class*="bg-neutral-900"],
+button[class*="bg-gray-900"],
+a[class*="bg-black"],
+a[class*="bg-slate-950"],
+a[class*="bg-slate-900"],
+a[class*="bg-neutral-900"],
+a[class*="bg-gray-900"] {
+  border-color: var(--brand-950) !important;
+  background-color: var(--brand-950) !important;
+  color: #ffffff !important;
+}
+
+button[class*="bg-black"]:hover:not(:disabled),
+button[class*="bg-slate-950"]:hover:not(:disabled),
+button[class*="bg-slate-900"]:hover:not(:disabled),
+button[class*="bg-neutral-900"]:hover:not(:disabled),
+button[class*="bg-gray-900"]:hover:not(:disabled),
+a[class*="bg-black"]:hover,
+a[class*="bg-slate-950"]:hover,
+a[class*="bg-slate-900"]:hover,
+a[class*="bg-neutral-900"]:hover,
+a[class*="bg-gray-900"]:hover {
+  border-color: var(--brand-900) !important;
+  background-color: var(--brand-900) !important;
+  color: #ffffff !important;
+}
+
+button[class*="bg-white"],
+button[class*="bg-slate-50"],
+button[class*="bg-slate-100"],
+a[class*="bg-white"],
+a[class*="bg-slate-50"],
+a[class*="bg-slate-100"] {
+  border-color: var(--border-strong);
+  color: var(--text-primary) !important;
 }
 
 .border-blue-200,
