@@ -47,6 +47,12 @@ Apply the platform foundation migration with:
 npm run db:migrate:platform
 ```
 
+Apply the staff invitation migration after the existing migrations with:
+
+```bash
+npm run db:migrate:staff-invitations
+```
+
 It adds school settings, profiles, documents, student status history, fee assignments, scholarships, timetable infrastructure, communications, notifications, audit logs, promotion decisions and import history, and extends student records and membership roles.
 
 ### Payments
@@ -123,7 +129,9 @@ Sensitive operations should use `requireRole()`/`requireTeacherScope()` before t
 
 ## Authentication bootstrap
 
-Neon Auth must have an initial administrator account configured in the Neon Auth project. Staff records in the application database are linked to their Neon Auth identity by normalized email. The application then resolves the local school membership and role server-side.
+Neon Auth must have an initial administrator account configured in the Neon Auth project. Staff records in the application database are linked to their Neon Auth identity by normalized email. The application then resolves the local school membership and role server-side. Administrators provision staff with an expiring invitation link; the raw token is never stored and previous invitations for the same school/email are invalidated.
+
+Neon Auth's built-in two-factor routes are available at `/auth/two-factor`. Administrators can configure an authenticator app and recovery codes from the school administration page. Mandatory platform-level enforcement depends on the enabled Neon Auth provider configuration.
 
 Student activation verifies the one-time hashed activation code, creates the Neon Auth email/password account, activates the local student account and records an audit event. The raw activation code is never stored.
 
@@ -160,6 +168,9 @@ The platform layer adds:
 - validated CSV student import infrastructure
 - global school-scoped search API
 - administration dashboard and staff access workflow
+- invitation-based staff onboarding with hashed, expiring, single-use tokens
+- cross-school membership management for platform super administrators
+- centralized school-context resolution and permission-based authorization
 
 ## Important production checks
 
@@ -173,3 +184,5 @@ Before production deployment:
 6. Verify report-card printing on an actual A4 browser print/PDF workflow.
 7. Configure an object-storage provider for document `storageKey` records before enabling uploads.
 8. Configure transactional email for password recovery and student activation communications.
+9. Configure transactional email for staff invitation links and verify invitation expiry/revocation behavior.
+10. Enable and test Neon Auth two-factor authentication for platform administrators.

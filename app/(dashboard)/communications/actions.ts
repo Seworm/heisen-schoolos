@@ -12,6 +12,7 @@ import {
   students,
   streams,
 } from "@/db/schema";
+import { requirePermission } from "@/lib/authorization";
 import { getApplicationSession } from "@/lib/auth/compat";
 import { requireCurrentSchool } from "@/lib/current-school";
 import { createAnnouncementNotifications } from "@/lib/communications/recipients";
@@ -62,6 +63,7 @@ async function getContext() {
   }
 
   const school = await requireCurrentSchool();
+  await requirePermission("communications.manage", school.id);
 
   if (session.user.schoolId !== school.id) {
     throw new Error("You do not have access to this school.");

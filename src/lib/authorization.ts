@@ -2,6 +2,7 @@
 import { auth } from "@/../auth";
 import { db } from "@/db";
 import { schoolMemberships } from "@/db/schema";
+import { hasPermission, type Permission } from "@/lib/permissions";
 
 export const PLATFORM_ROLES = [
   "super_admin",
@@ -40,15 +41,24 @@ export async function requireAuth() {
 }
 
 export function isPlatformRole(role?: string | null) {
-  return (
-    role === "super_admin" ||
-    role === "platform_admin"
+  return role === "super_admin" || role === "platform_admin";
+}
+
+export function isPlatformUser(user: {
+  platformRole?: string | null;
+  role?: string | null;
+  isPlatformAdmin?: boolean;
+  isSuperAdmin?: boolean;
+}) {
+  return Boolean(
+    user.isPlatformAdmin ||
+      user.isSuperAdmin ||
+      isPlatformRole(user.platformRole) ||
+      isPlatformRole(user.role),
   );
 }
 
-export async function requireSchoolMembership(
-  schoolId?: string,
-) {
+export async function requireSchoolMembership(schoolId?: string) {
   const user = await requireAuth();
 
   if (user.accountType === "student") {
@@ -73,7 +83,7 @@ export async function requireSchoolMembership(
    * existing school-scoped dashboard. Platform authorization
    * itself is not limited to that school.
    */
-  if (isPlatformRole(user.role)) {
+  if (isPlatformUser(user)) {
     if (schoolId) {
       const [membership] = await db
         .select({
@@ -141,6 +151,21 @@ export async function requireSchoolMembership(
   };
 }
 
+/**
+ * Resolve access to a requested school.
+ *
+ * Platform administrators are intentionally not required to have a
+ * membership row in every school. Ordinary staff must still resolve through
+ * their active membership, and students remain locked to their own school.
+ */
+export async function requireSchoolAccess(schoolId: string) {
+  if (!schoolId) {
+    throw new Error("A school is required.");
+  }
+
+  return requireSchoolMembership(schoolId);
+}
+
 export async function requireRole(
   roles: readonly string[],
   schoolId?: string,
@@ -150,8 +175,23 @@ export async function requireRole(
   if (
     user.accountType === "student" ||
     !user.role ||
-    (!isPlatformRole(user.role) && !roles.includes(user.role))
+    (!isPlatformUser(user) && !roles.includes(user.role))
   ) {
+    throw new Error(
+      "You do not have permission to perform this action.",
+    );
+  }
+
+  return user;
+}
+
+export async function requirePermission(
+  permission: Permission,
+  schoolId?: string,
+) {
+  const user = await requireSchoolMembership(schoolId);
+
+  if (!hasPermission(user, permission)) {
     throw new Error(
       "You do not have permission to perform this action.",
     );
@@ -165,7 +205,9 @@ export async function requireSuperAdmin() {
 
   if (
     user.accountType === "student" ||
-    user.role !== "super_admin"
+    (!user.isSuperAdmin &&
+      user.platformRole !== "super_admin" &&
+      user.role !== "super_admin")
   ) {
     throw new Error(
       "Super administrator permission required.",

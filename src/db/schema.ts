@@ -3426,6 +3426,30 @@ export const schoolMemberships = pgTable(
   ],
 );
 
+export const staffInvitations = pgTable(
+  "staff_invitations",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    schoolId: uuid("school_id")
+      .notNull()
+      .references(() => schools.id, { onDelete: "cascade" }),
+    email: text("email").notNull(),
+    firstName: text("first_name").notNull(),
+    lastName: text("last_name").notNull(),
+    role: schoolMembershipRoleEnum("role").notNull(),
+    tokenHash: text("token_hash").notNull().unique(),
+    expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+    acceptedAt: timestamp("accepted_at", { withTimezone: true }),
+    createdBy: text("created_by").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    index("staff_invitations_email_idx").on(table.email),
+    index("staff_invitations_school_idx").on(table.schoolId),
+    index("staff_invitations_expires_idx").on(table.expiresAt),
+  ],
+);
+
 export const studentAccountStatusEnum = pgEnum(
   "student_account_status",
   [

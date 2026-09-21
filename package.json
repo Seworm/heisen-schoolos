@@ -10,6 +10,7 @@
     "seed": "tsx --tsconfig tsconfig.json scripts/seed.ts",
     "test": "tsx --test src/lib/*.test.ts",
     "db:migrate:platform": "node scripts/apply-platform-migration.mjs",
+    "db:migrate:staff-invitations": "node scripts/apply-staff-invitations-migration.mjs",
     "typecheck": "tsc --noEmit",
     "verify": "npm run typecheck && npm run lint && npm test && npm run build",
     "seed:platform": "tsx --tsconfig tsconfig.json scripts/seed-platform.ts"

@@ -52,6 +52,9 @@ export default async function PlatformPage() {
             <Link href="/platform/reports" className="inline-flex items-center gap-2 rounded-xl border border-white/20 px-4 py-2.5 text-sm font-bold text-white transition hover:bg-white/10">
               <Activity className="h-4 w-4" /> Reports
             </Link>
+            <Link href="/platform/memberships" className="inline-flex items-center gap-2 rounded-xl border border-white/20 px-4 py-2.5 text-sm font-bold text-white transition hover:bg-white/10">
+              Manage access
+            </Link>
             <Link href="/platform/schools/new" className="inline-flex items-center gap-2 rounded-xl bg-white px-4 py-2.5 text-sm font-bold text-slate-950 shadow-lg transition hover:bg-cyan-50">
               <Building2 className="h-4 w-4" /> Add school <ArrowUpRight className="h-4 w-4" />
             </Link>

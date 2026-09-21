@@ -3,16 +3,24 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { db } from "@/db";
 import { schoolMemberships, schools } from "@/db/schema";
-import { requireAuth, isPlatformRole } from "@/lib/authorization";
+import { requireAuth, isPlatformUser } from "@/lib/authorization";
 
 const ACTIVE_SCHOOL_COOKIE = "schoolos_active_school_id";
+
+export const ACTIVE_SCHOOL_COOKIE_NAME = ACTIVE_SCHOOL_COOKIE;
+
+export async function resolveSchoolContext() {
+  const user = await requireAuth();
+  const school = await getCurrentSchool();
+  return { user, school };
+}
 
 export async function getCurrentSchool() {
   const user = await requireAuth();
 
   let schoolId: string | null = user.schoolId ?? null;
 
-  if (isPlatformRole(user.role)) {
+  if (isPlatformUser(user)) {
     const activeSchoolId = (await cookies()).get(
       ACTIVE_SCHOOL_COOKIE,
     )?.value;
@@ -21,7 +29,7 @@ export async function getCurrentSchool() {
   }
 
   if (!schoolId) {
-    if (isPlatformRole(user.role)) {
+    if (isPlatformUser(user)) {
       redirect("/dashboard");
     }
 
@@ -51,14 +59,14 @@ export async function getCurrentSchool() {
     .limit(1);
 
   if (!school) {
-    if (isPlatformRole(user.role)) {
+    if (isPlatformUser(user)) {
       redirect("/dashboard");
     }
 
     throw new Error("The active school could not be verified.");
   }
 
-  if (!isPlatformRole(user.role)) {
+  if (!isPlatformUser(user)) {
     const [membership] = await db
       .select({ id: schoolMemberships.id })
       .from(schoolMemberships)

@@ -6,10 +6,12 @@ import { redirect } from "next/navigation";
 
 import { db } from "@/db";
 import { attendanceSessions } from "@/db/schema";
+import { requirePermission } from "@/lib/authorization";
 import { requireCurrentSchool } from "@/lib/current-school";
 
 export async function cancelAttendanceSession(sessionId: string) {
   const school = await requireCurrentSchool();
+  await requirePermission("attendance.manage", school.id);
 
   const result = await db
     .update(attendanceSessions)
@@ -37,6 +39,7 @@ export async function cancelAttendanceSession(sessionId: string) {
 
 export async function reopenAttendanceSession(sessionId: string) {
   const school = await requireCurrentSchool();
+  await requirePermission("attendance.manage", school.id);
 
   const result = await db
     .update(attendanceSessions)
