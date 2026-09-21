@@ -483,6 +483,33 @@ button {
   cursor: pointer;
 }
 
+/* Ensure unstyled and legacy buttons remain readable across every route. */
+button:not([class*="bg-"]) {
+  min-height: 2.5rem;
+  border: 1px solid var(--primary);
+  border-radius: 0.55rem;
+  background: var(--primary);
+  color: #ffffff;
+  font-weight: 600;
+  transition:
+    background-color 150ms ease,
+    border-color 150ms ease,
+    color 150ms ease,
+    box-shadow 150ms ease;
+}
+
+button:not([class*="bg-"]):hover:not(:disabled) {
+  border-color: var(--primary-hover);
+  background: var(--primary-hover);
+}
+
+button:not([class*="bg-"]):focus-visible {
+  outline: none;
+  box-shadow:
+    0 0 0 2px #ffffff,
+    0 0 0 4px var(--ring);
+}
+
 button:disabled {
   cursor: not-allowed;
 }
@@ -862,12 +889,12 @@ select:focus-visible {
   color: #ffffff;
 
   box-shadow:
-    inset 3px 0 0 #93c5fd,
+    inset 3px 0 0 var(--secondary),
     0 3px 10px rgb(0 0 0 / 0.15);
 }
 
 .sidebar-item-active:hover {
-  background: #1d4ed8;
+  background: var(--primary-hover);
 }
 
 /* =========================================================
