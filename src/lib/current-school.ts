@@ -1,65 +1,31 @@
 ﻿import { and, eq } from "drizzle-orm";
 import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
 import { db } from "@/db";
 import { schoolMemberships, schools } from "@/db/schema";
 import { requireAuth, isPlatformRole } from "@/lib/authorization";
 
+const ACTIVE_SCHOOL_COOKIE = "schoolos_active_school_id";
+
 export async function getCurrentSchool() {
   const user = await requireAuth();
 
-  const requestedSchoolId = (await cookies()).get("schoolos_active_school_id")?.value;
-  let schoolId: string | undefined = isPlatformRole(user.role)
-    ? requestedSchoolId || user.schoolId
-    : user.schoolId;
+  let schoolId: string | null = user.schoolId ?? null;
 
-  /*
-   * Platform owners are allowed to operate across all schools.
-   * The existing workspace still needs one school to render, so
-   * use the user's primary school as the default.
-   */
-  if (isPlatformRole(user.role) && requestedSchoolId) {
-    const [selectedSchool] = await db
-      .select({ id: schools.id })
-      .from(schools)
-      .where(
-        and(
-          eq(schools.id, requestedSchoolId),
-          eq(schools.status, "active"),
-        ),
-      )
-      .limit(1);
+  if (isPlatformRole(user.role)) {
+    const activeSchoolId = (await cookies()).get(
+      ACTIVE_SCHOOL_COOKIE,
+    )?.value;
 
-    if (!selectedSchool) {
-      schoolId = undefined;
-    }
-  }
-
-  if (!schoolId && isPlatformRole(user.role)) {
-    const [membership] = await db
-      .select({
-        schoolId: schoolMemberships.schoolId,
-      })
-      .from(schoolMemberships)
-      .innerJoin(
-        schools,
-        eq(schools.id, schoolMemberships.schoolId),
-      )
-      .where(
-        and(
-          eq(schoolMemberships.userId, user.id),
-          eq(schoolMemberships.isActive, true),
-          eq(schools.status, "active"),
-        ),
-      )
-      .limit(1);
-
-    schoolId = membership?.schoolId;
+    schoolId = activeSchoolId ?? null;
   }
 
   if (!schoolId) {
-    throw new Error(
-      "No active school is associated with this account.",
-    );
+    if (isPlatformRole(user.role)) {
+      redirect("/dashboard");
+    }
+
+    throw new Error("Select a school before opening the school workspace.");
   }
 
   const [school] = await db
@@ -68,16 +34,12 @@ export async function getCurrentSchool() {
       name: schools.name,
       slug: schools.slug,
       schoolCode: schools.schoolCode,
-      schoolType: schools.schoolType,
+      logoUrl: schools.logoUrl,
       status: schools.status,
-      region: schools.region,
-      district: schools.district,
-      town: schools.town,
       address: schools.address,
       phone: schools.phone,
       email: schools.email,
       website: schools.website,
-      logoUrl: schools.logoUrl,
     })
     .from(schools)
     .where(
@@ -89,16 +51,13 @@ export async function getCurrentSchool() {
     .limit(1);
 
   if (!school) {
-    throw new Error(
-      "The active school could not be verified.",
-    );
+    if (isPlatformRole(user.role)) {
+      redirect("/dashboard");
+    }
+
+    throw new Error("The active school could not be verified.");
   }
 
-  /*
-   * Ordinary users must have an active membership in this school.
-   * Platform owners are authorized globally and therefore do not
-   * require a school membership for every school they administer.
-   */
   if (!isPlatformRole(user.role)) {
     const [membership] = await db
       .select({ id: schoolMemberships.id })
@@ -113,9 +72,7 @@ export async function getCurrentSchool() {
       .limit(1);
 
     if (!membership) {
-      throw new Error(
-        "Active school membership not found.",
-      );
+      throw new Error("Active school membership not found.");
     }
   }
 

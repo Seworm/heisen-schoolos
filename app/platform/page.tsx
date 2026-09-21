@@ -5,6 +5,7 @@ import { db } from "@/db";
 import { auditLogs, schoolMemberships, schools, staff, students } from "@/db/schema";
 import { requireSuperAdmin } from "@/lib/authorization";
 import PlatformAdminForm from "./PlatformAdminForm";
+import SchoolWorkspaceButton from "./SchoolWorkspaceButton";
 
 export const dynamic = "force-dynamic";
 
@@ -99,9 +100,7 @@ export default async function PlatformPage() {
                 <span>{school.staff} staff</span>
                 <span>{school.students} students</span>
                 {school.status === "active" && (
-                  <Link href="/dashboard" className="font-semibold text-blue-600 hover:text-blue-800">
-                    Open workspace
-                  </Link>
+                  <SchoolWorkspaceButton schoolId={school.id} />
                 )}
               </div>
             </div>

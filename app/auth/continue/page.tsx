@@ -21,9 +21,8 @@ export default async function AuthContinuePage() {
   }
 
   if (user.role === "super_admin") {
-    redirect("/platform");
+    redirect("/dashboard");
   }
 
   redirect("/dashboard");
 }
-
