@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { useFormStatus } from "react-dom";
 import Link from "next/link";
 import {
   ArrowLeft,
@@ -156,23 +157,23 @@ export default function FeeStructureForm({
   return (
     <form
       action={async (formData) => {
-  formData.set(
-    "items",
-    JSON.stringify(
-      items.map((item) => ({
-        feeCategoryId: item.feeCategoryId,
-        amount: item.amount,
-        description: item.description || undefined,
-      })),
-    ),
-  );
+        formData.set(
+          "items",
+          JSON.stringify(
+            items.map((item) => ({
+              feeCategoryId: item.feeCategoryId,
+              amount: item.amount,
+              description: item.description || undefined,
+            })),
+          ),
+        );
 
-  if (mode === "create") {
-    await createFeeStructureAction(formData);
-  } else {
-    await updateFeeStructureItemsAction(formData);
-  }
-}}
+        if (mode === "create") {
+          await createFeeStructureAction(formData);
+        } else {
+          await updateFeeStructureItemsAction(formData);
+        }
+      }}
       className="space-y-6"
     >
       {mode === "edit" && (
@@ -436,16 +437,10 @@ export default function FeeStructureForm({
           Cancel
         </Link>
 
-        <button
-          type="submit"
+        <SubmitButton
           disabled={categories.length === 0}
-          className="inline-flex items-center justify-center gap-2 rounded-lg bg-primary px-5 py-2.5 text-sm font-medium text-primary-foreground shadow-sm transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
-        >
-          <Check className="h-4 w-4" />
-          {mode === "create"
-            ? "Create fee structure"
-            : "Save changes"}
-        </button>
+          mode={mode}
+        />
       </div>
 
       <style jsx>{`
@@ -465,6 +460,33 @@ export default function FeeStructureForm({
         }
       `}</style>
     </form>
+  );
+}
+
+function SubmitButton({
+  disabled,
+  mode,
+}: {
+  disabled: boolean;
+  mode: "create" | "edit";
+}) {
+  const { pending } = useFormStatus();
+
+  return (
+    <button
+      type="submit"
+      disabled={disabled || pending}
+      className="btn btn-primary"
+    >
+      <Check className="h-4 w-4" />
+      {pending
+        ? mode === "create"
+          ? "Creating..."
+          : "Saving..."
+        : mode === "create"
+          ? "Create fee structure"
+          : "Save changes"}
+    </button>
   );
 }
 
@@ -489,4 +511,3 @@ function Field({
     </label>
   );
 }
-

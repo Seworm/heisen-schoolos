@@ -4,6 +4,9 @@ import {
   feeCategories,
   feeStructureItems,
   feeStructures,
+  academicYears,
+  classLevels,
+  terms,
 } from "@/db/schema";
 import {
   normaliseText,
@@ -67,6 +70,7 @@ export async function updateFeeCategory(input: {
       and(
         eq(feeCategories.id, categoryId),
         eq(feeCategories.schoolId, schoolId),
+        eq(feeCategories.isActive, true),
       ),
     )
     .limit(1);
@@ -165,6 +169,60 @@ export async function createFeeStructure(input: {
 
   if (!input.items?.length) {
     throw new Error("At least one fee item is required.");
+  }
+
+  const [academicYear] = await db
+    .select({ id: academicYears.id })
+    .from(academicYears)
+    .where(
+      and(
+        eq(academicYears.id, academicYearId),
+        eq(academicYears.schoolId, schoolId),
+      ),
+    )
+    .limit(1);
+
+  if (!academicYear) {
+    throw new Error("Academic year not found.");
+  }
+
+  const [term] = await db
+    .select({
+      id: terms.id,
+      academicYearId: terms.academicYearId,
+    })
+    .from(terms)
+    .innerJoin(
+      academicYears,
+      eq(academicYears.id, terms.academicYearId),
+    )
+    .where(
+      and(
+        eq(terms.id, termId),
+        eq(academicYears.schoolId, schoolId),
+      ),
+    )
+    .limit(1);
+
+  if (!term || term.academicYearId !== academicYearId) {
+    throw new Error(
+      "The selected term does not belong to the academic year.",
+    );
+  }
+
+  const [classLevel] = await db
+    .select({ id: classLevels.id })
+    .from(classLevels)
+    .where(
+      and(
+        eq(classLevels.id, classLevelId),
+        eq(classLevels.schoolId, schoolId),
+      ),
+    )
+    .limit(1);
+
+  if (!classLevel) {
+    throw new Error("Class level not found.");
   }
 
   const duplicate = await db

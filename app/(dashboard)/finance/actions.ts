@@ -121,10 +121,7 @@ export async function createFeeStructureAction(formData: FormData) {
   revalidatePath(financePath());
   revalidatePath("/finance/fee-structures");
 
-  return {
-    success: true,
-    structure,
-  };
+  redirect(`/finance/fee-structures/${structure.id}`);
 }
 
 export async function updateFeeStructureItemsAction(
