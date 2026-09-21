@@ -8,7 +8,7 @@ import { bootstrapSuperAdmin } from "@/lib/actions/bootstrap";
 export default function SetupPage() {
   const router = useRouter();
 
-  const [email, setEmail] = useState("");
+  const email = "atsu.seworm@gmail.com";
   const [password, setPassword] = useState("");
   const [schoolName, setSchoolName] = useState("");
   const [schoolCode, setSchoolCode] = useState("");
@@ -144,11 +144,14 @@ export default function SetupPage() {
                   <input
                     type="email"
                     value={email}
-                    onChange={(e) => setEmail(e.target.value)}
+                    readOnly
                     required
                     autoComplete="email"
                     className="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm outline-none focus:border-slate-500"
                   />
+                  <p className="mt-1.5 text-xs text-slate-500">
+                    The platform owner account is fixed to atsu.seworm@gmail.com.
+                  </p>
                 </div>
 
                 <div className="sm:col-span-2">
@@ -230,5 +233,3 @@ export default function SetupPage() {
     </main>
   );
 }
-
-

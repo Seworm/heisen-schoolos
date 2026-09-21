@@ -16,9 +16,14 @@ export default async function AuthContinuePage() {
     redirect("/student");
   }
 
+  if (user.accountType === "guardian") {
+    redirect("/guardian");
+  }
+
   if (user.role === "super_admin") {
     redirect("/platform");
   }
 
   redirect("/dashboard");
 }
+

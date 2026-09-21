@@ -1,13 +1,19 @@
-﻿import { and, eq } from "drizzle-orm";
+"use server";
+
+import { and, eq } from "drizzle-orm";
 import { db } from "@/db";
 import {
+  guardianUserAccounts,
+  guardians,
   schoolMemberships,
   schools,
+  studentGuardians,
   studentUserAccounts,
-  users,
   students,
+  users,
 } from "@/db/schema";
 import { getNeonAuth } from "@/lib/auth/server";
+import { isConfiguredSuperadminEmail } from "@/lib/auth/policy";
 
 const PLATFORM_ROLES = ["super_admin", "platform_admin"] as const;
 
@@ -18,7 +24,7 @@ export type ApplicationUser = {
   name: string;
   firstName: string;
   lastName: string;
-  accountType: "staff" | "student";
+  accountType: "staff" | "student" | "guardian";
   schoolId?: string;
   schoolName?: string;
   membershipId?: string;
@@ -32,6 +38,14 @@ export type ApplicationUser = {
     role: string;
   }>;
   studentNumber?: string;
+  guardianId?: string;
+  children?: Array<{
+    id: string;
+    studentNumber: string;
+    firstName: string;
+    lastName: string;
+    schoolId: string;
+  }>;
   mustChangePassword?: boolean;
 };
 
@@ -88,20 +102,18 @@ export async function getApplicationSession() {
         membership.role as (typeof PLATFORM_ROLES)[number],
       ),
     );
-    const platformRole = applicationUser.platformRole ?? platformMembership?.role;
+    const platformRole =
+      isConfiguredSuperadminEmail(email)
+        ? "super_admin"
+        : applicationUser.platformRole ?? platformMembership?.role;
     const isPlatformAdmin = platformRole !== undefined;
     const isSuperAdmin = platformRole === "super_admin";
 
-    /*
-     * Platform administrators can exist without a school membership.
-     * Ordinary staff users cannot.
-     */
     if (memberships.length === 0 && !isPlatformAdmin) {
       return null;
     }
 
-    const primaryMembership =
-      platformMembership ?? memberships[0];
+    const primaryMembership = platformMembership ?? memberships[0];
 
     return {
       user: {
@@ -147,22 +159,85 @@ export async function getApplicationSession() {
     )
     .limit(1);
 
-  if (!student) {
+  if (student) {
+    return {
+      user: {
+        id: authUser.id,
+        authUserId: authUser.id,
+        email,
+        name: `${student.firstName} ${student.lastName}`,
+        firstName: student.firstName,
+        lastName: student.lastName,
+        accountType: "student" as const,
+        schoolId: student.schoolId,
+        studentNumber: student.studentNumber,
+        mustChangePassword: student.mustChangePassword,
+        isSuperAdmin: false,
+      } satisfies ApplicationUser,
+    };
+  }
+
+  const [guardian] = await db
+    .select({
+      guardianId: guardianUserAccounts.guardianId,
+      email: guardianUserAccounts.email,
+      firstName: guardians.firstName,
+      lastName: guardians.lastName,
+      schoolId: guardians.schoolId,
+      status: guardianUserAccounts.status,
+      mustChangePassword: guardianUserAccounts.mustChangePassword,
+    })
+    .from(guardianUserAccounts)
+    .innerJoin(
+      guardians,
+      eq(guardians.id, guardianUserAccounts.guardianId),
+    )
+    .where(
+      and(
+        eq(guardianUserAccounts.email, email),
+        eq(guardianUserAccounts.status, "active"),
+      ),
+    )
+    .limit(1);
+
+  if (!guardian) {
     return null;
   }
 
+  const guardianChildren = await db
+    .select({
+      id: students.id,
+      studentNumber: students.studentNumber,
+      firstName: students.firstName,
+      lastName: students.lastName,
+      schoolId: students.schoolId,
+    })
+    .from(studentGuardians)
+    .innerJoin(
+      students,
+      eq(students.id, studentGuardians.studentId),
+    )
+    .where(
+      and(
+        eq(studentGuardians.guardianId, guardian.guardianId),
+        eq(students.schoolId, guardian.schoolId),
+      ),
+    )
+    .orderBy(students.firstName, students.lastName);
+
   return {
     user: {
-      id: authUser.id,
+      id: guardian.guardianId,
       authUserId: authUser.id,
       email,
-      name: `${student.firstName} ${student.lastName}`,
-      firstName: student.firstName,
-      lastName: student.lastName,
-      accountType: "student" as const,
-      schoolId: student.schoolId,
-      studentNumber: student.studentNumber,
-      mustChangePassword: student.mustChangePassword,
+      name: `${guardian.firstName} ${guardian.lastName}`,
+      firstName: guardian.firstName,
+      lastName: guardian.lastName,
+      accountType: "guardian" as const,
+      schoolId: guardian.schoolId,
+      guardianId: guardian.guardianId,
+      children: guardianChildren,
+      mustChangePassword: guardian.mustChangePassword,
       isSuperAdmin: false,
     } satisfies ApplicationUser,
   };

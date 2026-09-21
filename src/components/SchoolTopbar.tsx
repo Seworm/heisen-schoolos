@@ -16,7 +16,7 @@ export function SchoolTopbar({ school, availableSchools = [], isPlatformAdmin = 
         <button type="button" aria-label="Open navigation" className="flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 text-slate-500 lg:hidden">
           <Menu className="h-4 w-4" />
         </button>
-        <div className="hidden h-9 w-9 items-center justify-center rounded-xl bg-blue-50 text-blue-600 sm:flex">
+        <div className="hidden h-9 w-9 items-center justify-center rounded-xl bg-[#fff8d9] text-[#006b3f] sm:flex">
           <Sparkles className="h-4 w-4" />
         </div>
         <div className="min-w-0">
@@ -45,9 +45,9 @@ export function SchoolTopbar({ school, availableSchools = [], isPlatformAdmin = 
           <span>Search anything...</span>
           <kbd className="ml-auto rounded-md border border-slate-200 bg-white px-1.5 py-0.5 text-[10px] font-semibold">⌘ K</kbd>
         </div>
-        <button type="button" aria-label="Notifications" className="relative flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 text-slate-500 transition hover:bg-slate-50 hover:text-slate-900">
+        <button type="button" aria-label="Notifications" className="relative flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 text-slate-500 transition hover:bg-[#fff8d9] hover:text-slate-900">
           <Bell className="h-[17px] w-[17px]" />
-          <span className="absolute right-2 top-2 h-1.5 w-1.5 rounded-full bg-blue-600 ring-2 ring-white" />
+          <span className="absolute right-2 top-2 h-1.5 w-1.5 rounded-full bg-[#ce1126] ring-2 ring-white" />
         </button>
         <div className="hidden h-8 w-px bg-slate-200 sm:block" />
         <button type="button" className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white py-1.5 pl-1.5 pr-2.5 shadow-sm">

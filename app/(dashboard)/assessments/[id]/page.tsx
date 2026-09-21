@@ -14,8 +14,11 @@ import {
   students,
   streams,
   subjects,
+  staff,
+  teacherAssignments,
   terms,
 } from "@/db/schema";
+import { requireTeacherScope } from "@/lib/authorization";
 import { requireCurrentSchool } from "@/lib/current-school";
 import {
   calculateAssessmentResult,
@@ -40,6 +43,7 @@ export default async function AssessmentPage({
 
   const school =
     await requireCurrentSchool();
+  const currentUser = await requireTeacherScope(school.id);
 
   const [assessment] = await db
     .select({
@@ -173,6 +177,31 @@ export default async function AssessmentPage({
         </div>
       </div>
     );
+  }
+
+  if (currentUser.role === "teacher") {
+    const [teacher] = await db
+      .select({ id: staff.id })
+      .from(staff)
+      .where(and(eq(staff.schoolId, school.id), eq(staff.email, currentUser.email)))
+      .limit(1);
+    const [assignment] = teacher
+      ? await db
+          .select({ id: teacherAssignments.id })
+          .from(teacherAssignments)
+          .where(
+            and(
+              eq(teacherAssignments.staffId, teacher.id),
+              eq(teacherAssignments.streamId, assessment.streamId),
+              eq(teacherAssignments.subjectId, assessment.subjectId),
+              eq(teacherAssignments.academicYearId, assessment.academicYearId),
+            ),
+          )
+          .limit(1)
+      : [];
+    if (!assignment) {
+      throw new Error("You are not assigned to this class and subject.");
+    }
   }
 
   const studentsInStream =
@@ -738,4 +767,3 @@ export default async function AssessmentPage({
     </div>
   );
 }
-

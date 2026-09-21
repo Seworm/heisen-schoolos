@@ -4,7 +4,7 @@
 /* =========================================================
    HEISEN SCHOOL OS
    Institutional Design System
-   Navy / Blue / Neutral
+   Ghanaian red / gold / green / black
    ========================================================= */
 
 :root {
@@ -12,8 +12,8 @@
      CORE
      ======================================================= */
 
-  --background: #f5f7fb;
-  --foreground: #0f172a;
+  --background: #f8faf7;
+  --foreground: #111111;
 
   --card: #ffffff;
   --card-foreground: #0f172a;
@@ -22,36 +22,36 @@
      PRIMARY BRAND
      ======================================================= */
 
-  --primary: #2563eb;
+  --primary: #006b3f;
   --primary-foreground: #ffffff;
 
-  --primary-hover: #1d4ed8;
-  --primary-active: #1e40af;
+  --primary-hover: #005530;
+  --primary-active: #003d22;
 
-  --primary-soft: #eff6ff;
-  --primary-soft-foreground: #1d4ed8;
+  --primary-soft: #e8f3ed;
+  --primary-soft-foreground: #006b3f;
 
   /* =======================================================
      BRAND SCALE
      ======================================================= */
 
-  --brand-950: #172554;
-  --brand-900: #1e3a8a;
-  --brand-800: #1e40af;
-  --brand-700: #1d4ed8;
-  --brand-600: #2563eb;
-  --brand-500: #3b82f6;
-  --brand-400: #60a5fa;
-  --brand-300: #93c5fd;
-  --brand-200: #bfdbfe;
-  --brand-100: #dbeafe;
-  --brand-50: #eff6ff;
+  --brand-950: #111111;
+  --brand-900: #003d22;
+  --brand-800: #005530;
+  --brand-700: #006b3f;
+  --brand-600: #00874f;
+  --brand-500: #fcd116;
+  --brand-400: #ffe36e;
+  --brand-300: #fbe89b;
+  --brand-200: #f9efc0;
+  --brand-100: #fff8d9;
+  --brand-50: #fffdf0;
 
   /* =======================================================
      SECONDARY
      ======================================================= */
 
-  --secondary: #0f172a;
+  --secondary: #111111;
   --secondary-foreground: #ffffff;
 
   --secondary-hover: #1e293b;
@@ -61,56 +61,56 @@
      MUTED / NEUTRAL
      ======================================================= */
 
-  --muted: #f1f5f9;
-  --muted-foreground: #64748b;
+  --muted: #f1f5f0;
+  --muted-foreground: #5b665f;
 
-  --accent: #eff6ff;
-  --accent-foreground: #1d4ed8;
+  --accent: #fff8d9;
+  --accent-foreground: #111111;
 
   /* =======================================================
      BORDERS
      ======================================================= */
 
-  --border: #e2e8f0;
-  --border-strong: #cbd5e1;
+  --border: #dfe7df;
+  --border-strong: #bdccbe;
 
-  --input: #cbd5e1;
+  --input: #bdccbe;
 
-  --ring: #2563eb;
+  --ring: #006b3f;
 
   /* =======================================================
      SEMANTIC COLOURS
      ======================================================= */
 
-  --success: #16a34a;
-  --success-hover: #15803d;
-  --success-soft: #f0fdf4;
-  --success-border: #86efac;
+  --success: #006b3f;
+  --success-hover: #005530;
+  --success-soft: #e8f3ed;
+  --success-border: #84c9a4;
 
-  --warning: #d97706;
-  --warning-hover: #b45309;
-  --warning-soft: #fffbeb;
-  --warning-border: #fcd34d;
+  --warning: #b88600;
+  --warning-hover: #8c6900;
+  --warning-soft: #fff8d9;
+  --warning-border: #fcd116;
 
-  --danger: #dc2626;
-  --danger-hover: #b91c1c;
-  --danger-soft: #fef2f2;
-  --danger-border: #fca5a5;
+  --danger: #ce1126;
+  --danger-hover: #a50d1e;
+  --danger-soft: #fff0f1;
+  --danger-border: #ef9aa5;
 
-  --info: #0284c7;
-  --info-hover: #0369a1;
-  --info-soft: #f0f9ff;
-  --info-border: #7dd3fc;
+  --info: #006b3f;
+  --info-hover: #005530;
+  --info-soft: #e8f3ed;
+  --info-border: #84c9a4;
 
   /* =======================================================
      TEXT
      ======================================================= */
 
-  --text-primary: #0f172a;
-  --text-secondary: #334155;
-  --text-muted: #64748b;
-  --text-subtle: #94a3b8;
-  --text-disabled: #cbd5e1;
+  --text-primary: #111111;
+  --text-secondary: #334238;
+  --text-muted: #66736a;
+  --text-subtle: #91a096;
+  --text-disabled: #c5d0c7;
 
   /* =======================================================
      NEUTRALS
@@ -131,11 +131,11 @@
      SIDEBAR
      ======================================================= */
 
-  --sidebar: #0b1220;
-  --sidebar-hover: #172033;
-  --sidebar-active: #2563eb;
-  --sidebar-text: #cbd5e1;
-  --sidebar-muted: #64748b;
+  --sidebar: #111111;
+  --sidebar-hover: #262017;
+  --sidebar-active: #006b3f;
+  --sidebar-text: #f7f0cc;
+  --sidebar-muted: #a9a28a;
 
   /* =======================================================
      SHADOWS
@@ -276,6 +276,74 @@ html {
 html,
 body {
   min-height: 100%;
+}
+
+/* Ghana flag palette bridge for legacy utility classes. */
+::selection {
+  background: #fcd116;
+  color: #111111;
+}
+
+.bg-blue-50,
+.bg-indigo-50,
+.bg-cyan-50 {
+  background-color: #fff8d9 !important;
+}
+
+.bg-blue-100,
+.bg-indigo-100,
+.bg-cyan-100 {
+  background-color: #f9efc0 !important;
+}
+
+.bg-blue-500,
+.bg-blue-600,
+.bg-blue-700,
+.bg-indigo-500,
+.indigo-600,
+.bg-cyan-500,
+.bg-cyan-600 {
+  background-color: #006b3f !important;
+}
+
+.bg-violet-500,
+.bg-violet-600 {
+  background-color: #ce1126 !important;
+}
+
+.text-blue-600,
+.text-blue-700,
+.text-blue-800,
+.text-indigo-600,
+.text-indigo-700,
+.text-cyan-600 {
+  color: #006b3f !important;
+}
+
+.text-violet-600,
+.text-violet-700 {
+  color: #ce1126 !important;
+}
+
+.text-emerald-500,
+.text-emerald-600,
+.text-emerald-700,
+.text-emerald-800 {
+  color: #006b3f !important;
+}
+
+.border-blue-200,
+.border-blue-300,
+.border-blue-500,
+.border-indigo-200,
+.border-cyan-200 {
+  border-color: #84c9a4 !important;
+}
+
+.border-violet-200,
+.border-violet-300,
+.border-violet-400 {
+  border-color: #ef9aa5 !important;
 }
 
 body {

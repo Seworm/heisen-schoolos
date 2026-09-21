@@ -8,18 +8,6 @@ const STUDENT_AUTH_DOMAIN =
   process.env.STUDENT_AUTH_EMAIL_DOMAIN ??
   "students.heisen-schoolos.com";
 
-function generateTemporaryPassword(length = 12) {
-  const alphabet =
-    "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789!@#$%";
-
-  const bytes = crypto.randomBytes(length);
-
-  return Array.from(
-    bytes,
-    (byte) => alphabet[byte % alphabet.length],
-  ).join("");
-}
-
 function getStudentAuthEmail(studentNumber: string) {
   const normalized = studentNumber.trim().toLowerCase();
 
@@ -33,6 +21,7 @@ export async function provisionStudentAccount(studentId: string) {
       studentNumber: students.studentNumber,
       firstName: students.firstName,
       lastName: students.lastName,
+      dateOfBirth: students.dateOfBirth,
     })
     .from(students)
     .where(eq(students.id, studentId))
@@ -40,6 +29,9 @@ export async function provisionStudentAccount(studentId: string) {
 
   if (!student) {
     throw new Error("Student not found.");
+  }
+  if (!student.dateOfBirth) {
+    throw new Error("A date of birth is required before creating a student login.");
   }
 
   const [existingAccount] = await db
@@ -56,7 +48,8 @@ export async function provisionStudentAccount(studentId: string) {
   }
 
   const email = getStudentAuthEmail(student.studentNumber);
-  const temporaryPassword = generateTemporaryPassword();
+  const temporaryPassword = `${crypto.randomUUID()}A9!`;
+  const passwordExpiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
 
   const neon = getNeonAuth();
 
@@ -79,6 +72,7 @@ export async function provisionStudentAccount(studentId: string) {
       email,
       status: "active",
       mustChangePassword: true,
+      passwordExpiresAt,
     });
   } catch (error) {
     throw new Error(

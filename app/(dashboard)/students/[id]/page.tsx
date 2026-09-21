@@ -512,6 +512,12 @@ export default async function StudentDetailPage({
         >
           ← Back to Students
         </Link>
+        <Link
+          href={`/students/${student.id}/transcript`}
+          className="inline-flex items-center justify-center rounded-lg bg-[#006b3f] px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-[#00532f]"
+        >
+          View cumulative transcript
+        </Link>
       </div>
 
       {/* School context */}

@@ -38,6 +38,16 @@ const sections: NavSection[] = [
         href: "/dashboard",
         icon: LayoutDashboard,
       },
+      {
+        label: "Reports",
+        href: "/reports",
+        icon: BarChart3,
+      },
+      {
+        label: "Teacher portal",
+        href: "/teacher",
+        icon: ClipboardList,
+      },
     ],
   },
   {
@@ -68,6 +78,11 @@ const sections: NavSection[] = [
         href: "/assessments/results",
         icon: BarChart3,
       },
+      {
+        label: "Calendar",
+        href: "/calendar",
+        icon: CalendarDays,
+      },
     ],
   },
   {
@@ -79,6 +94,11 @@ const sections: NavSection[] = [
         icon: Users,
       },
       {
+        label: "Admissions",
+        href: "/admissions",
+        icon: ClipboardList,
+      },
+      {
         label: "Guardians",
         href: "/guardians",
         icon: UsersRound,
@@ -86,6 +106,16 @@ const sections: NavSection[] = [
       {
         label: "Staff",
         href: "/staff",
+        icon: ShieldCheck,
+      },
+      {
+        label: "Leave & absence",
+        href: "/staff/leave",
+        icon: CalendarDays,
+      },
+      {
+        label: "Student services",
+        href: "/student-services",
         icon: ShieldCheck,
       },
     ],
@@ -246,4 +276,3 @@ export function SchoolSidebar() {
     </aside>
   );
 }
-

@@ -18,13 +18,13 @@ export default async function DashboardLayout({
     session?.user.isPlatformAdmin ? await getAvailableSchools() : [];
 
   return (
-    <div className="min-h-screen bg-[#f7f9fc] text-slate-900">
+    <div className="min-h-screen bg-[#f8faf7] text-slate-900">
       <div className="flex min-h-screen">
         {/* Fixed navigation */}
         <SchoolSidebar isPlatformAdmin={Boolean(session?.user.isPlatformAdmin)} />
 
         {/* Application workspace */}
-        <div className="min-w-0 flex-1 bg-[radial-gradient(circle_at_top_right,rgba(99,102,241,0.08),transparent_28rem)]">
+        <div className="min-w-0 flex-1 bg-[radial-gradient(circle_at_top_right,rgba(252,209,22,0.14),transparent_28rem)]">
           <SchoolTopbar
             school={school}
             availableSchools={availableSchools}

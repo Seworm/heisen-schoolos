@@ -40,11 +40,11 @@ export async function createStudent(
     const phone = String(formData.get("phone") ?? "").trim();
     const email = String(formData.get("email") ?? "").trim();
 
-    if (!firstName || !lastName || !studentNumber || !gender) {
+    if (!firstName || !lastName || !studentNumber || !gender || !dateOfBirth) {
       return {
         success: false,
         error:
-          "First name, last name, student number and gender are required.",
+          "First name, last name, student number, gender and date of birth are required.",
       };
     }
 

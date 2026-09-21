@@ -1,18 +1,22 @@
 "use server";
 
 import { and, eq } from "drizzle-orm";
+import crypto from "node:crypto";
 import { redirect } from "next/navigation";
 
 import { db } from "@/db";
 import {
   guardians,
+  guardianUserAccounts,
   studentGuardians,
   students,
 } from "@/db/schema";
 import { requireCurrentSchool } from "@/lib/current-school";
+import { getNeonAuth } from "@/lib/auth/server";
 
 type GuardianFormState = {
   error?: string;
+  temporaryPassword?: string;
 };
 
 export async function createGuardian(
@@ -49,6 +53,7 @@ export async function createGuardian(
 
   const isPrimary =
     formData.get("isPrimary") === "on";
+  const temporaryPassword = email ? `${crypto.randomUUID()}A9!` : undefined;
 
   if (
     !studentId ||
@@ -109,6 +114,18 @@ export async function createGuardian(
       }
     }
 
+    if (email) {
+      const authResult = await getNeonAuth().admin.createUser({
+        email: email.toLowerCase(),
+        password: temporaryPassword!,
+        name: `${firstName} ${lastName}`,
+        role: "user",
+      });
+      if (authResult.error) {
+        return { error: "Unable to create the guardian authentication account." };
+      }
+    }
+
     const result = await db.transaction(async (tx) => {
       const [guardian] = await tx
         .insert(guardians)
@@ -136,6 +153,15 @@ export async function createGuardian(
         relationship,
         isPrimary,
       });
+      if (email) {
+        await tx.insert(guardianUserAccounts).values({
+          guardianId: guardian.id,
+          email: email.toLowerCase(),
+          mustChangePassword: true,
+          passwordExpiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
+          status: "active",
+        });
+      }
 
       return guardian;
     });
@@ -157,5 +183,8 @@ export async function createGuardian(
     };
   }
 
+  if (temporaryPassword) {
+    return { temporaryPassword };
+  }
   redirect(`/students/${studentId}`);
 }

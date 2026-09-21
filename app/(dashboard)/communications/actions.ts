@@ -272,7 +272,6 @@ export async function createAnnouncement(
     if (publishedAt) {
       await createAnnouncementNotifications({
         schoolId: school.id,
-        announcementId: announcement.id,
         title: data.title,
         body: data.body,
         audience: data.audience,
@@ -425,7 +424,6 @@ export async function publishAnnouncement(id: string) {
 
   await createAnnouncementNotifications({
     schoolId: school.id,
-    announcementId: announcement.id,
     title: announcement.title,
     body: announcement.body,
     audience: announcement.audience,

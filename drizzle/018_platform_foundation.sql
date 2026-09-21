@@ -13,8 +13,19 @@ ALTER TABLE students ADD COLUMN IF NOT EXISTS address text;
 ALTER TABLE students ADD COLUMN IF NOT EXISTS nationality varchar(80) DEFAULT 'Ghanaian';
 ALTER TABLE students ADD COLUMN IF NOT EXISTS medical_info jsonb NOT NULL DEFAULT '{}'::jsonb;
 ALTER TABLE students ADD COLUMN IF NOT EXISTS status varchar(30) NOT NULL DEFAULT 'active';
-DO $$ BEGIN ALTER TABLE students ADD CONSTRAINT student_school_admission_unique UNIQUE (school_id, admission_number); EXCEPTION WHEN duplicate_object THEN NULL; END $$;
-CREATE INDEX IF NOT EXISTS students_status_idx ON students(status);
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1
+    FROM pg_constraint
+    WHERE conname = 'student_school_admission_unique'
+      AND conrelid = 'students'::regclass
+  ) THEN
+    ALTER TABLE students
+      ADD CONSTRAINT student_school_admission_unique
+      UNIQUE (school_id, admission_number);
+  END IF;
+END $$;CREATE INDEX IF NOT EXISTS students_status_idx ON students(status);
 CREATE INDEX IF NOT EXISTS students_school_name_idx ON students(school_id, last_name, first_name);
 
 CREATE TABLE IF NOT EXISTS school_settings (

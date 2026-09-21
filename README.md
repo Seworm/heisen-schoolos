@@ -49,6 +49,19 @@ npm run db:migrate:platform
 
 It adds school settings, profiles, documents, student status history, fee assignments, scholarships, timetable infrastructure, communications, notifications, audit logs, promotion decisions and import history, and extends student records and membership roles.
 
+### Payments
+
+`drizzle/020_payment_integration_foundation.sql` adds school-scoped payment
+intents and provider transactions. The provider boundary is in
+`src/lib/payments/provider.ts`; it defaults to a non-confirming manual adapter.
+For local/staging tests only, set `PAYMENT_PROVIDER=mock` (never use this in
+production). Create intents with `POST /api/payments/intents`, verify or
+reconcile them with `POST /api/payments/verify` or
+`POST /api/payments/reconcile`, and read status or receipts from the
+corresponding `/api/payments/:intentId` and `/api/payments/receipts/:paymentId`
+endpoints. Real provider credentials and API calls must be implemented inside a
+dedicated adapter; none are stored or required by this foundation.
+
 ## Development
 
 ```bash

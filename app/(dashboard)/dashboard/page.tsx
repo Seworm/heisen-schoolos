@@ -27,9 +27,16 @@ import {
   terms,
 } from "@/db/schema";
 import { requireCurrentSchool } from "@/lib/current-school";
+import { requireTeacherScope } from "@/lib/authorization";
+import TeacherDashboard from "../teacher/TeacherDashboard";
 
 export default async function Home() {
   const school = await requireCurrentSchool();
+  const currentUser = await requireTeacherScope(school.id);
+
+  if (currentUser.role === "teacher") {
+    return <TeacherDashboard schoolId={school.id} user={currentUser} />;
+  }
 
   const [
     currentYearResult,

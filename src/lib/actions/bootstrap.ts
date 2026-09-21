@@ -1,6 +1,6 @@
 "use server";
 
-import { eq } from "drizzle-orm";
+import { eq, or } from "drizzle-orm";
 import { db } from "@/db";
 import {
   schoolMemberships,
@@ -8,6 +8,7 @@ import {
   users,
 } from "@/db/schema";
 import { getNeonAuth } from "@/lib/auth/server";
+import { isConfiguredSuperadminEmail } from "@/lib/auth/policy";
 
 export type BootstrapResult =
   | {
@@ -38,18 +39,34 @@ export async function bootstrapSuperAdmin(input: {
 
     const email = authUser.email.trim().toLowerCase();
 
-    const existingSuperAdmin = await db
-  .select({ id: schoolMemberships.id })
-  .from(schoolMemberships)
-  .where(eq(schoolMemberships.role, "super_admin"))
-  .limit(1);
+    if (!isConfiguredSuperadminEmail(email)) {
+      return {
+        success: false,
+        error: "Initial setup is restricted to the configured platform owner.",
+      };
+    }
 
-if (existingSuperAdmin.length > 0) {
-  return {
-    success: false,
-    error: "Platform setup has already been completed.",
-  };
-}
+    const existingSuperAdmin = await db
+      .select({ id: users.id })
+      .from(users)
+      .leftJoin(
+        schoolMemberships,
+        eq(schoolMemberships.userId, users.id),
+      )
+      .where(
+        or(
+          eq(users.platformRole, "super_admin"),
+          eq(schoolMemberships.role, "super_admin"),
+        ),
+      )
+      .limit(1);
+
+    if (existingSuperAdmin.length > 0) {
+      return {
+        success: false,
+        error: "Platform setup has already been completed.",
+      };
+    }
 
     const schoolName = input.schoolName.trim();
     const schoolCode = input.schoolCode.trim().toUpperCase();
@@ -92,6 +109,7 @@ if (existingSuperAdmin.length > 0) {
               passwordHash: null,
               firstName,
               lastName,
+              platformRole: "super_admin",
               status: "active",
             })
             .returning({
@@ -101,6 +119,18 @@ if (existingSuperAdmin.length > 0) {
 
       if (!user) {
         throw new Error("Unable to create the administrator profile.");
+      }
+
+      if (existingUser) {
+        await tx
+          .update(users)
+          .set({
+            firstName,
+            lastName,
+            platformRole: "super_admin",
+            status: "active",
+          })
+          .where(eq(users.id, existingUser.id));
       }
 
       const [existingSchool] = await tx

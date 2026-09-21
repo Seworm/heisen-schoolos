@@ -10,8 +10,9 @@ export async function POST(request: Request) {
     const studentNumber = String(body.studentNumber ?? "")
       .trim()
       .toUpperCase();
+    const password = String(body.password ?? "");
 
-    if (!studentNumber) {
+    if (!studentNumber || !password) {
       return NextResponse.json(
         { error: "Student number is required." },
         { status: 400 },
@@ -21,6 +22,7 @@ export async function POST(request: Request) {
     const [account] = await db
       .select({
         email: studentUserAccounts.email,
+        passwordExpiresAt: studentUserAccounts.passwordExpiresAt,
       })
       .from(studentUserAccounts)
       .innerJoin(
@@ -35,16 +37,14 @@ export async function POST(request: Request) {
       )
       .limit(1);
 
-    if (!account) {
+    if (!account || (account.passwordExpiresAt && account.passwordExpiresAt < new Date())) {
       return NextResponse.json(
         { error: "Invalid student login details." },
         { status: 401 },
       );
     }
 
-    return NextResponse.json({
-      email: account.email,
-    });
+    return NextResponse.json({ email: account.email });
   } catch {
     return NextResponse.json(
       { error: "Unable to process student login." },
@@ -52,5 +52,3 @@ export async function POST(request: Request) {
     );
   }
 }
-
-

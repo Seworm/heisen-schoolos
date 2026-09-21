@@ -1,13 +1,101 @@
-import { asc, eq } from "drizzle-orm";
+import { asc, and, eq } from "drizzle-orm";
+import { CalendarDays, CheckCircle2, Clock3, Sparkles, Users } from "lucide-react";
 import { db } from "@/db";
-import { timetableEntries, timetablePeriods, subjects, streams, staff } from "@/db/schema";
+import {
+  academicYears,
+  staff,
+  streams,
+  subjects,
+  terms,
+  timetableEntries,
+  timetablePeriods,
+} from "@/db/schema";
 import { getCurrentSchool } from "@/lib/current-school";
+import { generateIntelligentTimetable } from "./actions";
 
 export const dynamic = "force-dynamic";
-export default async function TimetablePage() {
+
+export default async function TimetablePage({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
   const school = await getCurrentSchool();
-  const entries = await db.select({ id: timetableEntries.id, period: timetablePeriods.name, day: timetablePeriods.dayOfWeek, startsAt: timetablePeriods.startsAt, subject: subjects.name, stream: streams.name, teacher: staff.firstName, teacherLast: staff.lastName }).from(timetableEntries).innerJoin(timetablePeriods, eq(timetablePeriods.id, timetableEntries.periodId)).innerJoin(subjects, eq(subjects.id, timetableEntries.subjectId)).innerJoin(streams, eq(streams.id, timetableEntries.streamId)).innerJoin(staff, eq(staff.id, timetableEntries.staffId)).where(eq(timetableEntries.schoolId, school.id)).orderBy(asc(timetablePeriods.dayOfWeek), asc(timetablePeriods.sortOrder)).limit(200);
-  return <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8"><p className="text-sm text-slate-500">Academics</p><h1 className="text-3xl font-semibold tracking-tight">Timetable</h1><p className="mt-1 text-sm text-slate-500">Teacher, class and room scheduling with database-level conflict protection.</p><div className="mt-7 overflow-hidden rounded-xl border border-slate-200 bg-white"><div className="overflow-x-auto"><table className="w-full text-left text-sm"><thead className="bg-slate-50 text-xs uppercase tracking-wide text-slate-500"><tr><th className="px-5 py-3">Day</th><th className="px-5 py-3">Period</th><th className="px-5 py-3">Class</th><th className="px-5 py-3">Subject</th><th className="px-5 py-3">Teacher</th></tr></thead><tbody className="divide-y divide-slate-100">{entries.map((e) => <tr key={e.id}><td className="px-5 py-3">{["", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"][e.day] ?? e.day}</td><td className="px-5 py-3">{e.period} <span className="text-slate-400">({e.startsAt})</span></td><td className="px-5 py-3">{e.stream}</td><td className="px-5 py-3 font-medium">{e.subject}</td><td className="px-5 py-3">{e.teacher} {e.teacherLast}</td></tr>)}{entries.length === 0 && <tr><td colSpan={5} className="px-5 py-12 text-center text-slate-500">No timetable entries have been configured.</td></tr>}</tbody></table></div></div></main>;
+  const params = await searchParams;
+  const years = await db
+    .select({ id: academicYears.id, name: academicYears.name, isCurrent: academicYears.isCurrent })
+    .from(academicYears)
+    .where(eq(academicYears.schoolId, school.id))
+    .orderBy(asc(academicYears.startDate));
+  const currentYear = years.find((year) => year.isCurrent) ?? years[years.length - 1];
+  const selectedYearId = typeof params.year === "string" ? params.year : currentYear?.id;
+  const termsForYear = selectedYearId
+    ? await db.select({ id: terms.id, name: terms.name, termNumber: terms.termNumber, isCurrent: terms.isCurrent })
+        .from(terms)
+        .where(eq(terms.academicYearId, selectedYearId))
+        .orderBy(asc(terms.termNumber))
+    : [];
+  const currentTerm = termsForYear.find((term) => term.isCurrent) ?? termsForYear[0];
+  const selectedTermId = typeof params.term === "string" ? params.term : currentTerm?.id;
+  const entries = await db
+    .select({
+      id: timetableEntries.id,
+      period: timetablePeriods.name,
+      day: timetablePeriods.dayOfWeek,
+      startsAt: timetablePeriods.startsAt,
+      endsAt: timetablePeriods.endsAt,
+      subject: subjects.name,
+      stream: streams.name,
+      teacher: staff.firstName,
+      teacherLast: staff.lastName,
+    })
+    .from(timetableEntries)
+    .innerJoin(timetablePeriods, eq(timetablePeriods.id, timetableEntries.periodId))
+    .innerJoin(subjects, eq(subjects.id, timetableEntries.subjectId))
+    .innerJoin(streams, eq(streams.id, timetableEntries.streamId))
+    .innerJoin(staff, eq(staff.id, timetableEntries.staffId))
+    .where(and(eq(timetableEntries.schoolId, school.id), ...(selectedYearId ? [eq(timetableEntries.academicYearId, selectedYearId)] : []), ...(selectedTermId ? [eq(timetableEntries.termId, selectedTermId)] : [])))
+    .orderBy(asc(timetablePeriods.dayOfWeek), asc(timetablePeriods.sortOrder));
+
+  const scheduled = typeof params.scheduled === "string" ? params.scheduled : null;
+  const unscheduled = typeof params.unscheduled === "string" ? params.unscheduled : null;
+  const days = ["", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
+
+  return (
+    <main className="mx-auto max-w-7xl space-y-7 px-4 py-7 sm:px-6 lg:px-8">
+      <section className="relative overflow-hidden rounded-3xl bg-[#111827] px-6 py-8 text-white shadow-2xl shadow-slate-300/40 sm:px-8">
+        <div className="absolute -right-16 -top-24 h-64 w-64 rounded-full bg-emerald-500/20 blur-3xl" />
+        <div className="relative">
+          <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.08] px-3 py-1.5 text-xs font-semibold text-emerald-200"><Sparkles className="h-3.5 w-3.5" /> Intelligent scheduling</div>
+          <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">Build a clash-free timetable.</h1>
+          <p className="mt-3 max-w-2xl text-sm leading-6 text-slate-300">The scheduler prioritises constrained teachers and classes, distributes lessons across available periods, and refuses teacher, class and room collisions.</p>
+        </div>
+      </section>
+
+      <section className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm">
+        <div className="flex flex-wrap items-start justify-between gap-4">
+          <div><p className="text-xs font-bold uppercase tracking-[0.14em] text-slate-400">Generate schedule</p><h2 className="mt-2 text-xl font-bold tracking-tight">Create a smart weekly plan</h2><p className="mt-1 text-sm text-slate-500">Existing entries are preserved. Only open slots are used.</p></div>
+          <div className="flex items-center gap-2 rounded-xl bg-emerald-50 px-3 py-2 text-xs font-semibold text-emerald-700"><CheckCircle2 className="h-4 w-4" /> Constraint protection enabled</div>
+        </div>
+        <form action={generateIntelligentTimetable} className="mt-5 grid gap-3 sm:grid-cols-4">
+          <select name="academicYearId" defaultValue={selectedYearId} className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm">
+            {years.map((year) => <option key={year.id} value={year.id}>{year.name}</option>)}
+          </select>
+          <select name="termId" defaultValue={selectedTermId} className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm">
+            {termsForYear.map((term) => <option key={term.id} value={term.id}>{term.name}</option>)}
+          </select>
+          <select name="lessonsPerAssignment" defaultValue="1" className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm">
+            {[1, 2, 3, 4, 5].map((count) => <option key={count} value={count}>{count} lesson{count === 1 ? "" : "s"} per subject</option>)}
+          </select>
+          <button className="inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-600 px-4 py-2.5 text-sm font-bold text-white shadow-lg shadow-emerald-900/10 transition hover:bg-emerald-700"><Sparkles className="h-4 w-4" /> Generate timetable</button>
+        </form>
+        {(scheduled || unscheduled) && <p className="mt-4 rounded-xl bg-slate-50 px-4 py-3 text-sm text-slate-600">Generated <strong>{scheduled ?? 0}</strong> lessons. <strong>{unscheduled ?? 0}</strong> lessons could not be placed because of capacity or conflicts.</p>}
+      </section>
+
+      <section className="overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-sm">
+        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 px-5 py-5"><div><h2 className="font-bold">Weekly timetable</h2><p className="mt-1 text-xs text-slate-500">Teacher and class assignments for the selected academic period.</p></div><div className="flex gap-3 text-xs text-slate-500"><span className="inline-flex items-center gap-1.5"><Clock3 className="h-3.5 w-3.5" /> {entries.length} lessons</span><span className="inline-flex items-center gap-1.5"><Users className="h-3.5 w-3.5" /> {new Set(entries.map((entry) => `${entry.teacher} ${entry.teacherLast}`)).size} teachers</span></div></div>
+        <div className="overflow-x-auto"><table className="w-full min-w-[760px] text-left text-sm"><thead className="bg-slate-50 text-[11px] uppercase tracking-[0.14em] text-slate-500"><tr><th className="px-5 py-3">Day</th><th className="px-5 py-3">Period</th><th className="px-5 py-3">Class</th><th className="px-5 py-3">Subject</th><th className="px-5 py-3">Teacher</th></tr></thead><tbody className="divide-y divide-slate-100">{entries.map((entry) => <tr key={entry.id} className="transition hover:bg-emerald-50/30"><td className="px-5 py-4 font-semibold text-slate-700">{days[entry.day] ?? entry.day}</td><td className="px-5 py-4 text-slate-500">{entry.period}<span className="ml-1 text-xs text-slate-400">{entry.startsAt}–{entry.endsAt}</span></td><td className="px-5 py-4">{entry.stream}</td><td className="px-5 py-4 font-semibold text-slate-900">{entry.subject}</td><td className="px-5 py-4 text-slate-600">{entry.teacher} {entry.teacherLast}</td></tr>)}{entries.length === 0 && <tr><td colSpan={5} className="px-5 py-16 text-center"><CalendarDays className="mx-auto h-8 w-8 text-slate-300" /><p className="mt-3 font-semibold text-slate-700">No lessons scheduled yet</p><p className="mt-1 text-sm text-slate-500">Assign teachers and generate a timetable to get started.</p></td></tr>}</tbody></table></div>
+      </section>
+    </main>
+  );
 }
-
-

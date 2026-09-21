@@ -4,6 +4,7 @@ import { count, countDistinct, desc, eq } from "drizzle-orm";
 import { db } from "@/db";
 import { auditLogs, schoolMemberships, schools, staff, students } from "@/db/schema";
 import { requireSuperAdmin } from "@/lib/authorization";
+import PlatformAdminForm from "./PlatformAdminForm";
 
 export const dynamic = "force-dynamic";
 
@@ -46,11 +47,19 @@ export default async function PlatformPage() {
             <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">Every school. One clear view.</h1>
             <p className="mt-3 max-w-xl text-sm leading-6 text-slate-300">Operate your education network with secure tenant isolation, live school switching and platform-wide oversight.</p>
           </div>
-          <Link href="/platform/schools/new" className="inline-flex items-center gap-2 rounded-xl bg-white px-4 py-2.5 text-sm font-bold text-slate-950 shadow-lg transition hover:bg-cyan-50">
-            <Building2 className="h-4 w-4" /> Add school <ArrowUpRight className="h-4 w-4" />
-          </Link>
+          <div className="flex flex-wrap gap-2">
+            <Link href="/platform/reports" className="inline-flex items-center gap-2 rounded-xl border border-white/20 px-4 py-2.5 text-sm font-bold text-white transition hover:bg-white/10">
+              <Activity className="h-4 w-4" /> Reports
+            </Link>
+            <Link href="/platform/schools/new" className="inline-flex items-center gap-2 rounded-xl bg-white px-4 py-2.5 text-sm font-bold text-slate-950 shadow-lg transition hover:bg-cyan-50">
+              <Building2 className="h-4 w-4" /> Add school <ArrowUpRight className="h-4 w-4" />
+            </Link>
+          </div>
         </div>
       </section>
+      <div className="mt-6">
+        <PlatformAdminForm />
+      </div>
       <div className="mt-1 flex flex-wrap items-end justify-between gap-4">
         <div>
           <p className="mt-8 text-sm font-semibold text-violet-600">Platform administration</p>

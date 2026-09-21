@@ -5,6 +5,7 @@ import Link from "next/link";
 
 type GuardianFormState = {
   error?: string;
+  temporaryPassword?: string;
 };
 
 type GuardianFormProps = {
@@ -62,6 +63,12 @@ export default function GuardianForm({
             <p className="mt-1 text-sm text-red-700">
               {state.error}
             </p>
+          </div>
+        )}
+        {state.temporaryPassword && (
+          <div className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+            Guardian account created. Temporary password: <strong>{state.temporaryPassword}</strong>
+            <span className="mt-1 block text-xs">Share this securely. It expires in 24 hours and must be changed after first login.</span>
           </div>
         )}
 

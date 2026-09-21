@@ -2,15 +2,12 @@ import { and, eq, inArray } from "drizzle-orm";
 
 import { db } from "@/db";
 import {
-  classLevels,
   guardians,
   notifications,
   profiles,
   schoolMemberships,
-  studentGuardians,
   studentUserAccounts,
   students,
-  streams,
   users,
 } from "@/db/schema";
 
@@ -120,69 +117,6 @@ async function getStaffRecipients(schoolId: string) {
   return rows;
 }
 
-async function getParentRecipients(
-  schoolId: string,
-  studentIds: string[],
-) {
-  if (studentIds.length === 0) {
-    return [];
-  }
-
-  const rows = await db
-    .select({
-      authUserId: profiles.authUserId,
-      email: profiles.email,
-    })
-    .from(studentGuardians)
-    .innerJoin(
-      guardians,
-      eq(guardians.id, studentGuardians.guardianId),
-    )
-    .innerJoin(
-      profiles,
-      eq(profiles.email, guardians.email),
-    )
-    .where(
-      and(
-        eq(guardians.schoolId, schoolId),
-        inArray(studentGuardians.studentId, studentIds),
-      ),
-    );
-
-  return rows;
-}
-
-async function getClassStudentIds(
-  schoolId: string,
-  classId: string,
-) {
-  const rows = await db
-    .select({
-      id: students.id,
-    })
-    .from(students)
-    .innerJoin(
-      studentUserAccounts,
-      eq(studentUserAccounts.studentId, students.id),
-    )
-    .innerJoin(
-      profiles,
-      eq(profiles.email, studentUserAccounts.email),
-    )
-    .where(eq(students.schoolId, schoolId));
-
-  /*
-   * Student placement/enrollment relationships vary by the
-   * current academic-year implementation. The announcement
-   * target itself is validated in actions.ts. This resolver
-   * deliberately avoids assuming a placement table here.
-   */
-
-  return rows
-    .map((row) => row.id)
-    .filter(Boolean);
-}
-
 export async function resolveAnnouncementRecipients({
   schoolId,
   audience,
@@ -258,14 +192,12 @@ export async function resolveAnnouncementRecipients({
 
 export async function createAnnouncementNotifications({
   schoolId,
-  announcementId,
   title,
   body,
   audience,
   targetId,
 }: {
   schoolId: string;
-  announcementId: string;
   title: string;
   body: string;
   audience: Audience;
