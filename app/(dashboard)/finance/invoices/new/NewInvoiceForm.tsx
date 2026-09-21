@@ -1,6 +1,7 @@
 "use client";
 import { generateInvoiceAction } from "../../actions";
 import { useMemo, useState } from "react";
+import { useFormStatus } from "react-dom";
 import Link from "next/link";
 import { ArrowLeft, Check, FileText } from "lucide-react";
 
@@ -89,6 +90,7 @@ export default function NewInvoiceForm({
                 <select
                   name="feeAssignmentId"
                   required
+                  aria-describedby="fee-assignment-help"
                   value={assignmentId}
                   onChange={(event) =>
                     setAssignmentId(event.target.value)
@@ -109,6 +111,12 @@ export default function NewInvoiceForm({
                     </option>
                   ))}
                 </select>
+                <span
+                  id="fee-assignment-help"
+                  className="mt-2 block text-xs text-muted-foreground"
+                >
+                  Choose the student fee assignment that should be billed.
+                </span>
               </label>
 
               {selectedAssignment && (
@@ -206,17 +214,25 @@ export default function NewInvoiceForm({
           Cancel
         </Link>
 
-        <button
-          type="submit"
-          disabled={!assignmentId}
-          className="btn btn-primary"
-        >
-          <Check className="h-4 w-4" />
-          Generate invoice
-        </button>
+        <SubmitButton disabled={assignments.length === 0} />
       </div>
 
     </form>
+  );
+}
+
+function SubmitButton({ disabled }: { disabled: boolean }) {
+  const { pending } = useFormStatus();
+
+  return (
+    <button
+      type="submit"
+      disabled={disabled || pending}
+      className="btn btn-primary"
+    >
+      <Check className="h-4 w-4" />
+      {pending ? "Generating invoice..." : "Generate invoice"}
+    </button>
   );
 }
 

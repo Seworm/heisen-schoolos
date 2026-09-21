@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 import { getCurrentSchool } from "@/lib/current-school";
 import {
   createFeeCategory,
@@ -237,10 +238,7 @@ export async function generateInvoiceAction(
   revalidatePath(financePath());
   revalidatePath("/finance/invoices");
 
-  return {
-    success: true,
-    invoice,
-  };
+  redirect(`/finance/invoices/${invoice.id}`);
 }
 
 export async function issueInvoiceAction(
@@ -356,4 +354,3 @@ export async function reversePaymentAction(
     success: true,
   };
 }
-

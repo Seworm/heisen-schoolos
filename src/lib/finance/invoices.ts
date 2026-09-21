@@ -10,6 +10,7 @@ import {
 } from "@/db/schema";
 import {
   getInvoiceFinancials,
+  assertDate,
   normaliseText,
   parsePositiveMoney,
   requireUuid,
@@ -133,7 +134,19 @@ export async function generateInvoiceForAssignment(input: {
     "Fee assignment",
   );
 
-  const issueDate = input.issueDate ?? today();
+  const issueDate = assertDate(
+    input.issueDate ?? today(),
+    "Issue date",
+  );
+  const dueDate = input.dueDate
+    ? assertDate(input.dueDate, "Due date")
+    : undefined;
+
+  if (dueDate && dueDate < issueDate) {
+    throw new Error(
+      "Due date cannot be earlier than the issue date.",
+    );
+  }
 
   const [assignment] = await db
     .select({
@@ -187,7 +200,7 @@ export async function generateInvoiceForAssignment(input: {
         termId: assignment.termId,
         invoiceNumber,
         issueDate,
-        dueDate: input.dueDate || null,
+        dueDate: dueDate || null,
         status: "draft",
         notes: normaliseText(input.notes),
       })

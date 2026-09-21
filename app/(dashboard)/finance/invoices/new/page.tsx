@@ -3,7 +3,7 @@ import {
   ArrowLeft,
   FileText,
 } from "lucide-react";
-import { asc, eq } from "drizzle-orm";
+import { and, asc, eq } from "drizzle-orm";
 
 import { db } from "@/db";
 import {
@@ -51,7 +51,12 @@ export default async function NewInvoicePage() {
       terms,
       eq(terms.id, feeAssignments.termId),
     )
-    .where(eq(feeAssignments.schoolId, school.id))
+    .where(
+      and(
+        eq(feeAssignments.schoolId, school.id),
+        eq(feeAssignments.status, "active"),
+      ),
+    )
     .orderBy(asc(feeAssignments.assignedAt))
     .limit(500);
 
