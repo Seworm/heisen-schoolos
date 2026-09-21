@@ -3,10 +3,12 @@ import { and, eq, ilike, or } from "drizzle-orm";
 import { db } from "@/db";
 import { classLevels, guardians, staff, students } from "@/db/schema";
 import { requireAuth } from "@/lib/authorization";
+import { requireCurrentSchool } from "@/lib/current-school";
 
 export async function GET(request: Request) {
   try {
-    const user = await requireAuth();
+    await requireAuth();
+    const school = await requireCurrentSchool();
 
     const q = new URL(request.url).searchParams.get("q")?.trim() ?? "";
 
@@ -28,7 +30,7 @@ export async function GET(request: Request) {
           .from(students)
           .where(
             and(
-              eq(students.schoolId, user.schoolId),
+              eq(students.schoolId, school.id),
               or(
                 ilike(students.firstName, pattern),
                 ilike(students.lastName, pattern),
@@ -48,7 +50,7 @@ export async function GET(request: Request) {
           .from(staff)
           .where(
             and(
-              eq(staff.schoolId, user.schoolId),
+              eq(staff.schoolId, school.id),
               or(
                 ilike(staff.firstName, pattern),
                 ilike(staff.lastName, pattern),
@@ -68,7 +70,7 @@ export async function GET(request: Request) {
           .from(guardians)
           .where(
             and(
-              eq(guardians.schoolId, user.schoolId),
+              eq(guardians.schoolId, school.id),
               or(
                 ilike(guardians.firstName, pattern),
                 ilike(guardians.lastName, pattern),
@@ -87,7 +89,7 @@ export async function GET(request: Request) {
           .from(classLevels)
           .where(
             and(
-              eq(classLevels.schoolId, user.schoolId),
+              eq(classLevels.schoolId, school.id),
               ilike(classLevels.name, pattern),
             ),
           )
@@ -110,4 +112,3 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 }
-
