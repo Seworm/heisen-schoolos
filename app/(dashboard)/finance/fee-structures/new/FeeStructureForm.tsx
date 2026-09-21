@@ -125,6 +125,8 @@ export default function FeeStructureForm({
   }
 
   function addItem() {
+    if (items.length >= categories.length) return;
+
     setItems((current) => [
       ...current,
       {
@@ -153,6 +155,8 @@ export default function FeeStructureForm({
         category.id === currentCategoryId ||
         !selectedCategoryIds.includes(category.id),
     );
+
+  const canAddItem = items.length < categories.length;
 
   return (
     <form
@@ -184,22 +188,22 @@ export default function FeeStructureForm({
         />
       )}
 
-      <section className="rounded-xl border bg-card p-5 shadow-sm">
-        <div className="mb-5">
-          <h2 className="font-semibold">Structure details</h2>
-          <p className="mt-1 text-sm text-muted-foreground">
+      <section className="finance-card">
+        <div className="finance-card-header">
+          <h2 className="finance-card-title">Structure details</h2>
+          <p className="finance-card-description">
             Select the academic context this fee structure applies to.
           </p>
         </div>
 
-        <div className="grid gap-5 md:grid-cols-2">
+        <div className="finance-card-body grid gap-5 md:grid-cols-2">
           <Field label="Structure name" required>
             <input
               name="name"
               required
               defaultValue={initialValues?.name || ""}
               placeholder="e.g. JHS 1 Term 1 Fees"
-              className="input-field"
+              className="finance-control"
             />
           </Field>
 
@@ -211,7 +215,7 @@ export default function FeeStructureForm({
               onChange={(event) =>
                 setClassLevelId(event.target.value)
               }
-              className="input-field"
+              className="finance-control"
             >
               <option value="">Select class level</option>
               {classLevels.map((classLevel) => (
@@ -235,7 +239,7 @@ export default function FeeStructureForm({
                 setAcademicYearId(nextYearId);
                 setTermId("");
               }}
-              className="input-field"
+              className="finance-control"
             >
               <option value="">Select academic year</option>
               {academicYears.map((year) => (
@@ -255,7 +259,7 @@ export default function FeeStructureForm({
               onChange={(event) =>
                 setTermId(event.target.value)
               }
-              className="input-field"
+              className="finance-control"
             >
               <option value="">Select term</option>
               {filteredTerms.map((term) => (
@@ -279,18 +283,18 @@ export default function FeeStructureForm({
                 defaultValue={initialValues?.description || ""}
                 rows={3}
                 placeholder="Optional description..."
-                className="input-field resize-none"
+                className="finance-control resize-none"
               />
             </Field>
           </div>
         </div>
       </section>
 
-      <section className="overflow-hidden rounded-xl border bg-card shadow-sm">
+      <section className="finance-card overflow-hidden">
         <div className="flex flex-col gap-3 border-b px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h2 className="font-semibold">Fee components</h2>
-            <p className="mt-1 text-sm text-muted-foreground">
+            <h2 className="finance-card-title">Fee components</h2>
+            <p className="finance-card-description">
               Add each fee category and its amount.
             </p>
           </div>
@@ -298,10 +302,16 @@ export default function FeeStructureForm({
           <button
             type="button"
             onClick={addItem}
-            className="inline-flex items-center justify-center gap-2 rounded-lg border bg-background px-3 py-2 text-sm font-medium shadow-sm transition hover:bg-muted"
+            disabled={!canAddItem}
+            className="btn btn-secondary"
+            title={
+              canAddItem
+                ? "Add another fee component"
+                : "All active fee categories have been added"
+            }
           >
             <Plus className="h-4 w-4" />
-            Add fee
+            {canAddItem ? "Add fee" : "All fees added"}
           </button>
         </div>
 
@@ -322,7 +332,7 @@ export default function FeeStructureForm({
             <div className="divide-y">
               {items.map((item, index) => (
                 <div
-                  key={`${index}-${item.feeCategoryId}`}
+                  key={`${item.feeCategoryId || "new"}-${index}`}
                   className="grid gap-4 p-5 lg:grid-cols-[1fr_180px_1fr_auto]"
                 >
                   <Field label="Fee category" required>
@@ -336,7 +346,7 @@ export default function FeeStructureForm({
                           event.target.value,
                         )
                       }
-                      className="input-field"
+                      className="finance-control"
                     >
                       <option value="">
                         Select fee category
@@ -375,7 +385,7 @@ export default function FeeStructureForm({
                           )
                         }
                         placeholder="0.00"
-                        className="input-field pl-12"
+                        className="finance-control pl-12"
                       />
                     </div>
                   </Field>
@@ -391,7 +401,7 @@ export default function FeeStructureForm({
                         )
                       }
                       placeholder="Optional"
-                      className="input-field"
+                      className="finance-control"
                     />
                   </Field>
 
@@ -410,9 +420,16 @@ export default function FeeStructureForm({
               ))}
             </div>
 
-            <div className="flex items-center justify-between border-t bg-muted/20 px-5 py-4">
-              <span className="font-medium">Total fee</span>
-              <span className="text-xl font-semibold">
+            <div className="flex items-center justify-between border-t bg-primary-soft px-5 py-4">
+              <div>
+                <span className="block text-xs font-bold uppercase tracking-[0.12em] text-primary">
+                  Fee summary
+                </span>
+                <span className="mt-1 block font-semibold text-foreground">
+                  {items.length} component{items.length === 1 ? "" : "s"}
+                </span>
+              </div>
+              <span className="text-xl font-bold text-primary">
                 {new Intl.NumberFormat("en-GH", {
                   style: "currency",
                   currency: "GHS",
@@ -424,14 +441,14 @@ export default function FeeStructureForm({
         )}
       </section>
 
-      <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+      <div className="finance-actions">
         <Link
           href={
             mode === "edit" && feeStructureId
               ? `/finance/fee-structures/${feeStructureId}`
               : "/finance/fee-structures"
           }
-          className="inline-flex items-center justify-center gap-2 rounded-lg border bg-background px-4 py-2.5 text-sm font-medium shadow-sm transition hover:bg-muted"
+          className="btn btn-secondary"
         >
           <ArrowLeft className="h-4 w-4" />
           Cancel
@@ -443,22 +460,6 @@ export default function FeeStructureForm({
         />
       </div>
 
-      <style jsx>{`
-        .input-field {
-          width: 100%;
-          border-radius: 0.5rem;
-          border: 1px solid hsl(var(--border));
-          background: hsl(var(--background));
-          padding: 0.625rem 0.75rem;
-          font-size: 0.875rem;
-          outline: none;
-        }
-
-        .input-field:focus {
-          border-color: hsl(var(--ring));
-          box-shadow: 0 0 0 2px hsl(var(--ring) / 0.15);
-        }
-      `}</style>
     </form>
   );
 }

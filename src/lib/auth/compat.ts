@@ -1,4 +1,4 @@
-"use server";
+﻿"use server";
 
 import { and, eq } from "drizzle-orm";
 import { db } from "@/db";
@@ -13,7 +13,6 @@ import {
   users,
 } from "@/db/schema";
 import { getNeonAuth } from "@/lib/auth/server";
-import { isConfiguredSuperadminEmail } from "@/lib/auth/policy";
 
 const PLATFORM_ROLES = ["super_admin", "platform_admin"] as const;
 
@@ -25,20 +24,28 @@ export type ApplicationUser = {
   firstName: string;
   lastName: string;
   accountType: "staff" | "student" | "guardian";
+
   schoolId?: string;
   schoolName?: string;
   membershipId?: string;
+
   role?: string;
+  platformRole?: "platform_admin" | "super_admin";
+
   isPlatformAdmin?: boolean;
   isSuperAdmin?: boolean;
+
   schoolMemberships?: Array<{
     membershipId: string;
     schoolId: string;
     schoolName: string;
     role: string;
   }>;
+
   studentNumber?: string;
+
   guardianId?: string;
+
   children?: Array<{
     id: string;
     studentNumber: string;
@@ -46,6 +53,7 @@ export type ApplicationUser = {
     lastName: string;
     schoolId: string;
   }>;
+
   mustChangePassword?: boolean;
 };
 
@@ -59,6 +67,9 @@ export async function getApplicationSession() {
 
   const email = authUser.email.trim().toLowerCase();
 
+  /*
+   * STAFF / PLATFORM USER
+   */
   const [applicationUser] = await db
     .select({
       id: users.id,
@@ -77,6 +88,12 @@ export async function getApplicationSession() {
       return null;
     }
 
+    /*
+     * School memberships are now independent from platform roles.
+     *
+     * A platform administrator can therefore exist without
+     * belonging to any school.
+     */
     const memberships = await db
       .select({
         membershipId: schoolMemberships.id,
@@ -97,44 +114,96 @@ export async function getApplicationSession() {
         ),
       );
 
+    /*
+     * Legacy compatibility:
+     *
+     * Existing school memberships may still contain platform_admin
+     * or super_admin. We recognize them temporarily, but the
+     * authoritative platform role is now users.platformRole.
+     */
     const platformMembership = memberships.find((membership) =>
       PLATFORM_ROLES.includes(
         membership.role as (typeof PLATFORM_ROLES)[number],
       ),
     );
-    const platformRole =
-      isConfiguredSuperadminEmail(email)
-        ? "super_admin"
-        : applicationUser.platformRole ?? platformMembership?.role;
-    const isPlatformAdmin = platformRole !== undefined;
-    const isSuperAdmin = platformRole === "super_admin";
 
+    /*
+     * Platform role comes from users.platform_role.
+     *
+     * Do NOT derive the owner's platform identity from a school
+     * membership or configured email.
+     */
+    const platformRole = applicationUser.platformRole;
+
+    const isPlatformAdmin =
+      platformRole === "platform_admin" ||
+      platformRole === "super_admin";
+
+    const isSuperAdmin =
+      platformRole === "super_admin";
+
+    /*
+     * Ordinary staff must belong to at least one active school.
+     *
+     * Platform users do not need a school membership.
+     */
     if (memberships.length === 0 && !isPlatformAdmin) {
       return null;
     }
 
-    const primaryMembership = platformMembership ?? memberships[0];
+    /*
+     * The first school membership is the user's normal school
+     * context when they actually belong to a school.
+     *
+     * Platform-only users will have no membership, so all these
+     * values remain undefined.
+     */
+    const primaryMembership = memberships[0];
 
     return {
       user: {
         id: applicationUser.id,
         authUserId: authUser.id,
         email,
+
         name: `${applicationUser.firstName} ${applicationUser.lastName}`,
+
         firstName: applicationUser.firstName,
         lastName: applicationUser.lastName,
+
         accountType: "staff" as const,
+
+        /*
+         * School context.
+         *
+         * A platform-only super_admin intentionally has no
+         * schoolId, membershipId, or schoolName.
+         */
         schoolId: primaryMembership?.schoolId,
         membershipId: primaryMembership?.membershipId,
-        role: platformRole ?? primaryMembership?.role,
         schoolName: primaryMembership?.schoolName,
-        isSuperAdmin,
+
+        /*
+         * Platform role takes precedence over a school role.
+         */
+        role:
+          platformRole ??
+          primaryMembership?.role,
+
+        platformRole:
+          applicationUser.platformRole ?? undefined,
+
         isPlatformAdmin,
+        isSuperAdmin,
+
         schoolMemberships: memberships,
       } satisfies ApplicationUser,
     };
   }
 
+  /*
+   * STUDENT
+   */
   const [student] = await db
     .select({
       studentId: studentUserAccounts.studentId,
@@ -144,7 +213,8 @@ export async function getApplicationSession() {
       lastName: students.lastName,
       schoolId: students.schoolId,
       status: studentUserAccounts.status,
-      mustChangePassword: studentUserAccounts.mustChangePassword,
+      mustChangePassword:
+        studentUserAccounts.mustChangePassword,
     })
     .from(studentUserAccounts)
     .innerJoin(
@@ -165,18 +235,30 @@ export async function getApplicationSession() {
         id: authUser.id,
         authUserId: authUser.id,
         email,
+
         name: `${student.firstName} ${student.lastName}`,
+
         firstName: student.firstName,
         lastName: student.lastName,
+
         accountType: "student" as const,
+
         schoolId: student.schoolId,
+
         studentNumber: student.studentNumber,
-        mustChangePassword: student.mustChangePassword,
+
+        mustChangePassword:
+          student.mustChangePassword,
+
         isSuperAdmin: false,
+        isPlatformAdmin: false,
       } satisfies ApplicationUser,
     };
   }
 
+  /*
+   * GUARDIAN
+   */
   const [guardian] = await db
     .select({
       guardianId: guardianUserAccounts.guardianId,
@@ -185,7 +267,8 @@ export async function getApplicationSession() {
       lastName: guardians.lastName,
       schoolId: guardians.schoolId,
       status: guardianUserAccounts.status,
-      mustChangePassword: guardianUserAccounts.mustChangePassword,
+      mustChangePassword:
+        guardianUserAccounts.mustChangePassword,
     })
     .from(guardianUserAccounts)
     .innerJoin(
@@ -219,26 +302,45 @@ export async function getApplicationSession() {
     )
     .where(
       and(
-        eq(studentGuardians.guardianId, guardian.guardianId),
-        eq(students.schoolId, guardian.schoolId),
+        eq(
+          studentGuardians.guardianId,
+          guardian.guardianId,
+        ),
+        eq(
+          students.schoolId,
+          guardian.schoolId,
+        ),
       ),
     )
-    .orderBy(students.firstName, students.lastName);
+    .orderBy(
+      students.firstName,
+      students.lastName,
+    );
 
   return {
     user: {
       id: guardian.guardianId,
       authUserId: authUser.id,
       email,
+
       name: `${guardian.firstName} ${guardian.lastName}`,
+
       firstName: guardian.firstName,
       lastName: guardian.lastName,
+
       accountType: "guardian" as const,
+
       schoolId: guardian.schoolId,
+
       guardianId: guardian.guardianId,
+
       children: guardianChildren,
-      mustChangePassword: guardian.mustChangePassword,
+
+      mustChangePassword:
+        guardian.mustChangePassword,
+
       isSuperAdmin: false,
+      isPlatformAdmin: false,
     } satisfies ApplicationUser,
   };
 }
