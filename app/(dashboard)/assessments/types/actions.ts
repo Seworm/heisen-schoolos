@@ -4,16 +4,55 @@ import { and, eq } from "drizzle-orm";
 import { redirect } from "next/navigation";
 
 import { db } from "@/db";
-import { assessmentTypes } from "@/db/schema";
+import { assessmentTypes, assessments, gradingSchemeItems } from "@/db/schema";
 import { requireCurrentSchool } from "@/lib/current-school";
 
 type ActionState = {
   error?: string;
+  success?: string;
 };
 
 type AssessmentTypeCategory =
   | "continuous_assessment"
   | "examination";
+
+export async function deleteAssessmentType(
+  _previousState: ActionState,
+  formData: FormData,
+): Promise<ActionState> {
+  const school = await requireCurrentSchool();
+  const id = String(formData.get("id") ?? "").trim();
+  if (!id) return { error: "Assessment type is required." };
+
+  const [assessmentType] = await db
+    .select({ id: assessmentTypes.id })
+    .from(assessmentTypes)
+    .where(and(eq(assessmentTypes.id, id), eq(assessmentTypes.schoolId, school.id)))
+    .limit(1);
+
+  if (!assessmentType) return { error: "Assessment type not found." };
+
+  const [gradingSchemeUse] = await db
+    .select({ id: gradingSchemeItems.id })
+    .from(gradingSchemeItems)
+    .where(eq(gradingSchemeItems.assessmentTypeId, id))
+    .limit(1);
+  const [assessmentUse] = await db
+    .select({ id: assessments.id })
+    .from(assessments)
+    .where(eq(assessments.assessmentTypeId, id))
+    .limit(1);
+
+  if (gradingSchemeUse || assessmentUse) {
+    return {
+      error:
+        "This assessment type cannot be deleted because it is already used by a grading scheme or assessment.",
+    };
+  }
+
+  await db.delete(assessmentTypes).where(eq(assessmentTypes.id, id));
+  return { success: "Assessment type deleted." };
+}
 
 export async function createAssessmentType(
   _previousState: ActionState,
@@ -131,5 +170,3 @@ export async function createAssessmentType(
 
   redirect("/assessments/types");
 }
-
-

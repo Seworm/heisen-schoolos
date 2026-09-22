@@ -512,6 +512,11 @@ export const subjects = pgTable(
       length: 50,
     }),
 
+    curriculumCode: varchar("curriculum_code", { length: 80 }),
+    languageCode: varchar("language_code", { length: 40 }),
+    examinable: boolean("examinable").notNull().default(true),
+    activityBased: boolean("activity_based").notNull().default(false),
+
     createdAt: timestamp(
       "created_at",
       {
@@ -534,6 +539,67 @@ export const subjects = pgTable(
     ).on(
       table.schoolId,
     ),
+  ],
+);
+
+export const curriculumStages = pgTable(
+  "curriculum_stages",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    code: varchar("code", { length: 40 }).notNull().unique(),
+    name: varchar("name", { length: 120 }).notNull(),
+    description: text("description"),
+    minSortOrder: integer("min_sort_order").notNull(),
+    maxSortOrder: integer("max_sort_order").notNull(),
+    active: boolean("active").notNull().default(true),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+);
+
+export const curriculumSubjects = pgTable(
+  "curriculum_subjects",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    curriculumStageId: uuid("curriculum_stage_id").notNull().references(() => curriculumStages.id, { onDelete: "cascade" }),
+    code: varchar("code", { length: 80 }).notNull(),
+    name: varchar("name", { length: 150 }).notNull(),
+    category: varchar("category", { length: 40 }).notNull(),
+    compulsory: boolean("compulsory").notNull().default(false),
+    parameterized: varchar("parameterized", { length: 60 }),
+    examinable: boolean("examinable").notNull().default(true),
+    activityBased: boolean("activity_based").notNull().default(false),
+    sortOrder: integer("sort_order").notNull().default(0),
+    active: boolean("active").notNull().default(true),
+  },
+  (table) => [unique("curriculum_stage_subject_code_unique").on(table.curriculumStageId, table.code)],
+);
+
+export const ghanaianLanguages = pgTable(
+  "ghanaian_languages",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    code: varchar("code", { length: 40 }).notNull().unique(),
+    name: varchar("name", { length: 100 }).notNull(),
+    active: boolean("active").notNull().default(true),
+    sortOrder: integer("sort_order").notNull(),
+  },
+);
+
+export const schoolCurriculumConfigurations = pgTable(
+  "school_curriculum_configurations",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    schoolId: uuid("school_id").notNull().references(() => schools.id, { onDelete: "cascade" }),
+    classLevelId: uuid("class_level_id").notNull().references(() => classLevels.id, { onDelete: "cascade" }),
+    curriculumSubjectId: uuid("curriculum_subject_id").notNull().references(() => curriculumSubjects.id, { onDelete: "cascade" }),
+    languageId: uuid("language_id").references(() => ghanaianLanguages.id, { onDelete: "restrict" }),
+    offered: boolean("offered").notNull().default(true),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    unique("school_curriculum_config_class_subject_unique").on(table.schoolId, table.classLevelId, table.curriculumSubjectId),
+    index("school_curriculum_config_school_idx").on(table.schoolId),
   ],
 );
 

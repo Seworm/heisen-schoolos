@@ -123,6 +123,13 @@ export default async function AcademicsPage() {
           description="Subjects available"
           href="/academics/subjects"
         />
+
+        <AcademicCard
+          title="Curriculum"
+          value="Setup"
+          description="Configure Ghanaian curriculum"
+          href="/academics/curriculum"
+        />
       </div>
 
       {/* Main information panels */}
@@ -366,7 +373,7 @@ function AcademicCard({
   href,
 }: {
   title: string;
-  value: number;
+  value: number | string;
   description: string;
   href: string;
 }) {
@@ -414,4 +421,3 @@ function QuickLink({
     </Link>
   );
 }
-

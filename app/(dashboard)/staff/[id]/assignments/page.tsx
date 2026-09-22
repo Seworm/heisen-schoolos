@@ -12,6 +12,7 @@ import {
   teacherAssignments,
 } from "@/db/schema";
 import { requireCurrentSchool } from "@/lib/current-school";
+import { formatConfiguredSubjectName } from "@/lib/curriculum";
 import AssignmentForm from "./AssignmentForm";
 
 type AssignmentsPageProps = {
@@ -60,6 +61,7 @@ export default async function StaffAssignmentsPage({
       streamName: streams.name,
       className: classLevels.name,
       subjectName: subjects.name,
+      subjectLanguageCode: subjects.languageCode,
       subjectCode: subjects.code,
       isClassTeacher: teacherAssignments.isClassTeacher,
     })
@@ -251,7 +253,7 @@ export default async function StaffAssignmentsPage({
                         </td>
 
                         <td className="whitespace-nowrap px-6 py-4 text-sm text-slate-700">
-                          {assignment.subjectName || (
+                          {assignment.subjectName ? formatConfiguredSubjectName(assignment.subjectName, assignment.subjectLanguageCode) : (
                             <span className="text-slate-400">
                               No subject
                             </span>

@@ -4,6 +4,7 @@ import { asc, eq } from "drizzle-orm";
 import { db } from "@/db";
 import { assessmentTypes } from "@/db/schema";
 import { requireCurrentSchool } from "@/lib/current-school";
+import AssessmentTypeDeleteButton from "./AssessmentTypeDeleteButton";
 
 export const dynamic = "force-dynamic";
 
@@ -117,6 +118,12 @@ export default async function AssessmentTypesPage() {
                   >
                     Description
                   </th>
+                  <th
+                    scope="col"
+                    className="px-6 py-3 text-right text-xs font-semibold uppercase tracking-wide text-slate-500"
+                  >
+                    Actions
+                  </th>
                 </tr>
               </thead>
 
@@ -145,6 +152,9 @@ export default async function AssessmentTypesPage() {
 
                     <td className="max-w-md px-6 py-4 text-sm text-slate-500">
                       {type.description ?? "—"}
+                    </td>
+                    <td className="px-6 py-4 text-right">
+                      <AssessmentTypeDeleteButton id={type.id} name={type.name} />
                     </td>
                   </tr>
                 ))}
@@ -183,6 +193,9 @@ export default async function AssessmentTypesPage() {
                     {type.description}
                   </p>
                 )}
+                <div className="mt-4">
+                  <AssessmentTypeDeleteButton id={type.id} name={type.name} />
+                </div>
               </div>
             ))}
           </div>
@@ -191,5 +204,4 @@ export default async function AssessmentTypesPage() {
     </div>
   );
 }
-
 

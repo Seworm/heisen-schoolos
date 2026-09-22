@@ -193,5 +193,6 @@ export function formatConfiguredSubjectName(
 ) {
   if (!languageCode || !isGhanaianLanguageCode(languageCode)) return subjectName;
   const language = GHANAIAN_LANGUAGES.find((item) => item.code === languageCode);
-  return `${subjectName} (${language?.name ?? languageCode})`;
+  const suffix = ` (${language?.name ?? languageCode})`;
+  return subjectName.endsWith(suffix) ? subjectName : `${subjectName}${suffix}`;
 }
