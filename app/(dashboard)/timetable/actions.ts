@@ -146,3 +146,29 @@ export async function generateIntelligentTimetable(formData: FormData) {
 
   redirect(`/timetable?year=${encodeURIComponent(academicYearId)}&term=${encodeURIComponent(termId)}&scheduled=${result.scheduled}&unscheduled=${result.unscheduled}`);
 }
+
+export async function createTimetablePeriod(formData: FormData) {
+  const school = await getCurrentSchool();
+  await requireRole(["super_admin", "platform_admin", "school_owner", "school_admin", "principal", "headteacher"]);
+  const name = String(formData.get("name") ?? "").trim();
+  const dayOfWeek = Number(formData.get("dayOfWeek"));
+  const startsAt = String(formData.get("startsAt") ?? "");
+  const endsAt = String(formData.get("endsAt") ?? "");
+  const sortOrder = Number(formData.get("sortOrder"));
+  if (!name || !/^\d{2}:\d{2}$/.test(startsAt) || !/^\d{2}:\d{2}$/.test(endsAt) || !Number.isInteger(dayOfWeek) || dayOfWeek < 1 || dayOfWeek > 7 || !Number.isInteger(sortOrder) || sortOrder < 1) {
+    throw new Error("Enter a valid period name, day, time range and order.");
+  }
+  if (startsAt >= endsAt) throw new Error("Period end time must be after its start time.");
+  await db.insert(timetablePeriods).values({ schoolId: school.id, name, dayOfWeek, startsAt, endsAt, sortOrder });
+  redirect("/timetable");
+}
+
+export async function deleteTimetablePeriod(formData: FormData) {
+  const school = await getCurrentSchool();
+  await requireRole(["super_admin", "platform_admin", "school_owner", "school_admin", "principal", "headteacher"]);
+  const periodId = String(formData.get("periodId") ?? "");
+  const [period] = await db.select({ id: timetablePeriods.id }).from(timetablePeriods).where(and(eq(timetablePeriods.id, periodId), eq(timetablePeriods.schoolId, school.id))).limit(1);
+  if (!period) throw new Error("Timetable period not found.");
+  await db.delete(timetablePeriods).where(eq(timetablePeriods.id, period.id));
+  redirect("/timetable");
+}

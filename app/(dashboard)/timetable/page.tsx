@@ -11,7 +11,7 @@ import {
   timetablePeriods,
 } from "@/db/schema";
 import { getCurrentSchool } from "@/lib/current-school";
-import { generateIntelligentTimetable } from "./actions";
+import { createTimetablePeriod, deleteTimetablePeriod, generateIntelligentTimetable } from "./actions";
 
 export const dynamic = "force-dynamic";
 
@@ -56,6 +56,17 @@ export default async function TimetablePage({
     .innerJoin(staff, eq(staff.id, timetableEntries.staffId))
     .where(and(eq(timetableEntries.schoolId, school.id), ...(selectedYearId ? [eq(timetableEntries.academicYearId, selectedYearId)] : []), ...(selectedTermId ? [eq(timetableEntries.termId, selectedTermId)] : [])))
     .orderBy(asc(timetablePeriods.dayOfWeek), asc(timetablePeriods.sortOrder));
+  const periods = await db
+    .select({
+      id: timetablePeriods.id,
+      name: timetablePeriods.name,
+      dayOfWeek: timetablePeriods.dayOfWeek,
+      startsAt: timetablePeriods.startsAt,
+      endsAt: timetablePeriods.endsAt,
+    })
+    .from(timetablePeriods)
+    .where(eq(timetablePeriods.schoolId, school.id))
+    .orderBy(asc(timetablePeriods.dayOfWeek), asc(timetablePeriods.sortOrder));
 
   const scheduled = typeof params.scheduled === "string" ? params.scheduled : null;
   const unscheduled = typeof params.unscheduled === "string" ? params.unscheduled : null;
@@ -69,6 +80,29 @@ export default async function TimetablePage({
           <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.08] px-3 py-1.5 text-xs font-semibold text-emerald-200"><Sparkles className="h-3.5 w-3.5" /> Intelligent scheduling</div>
           <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">Build a clash-free timetable.</h1>
           <p className="mt-3 max-w-2xl text-sm leading-6 text-slate-300">The scheduler prioritises constrained teachers and classes, distributes lessons across available periods, and refuses teacher, class and room collisions.</p>
+        </div>
+      </section>
+
+      <section className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm">
+        <p className="text-xs font-bold uppercase tracking-[0.14em] text-slate-400">Timetable setup</p>
+        <h2 className="mt-2 text-xl font-bold tracking-tight">Configure teaching periods</h2>
+        <p className="mt-1 text-sm text-slate-500">Periods must be configured before the intelligent scheduler can place lessons.</p>
+        <form action={createTimetablePeriod} className="mt-5 grid gap-3 sm:grid-cols-6">
+          <input name="name" required placeholder="Period 1" className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm" />
+          <select name="dayOfWeek" defaultValue="1" className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm">{days.slice(1).map((day, index) => <option key={day} value={index + 1}>{day}</option>)}</select>
+          <input name="startsAt" required type="time" className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm" />
+          <input name="endsAt" required type="time" className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm" />
+          <input name="sortOrder" required type="number" min="1" placeholder="Order" className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm" />
+          <button className="rounded-xl bg-emerald-600 px-4 py-2.5 text-sm font-bold text-white transition hover:bg-emerald-700">Add period</button>
+        </form>
+        <div className="mt-5 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+          {periods.map((period) => (
+            <div key={period.id} className="flex items-center justify-between rounded-xl border border-slate-100 bg-slate-50 px-3 py-2.5 text-sm">
+              <span><strong>{days[period.dayOfWeek]}</strong> · {period.name}<span className="ml-2 text-xs text-slate-500">{period.startsAt}–{period.endsAt}</span></span>
+              <form action={deleteTimetablePeriod}><input type="hidden" name="periodId" value={period.id} /><button className="text-xs font-semibold text-rose-600">Remove</button></form>
+            </div>
+          ))}
+          {periods.length === 0 && <p className="text-sm text-slate-500">No periods configured yet.</p>}
         </div>
       </section>
 

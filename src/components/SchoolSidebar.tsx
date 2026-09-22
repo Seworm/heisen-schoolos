@@ -35,6 +35,11 @@ const groups = [
       { href: "/payroll", label: "Payroll", icon: WalletCards },
       { href: "/timetable", label: "Timetable", icon: Clock3 },
       { href: "/communications", label: "Communications", icon: Megaphone },
+      { href: "/admissions", label: "Admissions", icon: GraduationCap },
+      { href: "/calendar", label: "Calendar", icon: CalendarDays },
+      { href: "/student-services", label: "Student services", icon: ShieldCheck },
+      { href: "/reports", label: "Reports", icon: Activity },
+      { href: "/operations/documents", label: "Operations", icon: Building2 },
     ],
   },
   {
