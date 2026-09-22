@@ -146,19 +146,18 @@ export default async function Home() {
   ];
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-5">
       {/* PAGE HEADER */}
-      <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-        <div className="relative px-6 py-7 sm:px-8">
+      <section className="overflow-hidden rounded-2xl border border-[#d9e9de] bg-white shadow-sm">
+        <div className="relative px-5 py-6 sm:px-7">
           <div className="absolute right-0 top-0 h-40 w-40 translate-x-12 -translate-y-12 rounded-full bg-[#fff8d9]" />
-          <div className="absolute right-20 top-12 h-24 w-24 rounded-full bg-[#e8f3ed]" />
-
+          <div className="absolute right-24 top-16 h-24 w-24 rounded-full bg-[#edf7f0]" />
           <div className="relative">
-            <div className="flex flex-col justify-between gap-6 lg:flex-row lg:items-end">
+            <div className="flex flex-col justify-between gap-5 lg:flex-row lg:items-center">
               <div className="min-w-0">
-                <div className="mb-3 inline-flex items-center gap-2 rounded-md bg-[#e8f3ed] px-2.5 py-1.5 text-xs font-bold text-[#006b3f]">
+                <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-[#cfe4d5] bg-[#edf7f0] px-3 py-1.5 text-[11px] font-bold text-[#087443]">
                   <Activity className="h-3.5 w-3.5" />
-                  Heisen SMS Dashboard
+                  Live school overview
                 </div>
 
                 <h1 className="max-w-3xl text-2xl font-bold tracking-tight text-slate-950 sm:text-3xl">
@@ -166,33 +165,32 @@ export default async function Home() {
                 </h1>
 
                 <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-500">
-                  Manage your school&apos;s academic structure, people,
-                  assessments and results from one central workspace.
+                  A clear view of your people, academic structure and daily operations.
                 </p>
               </div>
 
               <div className="flex shrink-0 flex-wrap gap-3">
                 <Link
-                  href="/academics/classes"
-                  className="inline-flex items-center justify-center gap-2 rounded-lg bg-[#006b3f] px-4 py-2.5 text-sm font-bold text-white shadow-sm transition-colors hover:bg-[#005530] focus:outline-none focus:ring-2 focus:ring-[#fcd116] focus:ring-offset-2"
+                  href="/students/new"
+                  className="inline-flex items-center justify-center gap-2 rounded-lg bg-[#087443] px-4 py-2.5 text-sm font-bold text-white shadow-sm transition-colors hover:bg-[#056137] focus:outline-none focus:ring-2 focus:ring-[#fcd116] focus:ring-offset-2"
                 >
-                  <GraduationCap className="h-4 w-4" />
-                  Manage Classes
+                  <Users className="h-4 w-4" />
+                  Add student
                 </Link>
 
                 <Link
-                  href="/students"
-                  className="inline-flex items-center justify-center gap-2 rounded-lg border border-[#006b3f]/25 bg-white px-4 py-2.5 text-sm font-bold text-[#006b3f] shadow-sm transition-colors hover:bg-[#fff8d9] hover:text-[#003d22] focus:outline-none focus:ring-2 focus:ring-[#fcd116] focus:ring-offset-2"
+                  href="/communications/new"
+                  className="inline-flex items-center justify-center gap-2 rounded-lg border border-[#cfe4d5] bg-white px-4 py-2.5 text-sm font-bold text-[#087443] shadow-sm transition-colors hover:bg-[#fff8d9] focus:outline-none focus:ring-2 focus:ring-[#fcd116] focus:ring-offset-2"
                 >
-                  <Users className="h-4 w-4" />
-                  Students
+                  <Activity className="h-4 w-4" />
+                  New announcement
                 </Link>
               </div>
             </div>
 
             {/* Current academic context */}
-            <div className="mt-7 grid gap-3 sm:grid-cols-2 lg:max-w-2xl">
-              <div className="flex items-center gap-3 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3">
+            <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              <div className="flex items-center gap-3 rounded-xl border border-[#dfece2] bg-[#f8fcf9] px-4 py-3">
                 <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-white text-blue-700 shadow-sm ring-1 ring-slate-200">
                   <CalendarDays className="h-4 w-4" />
                 </div>
@@ -208,7 +206,7 @@ export default async function Home() {
                 </div>
               </div>
 
-              <div className="flex items-center gap-3 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3">
+              <div className="flex items-center gap-3 rounded-xl border border-[#dfece2] bg-[#f8fcf9] px-4 py-3">
                 <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-white text-indigo-700 shadow-sm ring-1 ring-slate-200">
                   <ClipboardList className="h-4 w-4" />
                 </div>
@@ -221,6 +219,15 @@ export default async function Home() {
                   <p className="mt-0.5 truncate text-sm font-semibold text-slate-900">
                     {currentTerm?.name ?? "Not set"}
                   </p>
+                </div>
+                <div className="flex items-center gap-3 rounded-xl border border-[#dfece2] bg-[#f8fcf9] px-4 py-3">
+                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-white text-[#087443] shadow-sm ring-1 ring-[#d9e9de]">
+                    <CheckCircle2 className="h-4 w-4" />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Workspace status</p>
+                    <p className="mt-0.5 truncate text-sm font-semibold text-[#087443]">Operational</p>
+                  </div>
                 </div>
               </div>
             </div>
@@ -242,7 +249,7 @@ export default async function Home() {
           </div>
         </div>
 
-        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
+        <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
           {stats.map((stat) => {
             const Icon = stat.icon;
 
@@ -250,7 +257,7 @@ export default async function Home() {
               <Link
                 key={stat.label}
                 href={stat.href}
-                className="group rounded-xl border border-slate-200 bg-white p-5 shadow-sm transition-all hover:-translate-y-0.5 hover:border-[#006b3f]/30 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-[#fcd116] focus:ring-offset-2"
+                className="group rounded-xl border border-slate-200/80 bg-white p-4 shadow-sm transition-all hover:-translate-y-0.5 hover:border-[#087443]/30 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-[#fcd116] focus:ring-offset-2 sm:p-5"
               >
                 <div className="flex items-start justify-between gap-4">
                   <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[#e8f3ed] text-[#006b3f]">

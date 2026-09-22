@@ -81,7 +81,7 @@ export function SchoolSidebar({ isPlatformAdmin = false }: { isPlatformAdmin?: b
       <div className="school-sidebar-brand">
         <Link href="/dashboard" className="school-sidebar-logo">
           <span className="school-sidebar-mark">
-            <GraduationCap className="h-5 w-5" strokeWidth={2.3} />
+            <img src="/heisen-logo.png" alt="" className="h-8 w-8 object-contain" />
           </span>
           <span className="min-w-0">
             <span className="school-sidebar-name">Heisen SMS</span>

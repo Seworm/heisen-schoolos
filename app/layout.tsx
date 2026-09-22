@@ -19,6 +19,11 @@ export const metadata: Metadata = {
     template: "%s | Heisen SMS",
   },
   description: "Heisen School Management System",
+  icons: {
+    icon: "/heisen-logo.png",
+    shortcut: "/heisen-logo.png",
+    apple: "/heisen-logo.png",
+  },
 };
 
 export default function RootLayout({
