@@ -6,6 +6,7 @@ import { redirect } from "next/navigation";
 import { db } from "@/db";
 import { staff } from "@/db/schema";
 import { requireCurrentSchool } from "@/lib/current-school";
+import { createStaffInvitation } from "@/../app/(dashboard)/admin/actions";
 
 type FormState = {
   error?: string;
@@ -60,6 +61,8 @@ export async function createStaff(
   const position = String(
     formData.get("position") ?? "",
   ).trim();
+  const accountRole = String(formData.get("accountRole") ?? "teacher").trim();
+  const createAccount = formData.get("createAccount") === "on";
 
   const statusValue = String(
     formData.get("status") ?? "active",
@@ -84,6 +87,14 @@ export async function createStaff(
     !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
   ) {
     fieldErrors.email = "Enter a valid email address.";
+  }
+
+  const validAccountRoles = ["school_admin", "principal", "headteacher", "teacher", "accountant", "bursar", "secretary", "librarian", "nurse", "staff"];
+  if (createAccount && (!email || !validAccountRoles.includes(accountRole))) {
+    return {
+      error: "A valid email and account role are required to create a staff login.",
+      fieldErrors,
+    };
   }
 
   if (
@@ -189,6 +200,22 @@ export async function createStaff(
     };
   }
 
+  if (createAccount) {
+    try {
+      await createStaffInvitation({
+        email,
+        firstName,
+        lastName,
+        role: accountRole,
+        schoolId: school.id,
+      });
+    } catch (error) {
+      console.error("Staff created but account invitation failed:", error);
+      return {
+        error: "Staff was created, but the login invitation could not be sent. Use staff access tools to invite them again.",
+      };
+    }
+  }
+
   redirect(`/staff/${createdStaff.id}`);
 }
-

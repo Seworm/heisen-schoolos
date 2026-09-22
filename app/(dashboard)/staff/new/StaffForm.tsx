@@ -281,6 +281,27 @@ export default function StaffForm() {
             )}
           </div>
 
+          <div className="sm:col-span-2 rounded-xl border border-emerald-100 bg-emerald-50/50 p-4">
+            <label className="flex items-center gap-3 text-sm font-semibold text-slate-800">
+              <input name="createAccount" type="checkbox" className="h-4 w-4 accent-[#087443]" />
+              Create a login account and email an invitation
+            </label>
+            <p className="mt-1 text-xs text-slate-500">The staff member creates their own password from the secure invitation link. Passwords are never emailed.</p>
+            <label htmlFor="accountRole" className="mt-3 block text-sm font-medium text-slate-700">Account role</label>
+            <select id="accountRole" name="accountRole" defaultValue="teacher" className="mt-2 w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm">
+              <option value="teacher">Teacher</option>
+              <option value="headteacher">Headteacher</option>
+              <option value="principal">Principal</option>
+              <option value="accountant">Accountant</option>
+              <option value="bursar">Bursar</option>
+              <option value="secretary">Secretary</option>
+              <option value="librarian">Librarian</option>
+              <option value="nurse">Nurse</option>
+              <option value="staff">General staff</option>
+              <option value="school_admin">School administrator</option>
+            </select>
+          </div>
+
           <div>
             <label
               htmlFor="dateOfBirth"
@@ -321,4 +342,3 @@ export default function StaffForm() {
     </form>
   );
 }
-
