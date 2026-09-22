@@ -46,6 +46,20 @@ export default function StaffAccountForm({
     return (
       <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-5">
         <p className="text-sm text-emerald-800">{state.success}</p>
+        {state.inviteUrl && (
+          <div className="mt-4">
+            <p className="text-xs font-semibold uppercase tracking-wider text-emerald-700">
+              Invitation link
+            </p>
+            <div className="mt-2 break-all rounded-lg border border-emerald-200 bg-white px-4 py-3 text-sm font-mono text-emerald-900">
+              {state.inviteUrl}
+            </div>
+            <p className="mt-2 text-xs text-emerald-700">
+              Copy this link and share it with the staff member — they will set
+              their own password from this page.
+            </p>
+          </div>
+        )}
       </div>
     );
   }

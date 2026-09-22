@@ -367,56 +367,95 @@ export default async function StaffProfilePage({
                  : "This staff member has no email address on file."}
              </p>
 
-             <div className="mt-5">
-               {accountStatus?.hasAccount && accountStatus.user ? (
-                 <div className="rounded-xl border border-slate-200 bg-slate-50 p-5">
-                   <div className="flex items-center justify-between">
-                     <div>
-                       <p className="font-semibold text-slate-900">
-                         Account exists
-                       </p>
-                       <p className="mt-1 text-sm text-slate-500">
-                         {accountStatus.user.firstName}{" "}
-                         {accountStatus.user.lastName} ·{" "}
-                         {accountStatus.user.status === "active"
-                           ? "Active"
-                           : "Inactive"}
-                       </p>
-                     </div>
-                     {accountStatus.membership && (
-                       <span className="text-sm text-slate-600">
-                         School role:{" "}
-                         <span className="font-medium">
-                           {accountStatus.membership.role.replace("_", " ")}
-                         </span>
-                         {" · "}
-                         <span className={
-                           accountStatus.membership.isActive
-                             ? "text-emerald-700"
-                             : "text-rose-700"
-                         }>
-                           {accountStatus.membership.isActive
-                             ? "Active"
-                             : "Inactive"}
-                         </span>
-                       </span>
-                     )}
-                   </div>
-                 </div>
-               ) : canInvite ? (
-                 <StaffAccountForm
-                   staffId={member.id}
-                   firstName={member.firstName}
-                   lastName={member.lastName}
-                   email={member.email}
-                   canInvite={canInvite}
-                 />
-               ) : (
-                 <p className="text-sm text-slate-500">
-                   You do not have permission to create a login account
-                   for this staff member.
-                 </p>
-               )}
+              <div className="mt-5">
+                {accountStatus?.hasAccount && accountStatus.user ? (
+                  <div className="rounded-xl border border-slate-200 bg-slate-50 p-5">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="font-semibold text-slate-900">
+                          Account exists
+                        </p>
+                        <p className="mt-1 text-sm text-slate-500">
+                          {accountStatus.user.firstName}{" "}
+                          {accountStatus.user.lastName} ·{" "}
+                          {accountStatus.user.status === "active"
+                            ? "Active"
+                            : "Inactive"}
+                        </p>
+                      </div>
+                      {accountStatus.membership && (
+                        <span className="text-sm text-slate-600">
+                          School role:{" "}
+                          <span className="font-medium">
+                            {accountStatus.membership.role.replace("_", " ")}
+                          </span>
+                          {" · "}
+                          <span className={
+                            accountStatus.membership.isActive
+                              ? "text-emerald-700"
+                              : "text-rose-700"
+                          }>
+                            {accountStatus.membership.isActive
+                              ? "Active"
+                              : "Inactive"}
+                          </span>
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                ) : accountStatus?.pendingInvitation ? (
+                  <div className="space-y-5">
+                    <div className="rounded-xl border border-amber-200 bg-amber-50 p-5">
+                      <p className="font-semibold text-amber-900">
+                        Invitation pending
+                      </p>
+                      <p className="mt-1 text-sm text-amber-800">
+                        An invitation has been sent to{" "}
+                        <span className="font-medium">{member.email}</span>{" "}
+                        with the{" "}
+                        <span className="font-medium">
+                          {accountStatus.pendingInvitation.role.replace("_", " ")}
+                        </span>{" "}
+                        role. It expires on{" "}
+                        {new Date(
+                          accountStatus.pendingInvitation.expiresAt,
+                        ).toLocaleDateString("en-GH", {
+                          day: "numeric",
+                          month: "long",
+                          year: "numeric",
+                        })}
+                        .
+                      </p>
+                      <p className="mt-2 text-sm text-amber-800">
+                        If the email was not received, re-send a fresh
+                        invitation below — the previous link will be
+                        invalidated.
+                      </p>
+                    </div>
+                    {canInvite && (
+                      <StaffAccountForm
+                        staffId={member.id}
+                        firstName={member.firstName}
+                        lastName={member.lastName}
+                        email={member.email}
+                        canInvite={canInvite}
+                      />
+                    )}
+                  </div>
+                ) : canInvite ? (
+                  <StaffAccountForm
+                    staffId={member.id}
+                    firstName={member.firstName}
+                    lastName={member.lastName}
+                    email={member.email}
+                    canInvite={canInvite}
+                  />
+                ) : (
+                  <p className="text-sm text-slate-500">
+                    You do not have permission to create a login account
+                    for this staff member.
+                  </p>
+                )}
              </div>
            </section>
          </div>

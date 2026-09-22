@@ -16,6 +16,7 @@ type FormState = {
     staffNumber?: string;
     email?: string;
   };
+  inviteUrl?: string;
 };
 
 export async function createStaff(
@@ -201,8 +202,9 @@ export async function createStaff(
   }
 
   if (createAccount) {
+    let invitationResult: { success: boolean; inviteUrl: string; emailSent: boolean };
     try {
-      await createStaffInvitation({
+      invitationResult = await createStaffInvitation({
         email,
         firstName,
         lastName,
@@ -212,7 +214,13 @@ export async function createStaff(
     } catch (error) {
       console.error("Staff created but account invitation failed:", error);
       return {
-        error: "Staff was created, but the login invitation could not be sent. Use staff access tools to invite them again.",
+        error: "Staff was created, but the login invitation could not be sent. Invite them manually from the staff profile.",
+      };
+    }
+
+    if (!invitationResult.emailSent) {
+      return {
+        inviteUrl: invitationResult.inviteUrl,
       };
     }
   }

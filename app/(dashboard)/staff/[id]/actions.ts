@@ -1,9 +1,9 @@
 "use server";
 
-import { and, eq } from "drizzle-orm";
+import { and, desc, eq, isNull } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { db } from "@/db";
-import { schoolMemberships, staff, users } from "@/db/schema";
+import { schoolMemberships, staff, staffInvitations, users } from "@/db/schema";
 import { requireCurrentSchool } from "@/lib/current-school";
 import { requireRole } from "@/lib/authorization";
 import { writeAuditLog } from "@/lib/audit";
@@ -11,7 +11,7 @@ import { createStaffInvitation } from "@/../app/(dashboard)/admin/actions";
 
 export async function archiveStaff(formData: FormData) {
   const school = await requireCurrentSchool();
-  await requireRole(["school_owner", "school_admin", "principal", "headteacher"], school.id);
+  const actor = await requireRole(["school_owner", "school_admin", "principal", "headteacher"], school.id);
   const staffId = String(formData.get("staffId") ?? "");
   const [member] = await db.update(staff).set({ status: "inactive", updatedAt: new Date() }).where(and(eq(staff.id, staffId), eq(staff.schoolId, school.id))).returning({ email: staff.email });
   if (!member) throw new Error("Staff record not found.");
@@ -19,6 +19,15 @@ export async function archiveStaff(formData: FormData) {
     const [matchingUser] = await db.select({ id: users.id }).from(users).where(eq(users.email, member.email.toLowerCase())).limit(1);
     if (matchingUser) await db.update(schoolMemberships).set({ isActive: false, updatedAt: new Date() }).where(and(eq(schoolMemberships.userId, matchingUser.id), eq(schoolMemberships.schoolId, school.id)));
   }
+  await writeAuditLog({
+    schoolId: school.id,
+    actorAuthUserId: actor.authUserId ?? actor.id,
+    action: "staff_archived",
+    entity: "staff",
+    entityId: staffId,
+  });
+  revalidatePath(`/staff/${staffId}`);
+  revalidatePath("/staff");
 }
 
 export async function getStaffAccountStatus(staffId: string) {
@@ -30,6 +39,7 @@ export async function getStaffAccountStatus(staffId: string) {
     .limit(1);
   if (!member) return null;
   if (!member.email) return { hasAccount: false } as const;
+
   const [userRow] = await db
     .select({
       id: users.id,
@@ -40,21 +50,49 @@ export async function getStaffAccountStatus(staffId: string) {
     .from(users)
     .where(eq(users.email, member.email.toLowerCase()))
     .limit(1);
-  if (!userRow) return { hasAccount: false } as const;
-  const [membership] = await db
-    .select({ role: schoolMemberships.role, isActive: schoolMemberships.isActive })
-    .from(schoolMemberships)
+
+  if (userRow) {
+    const [membership] = await db
+      .select({ role: schoolMemberships.role, isActive: schoolMemberships.isActive })
+      .from(schoolMemberships)
+      .where(
+        and(
+          eq(schoolMemberships.userId, userRow.id),
+          eq(schoolMemberships.schoolId, school.id),
+        ),
+      )
+      .limit(1);
+    return {
+      hasAccount: true,
+      user: userRow,
+      membership: membership ?? null,
+    };
+  }
+
+  const now = new Date();
+  const [pendingInvitation] = await db
+    .select({
+      role: staffInvitations.role,
+      expiresAt: staffInvitations.expiresAt,
+      createdAt: staffInvitations.createdAt,
+    })
+    .from(staffInvitations)
     .where(
       and(
-        eq(schoolMemberships.userId, userRow.id),
-        eq(schoolMemberships.schoolId, school.id),
+        eq(staffInvitations.email, member.email.toLowerCase()),
+        eq(staffInvitations.schoolId, school.id),
+        isNull(staffInvitations.acceptedAt),
       ),
     )
+    .orderBy(desc(staffInvitations.createdAt))
     .limit(1);
+
   return {
-    hasAccount: true,
-    user: userRow,
-    membership: membership ?? null,
+    hasAccount: false,
+    pendingInvitation:
+      pendingInvitation && pendingInvitation.expiresAt > now
+        ? pendingInvitation
+        : null,
   };
 }
 
@@ -75,6 +113,7 @@ const validStaffRoles = [
 export type InviteStaffAccountResult = {
   error?: string;
   success?: string;
+  inviteUrl?: string;
 };
 
 export async function inviteStaffAccount(
@@ -131,8 +170,10 @@ export async function inviteStaffAccount(
     return { error: "This staff member already has a login account." };
   }
 
+  let result: { success: boolean; inviteUrl: string; emailSent: boolean };
+
   try {
-    await createStaffInvitation({
+    result = await createStaffInvitation({
       email: member.email,
       firstName: member.firstName,
       lastName: member.lastName,
@@ -153,12 +194,21 @@ export async function inviteStaffAccount(
     action: "staff_account_invited",
     entity: "staff",
     entityId: staffId,
-    metadata: { role },
+    metadata: { role, emailSent: result.emailSent },
   });
 
   revalidatePath(`/staff/${staffId}`);
+
+  if (result.emailSent) {
+    return {
+      success:
+        "Invitation email sent. The staff member will receive an email to create their password.",
+    };
+  }
+
   return {
     success:
-      "Invitation sent. The staff member will receive an email to create their password.",
+      "Invitation created but the email could not be sent. Resend API is not configured — copy the link below and share it with the staff member manually.",
+    inviteUrl: result.inviteUrl,
   };
 }

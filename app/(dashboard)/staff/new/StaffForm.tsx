@@ -13,9 +13,10 @@ type FormState = {
     staffNumber?: string;
     email?: string;
   };
+  inviteUrl?: string;
 };
 
-const initialState: FormState = {};
+const initialState: FormState = {} as FormState;
 
 export default function StaffForm() {
   const [state, formAction, pending] = useActionState(
@@ -42,6 +43,22 @@ export default function StaffForm() {
         {state.error && (
           <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
             {state.error}
+          </div>
+        )}
+
+        {state.inviteUrl && (
+          <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-4 text-sm">
+            <p className="font-semibold text-amber-900">
+              Invitation created — email not sent
+            </p>
+            <p className="mt-1 text-sm text-amber-800">
+              The staff member was created and an invitation exists, but the
+              welcome email could not be delivered. Copy the link below and
+              share it with them directly.
+            </p>
+            <div className="mt-3 break-all rounded-lg border border-amber-200 bg-white px-4 py-3 font-mono text-xs text-amber-900">
+              {state.inviteUrl}
+            </div>
           </div>
         )}
 
