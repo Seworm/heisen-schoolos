@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
@@ -45,7 +45,7 @@ router.refresh();
       <div className="w-full max-w-md">
         <div className="mb-8 text-center">
           <p className="text-sm font-bold tracking-wide text-[#006b3f]">
-            Heisen SchoolOS
+            Heisen SMS
           </p>
 
           <h1 className="mt-2 text-3xl font-semibold tracking-tight text-slate-950">

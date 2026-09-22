@@ -1,7 +1,7 @@
 ﻿import { and, eq } from "drizzle-orm";
 import { auth } from "@/../auth";
 import { db } from "@/db";
-import { schoolMemberships } from "@/db/schema";
+import { schoolMemberships, schools } from "@/db/schema";
 import { hasPermission, type Permission } from "@/lib/permissions";
 
 export const PLATFORM_ROLES = [
@@ -85,6 +85,21 @@ export async function requireSchoolMembership(schoolId?: string) {
    */
   if (isPlatformUser(user)) {
     if (schoolId) {
+      const [school] = await db
+        .select({ id: schools.id })
+        .from(schools)
+        .where(
+          and(
+            eq(schools.id, schoolId),
+            eq(schools.status, "active"),
+          ),
+        )
+        .limit(1);
+
+      if (!school) {
+        throw new Error("The requested school is not available.");
+      }
+
       const [membership] = await db
         .select({
           id: schoolMemberships.id,

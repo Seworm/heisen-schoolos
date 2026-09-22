@@ -5,7 +5,8 @@ import { db } from "@/db";
 import { schoolMemberships, schools } from "@/db/schema";
 import { requireAuth, isPlatformUser } from "@/lib/authorization";
 
-const ACTIVE_SCHOOL_COOKIE = "schoolos_active_school_id";
+const ACTIVE_SCHOOL_COOKIE = "heisensms_active_school_id";
+const LEGACY_ACTIVE_SCHOOL_COOKIE = "schoolos_active_school_id";
 
 export const ACTIVE_SCHOOL_COOKIE_NAME = ACTIVE_SCHOOL_COOKIE;
 
@@ -21,9 +22,10 @@ export async function getCurrentSchool() {
   let schoolId: string | null = user.schoolId ?? null;
 
   if (isPlatformUser(user)) {
-    const activeSchoolId = (await cookies()).get(
-      ACTIVE_SCHOOL_COOKIE,
-    )?.value;
+    const cookieStore = await cookies();
+    const activeSchoolId =
+      cookieStore.get(ACTIVE_SCHOOL_COOKIE)?.value ??
+      cookieStore.get(LEGACY_ACTIVE_SCHOOL_COOKIE)?.value;
 
     schoolId = activeSchoolId ?? null;
   }

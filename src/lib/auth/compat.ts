@@ -14,8 +14,6 @@ import {
 } from "@/db/schema";
 import { getNeonAuth } from "@/lib/auth/server";
 
-const PLATFORM_ROLES = ["super_admin", "platform_admin"] as const;
-
 export type ApplicationUser = {
   id: string;
   authUserId?: string;
@@ -113,19 +111,6 @@ export async function getApplicationSession() {
           eq(schools.status, "active"),
         ),
       );
-
-    /*
-     * Legacy compatibility:
-     *
-     * Existing school memberships may still contain platform_admin
-     * or super_admin. We recognize them temporarily, but the
-     * authoritative platform role is now users.platformRole.
-     */
-    const platformMembership = memberships.find((membership) =>
-      PLATFORM_ROLES.includes(
-        membership.role as (typeof PLATFORM_ROLES)[number],
-      ),
-    );
 
     /*
      * Platform role comes from users.platform_role.

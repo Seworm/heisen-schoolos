@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
@@ -86,7 +86,7 @@ export default function SetupPage() {
       <div className="mx-auto max-w-2xl">
         <div className="mb-8">
           <p className="text-sm font-semibold text-slate-500">
-            Heisen SchoolOS
+            Heisen SMS
           </p>
 
           <h1 className="mt-2 text-3xl font-semibold tracking-tight text-slate-950">

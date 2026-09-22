@@ -6,8 +6,7 @@ import { revalidatePath } from "next/cache";
 import { db } from "@/db";
 import { schools } from "@/db/schema";
 import { requireRole } from "@/lib/authorization";
-
-const ACTIVE_SCHOOL_COOKIE = "schoolos_active_school_id";
+import { ACTIVE_SCHOOL_COOKIE_NAME } from "@/lib/current-school";
 
 export async function getAvailableSchools() {
   await requireRole(["super_admin", "platform_admin"]);
@@ -37,7 +36,7 @@ export async function switchActiveSchool(schoolId: string) {
     throw new Error("The selected school is not available.");
   }
 
-  (await cookies()).set(ACTIVE_SCHOOL_COOKIE, school.id, {
+  (await cookies()).set(ACTIVE_SCHOOL_COOKIE_NAME, school.id, {
     httpOnly: true,
     sameSite: "lax",
     secure: process.env.NODE_ENV === "production",

@@ -18,7 +18,7 @@ export default async function StudentDashboardPage() {
         <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
           <div>
             <h1 className="text-xl font-semibold text-slate-950">
-              Heisen SchoolOS
+              Heisen SMS
             </h1>
 
             <p className="text-sm text-slate-500">

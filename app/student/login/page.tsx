@@ -56,7 +56,7 @@ export default function StudentLoginPage() {
         <div className="auth-brand">
           <span className="auth-brand-mark">H</span>
           <div>
-            <p className="auth-brand-name">Heisen SchoolOS</p>
+            <p className="auth-brand-name">Heisen SMS</p>
             <p className="auth-brand-caption">Ghanaian school management</p>
           </div>
         </div>

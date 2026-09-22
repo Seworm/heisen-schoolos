@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useEffect, useState } from "react";
 import {
   Activity,
   BookOpen,
@@ -53,16 +54,32 @@ function active(pathname: string, href: string) {
 
 export function SchoolSidebar({ isPlatformAdmin = false }: { isPlatformAdmin?: boolean }) {
   const pathname = usePathname();
+  const [mobileOpen, setMobileOpen] = useState(false);
+
+  useEffect(() => {
+    const openNavigation = () => setMobileOpen(true);
+    window.addEventListener("heisensms:open-navigation", openNavigation);
+    return () => window.removeEventListener("heisensms:open-navigation", openNavigation);
+  }, []);
 
   return (
-    <aside className="school-sidebar">
+    <>
+      {mobileOpen && (
+        <button
+          type="button"
+          aria-label="Close navigation"
+          className="school-sidebar-backdrop"
+          onClick={() => setMobileOpen(false)}
+        />
+      )}
+      <aside className={`school-sidebar ${mobileOpen ? "is-mobile-open" : ""}`}>
       <div className="school-sidebar-brand">
         <Link href="/dashboard" className="school-sidebar-logo">
           <span className="school-sidebar-mark">
             <GraduationCap className="h-5 w-5" strokeWidth={2.3} />
           </span>
           <span className="min-w-0">
-            <span className="school-sidebar-name">Heisen SchoolOS</span>
+            <span className="school-sidebar-name">Heisen SMS</span>
             <span className="school-sidebar-caption">Education OS</span>
           </span>
         </Link>
@@ -72,6 +89,7 @@ export function SchoolSidebar({ isPlatformAdmin = false }: { isPlatformAdmin?: b
         {isPlatformAdmin && (
           <Link
             href="/platform"
+            onClick={() => setMobileOpen(false)}
             className={`school-sidebar-workspace ${
               active(pathname, "/platform")
                 ? "is-active"
@@ -100,6 +118,7 @@ export function SchoolSidebar({ isPlatformAdmin = false }: { isPlatformAdmin?: b
                     <Link
                       key={href}
                       href={href}
+                      onClick={() => setMobileOpen(false)}
                       className={`school-sidebar-item ${
                         isActive
                           ? "is-active"
@@ -130,6 +149,7 @@ export function SchoolSidebar({ isPlatformAdmin = false }: { isPlatformAdmin?: b
           <ShieldCheck className="school-sidebar-status-icon" />
         </div>
       </div>
-    </aside>
+      </aside>
+    </>
   );
 }

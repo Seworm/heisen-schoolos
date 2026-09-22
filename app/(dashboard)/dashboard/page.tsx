@@ -158,7 +158,7 @@ export default async function Home() {
               <div className="min-w-0">
                 <div className="mb-3 inline-flex items-center gap-2 rounded-md bg-[#e8f3ed] px-2.5 py-1.5 text-xs font-bold text-[#006b3f]">
                   <Activity className="h-3.5 w-3.5" />
-                  SchoolOS Dashboard
+                  Heisen SMS Dashboard
                 </div>
 
                 <h1 className="max-w-3xl text-2xl font-bold tracking-tight text-slate-950 sm:text-3xl">

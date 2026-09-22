@@ -14,8 +14,11 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Heisen SchoolOS",
-  description: "School management system",
+  title: {
+    default: "Heisen SMS",
+    template: "%s | Heisen SMS",
+  },
+  description: "Heisen School Management System",
 };
 
 export default function RootLayout({
@@ -36,4 +39,3 @@ export default function RootLayout({
     </html>
   );
 }
-

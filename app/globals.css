@@ -12,8 +12,8 @@
      CORE
      ======================================================= */
 
-  --background: #f8faf7;
-  --foreground: #111111;
+  --background: #f6faf7;
+  --foreground: #183126;
 
   --card: #ffffff;
   --card-foreground: #0f172a;
@@ -51,7 +51,7 @@
      SECONDARY
      ======================================================= */
 
-  --secondary: #111111;
+  --secondary: #006b3f;
   --secondary-foreground: #ffffff;
 
   --secondary-hover: #1e293b;
@@ -131,11 +131,11 @@
      SIDEBAR
      ======================================================= */
 
-  --sidebar: #111111;
-  --sidebar-hover: #262017;
-  --sidebar-active: #006b3f;
-  --sidebar-text: #f7f0cc;
-  --sidebar-muted: #a9a28a;
+  --sidebar: #ffffff;
+  --sidebar-hover: #f0f8f3;
+  --sidebar-active: #e4f3e9;
+  --sidebar-text: #183126;
+  --sidebar-muted: #718077;
 
   /* =======================================================
      SHADOWS
@@ -1553,6 +1553,124 @@ select:focus-visible {
   color: var(--success-border);
 }
 
+/* Keep the legacy application shell visually aligned with the new
+   Heisen SMS product surface. */
+.school-sidebar {
+  width: 272px;
+  background: #ffffff !important;
+  color: #183126 !important;
+  border-right: 1px solid #d9e9de !important;
+  box-shadow: 8px 0 30px rgb(38 91 57 / 0.06);
+}
+
+.school-sidebar-brand {
+  min-height: 92px;
+  padding: 1.5rem 1.25rem 1.25rem;
+  border-bottom-color: #d9e9de !important;
+}
+
+.school-sidebar-logo {
+  gap: 0.75rem;
+}
+
+.school-sidebar-mark {
+  width: 2.75rem;
+  height: 2.75rem;
+  border: 0;
+  border-radius: 0.875rem;
+  background: #edf7f0 !important;
+  color: #087443 !important;
+  box-shadow: none;
+}
+
+.school-sidebar-name {
+  color: #183126 !important;
+  font-size: 1rem;
+}
+
+.school-sidebar-caption {
+  color: #6b7d72 !important;
+}
+
+.school-sidebar-nav {
+  padding: 1.25rem 0.75rem;
+}
+
+.school-sidebar-group-label {
+  color: #819087 !important;
+}
+
+.school-sidebar-item {
+  min-height: 2.75rem;
+  color: #6b7d72 !important;
+  border-color: transparent;
+}
+
+.school-sidebar-item:hover,
+.school-sidebar-item:focus-visible {
+  border-color: #d9e9de !important;
+  background: #f5faf7 !important;
+  color: #183126 !important;
+}
+
+.school-sidebar-item.is-active {
+  border-color: #b9ddc4 !important;
+  background: #edf7f0 !important;
+  color: #087443 !important;
+  box-shadow: none !important;
+}
+
+.school-sidebar-item-icon,
+.school-sidebar-item:hover .school-sidebar-item-icon,
+.school-sidebar-item.is-active .school-sidebar-item-icon {
+  background: #e4f3e9 !important;
+  color: #087443 !important;
+}
+
+.school-sidebar-item-dot {
+  background: #f3c928;
+  box-shadow: none;
+}
+
+.school-sidebar-footer {
+  border-top-color: #d9e9de !important;
+}
+
+.school-sidebar-status {
+  border-color: #cde6d4 !important;
+  background: #edf7f0 !important;
+}
+
+.school-sidebar-status-title {
+  color: #315443 !important;
+}
+
+.school-sidebar-status-caption {
+  color: #6b7d72 !important;
+}
+
+@media (min-width: 1024px) {
+  .school-sidebar {
+    display: flex;
+  }
+}
+
+@media (max-width: 1023px) {
+  .school-sidebar {
+    position: fixed;
+    inset: 0 auto 0 0;
+    z-index: 60;
+    display: flex;
+    width: min(86vw, 320px);
+    transform: translateX(-105%);
+    transition: transform 180ms ease;
+  }
+
+  .school-sidebar.is-mobile-open {
+    transform: translateX(0);
+  }
+}
+
 @media (min-width: 1024px) {
   .school-sidebar {
     display: flex;
@@ -1941,6 +2059,271 @@ tbody tr:last-child {
 
 .text-primary {
   color: var(--text-primary);
+}
+
+/* =========================================================
+   HEISEN SMS LIGHT, MOBILE-FIRST SHELL
+   ========================================================= */
+
+html,
+body {
+  min-width: 320px;
+  background: var(--background);
+  color: var(--foreground);
+}
+
+button,
+a,
+input,
+select,
+textarea {
+  -webkit-tap-highlight-color: transparent;
+}
+
+button,
+a {
+  touch-action: manipulation;
+}
+
+.school-sidebar {
+  z-index: 60;
+  background: #ffffff;
+  color: var(--sidebar-text);
+  border-right: 1px solid #dcebe1;
+  box-shadow: 8px 0 30px rgb(31 92 55 / 0.06);
+}
+
+.school-sidebar::before {
+  background: linear-gradient(90deg, #ce1126 0 33%, #fcd116 33% 66%, #006b3f 66%);
+}
+
+.school-sidebar-brand {
+  border-bottom-color: #e7f0ea;
+}
+
+.school-sidebar-mark {
+  background: linear-gradient(145deg, #e3f4e9, #cdebd8);
+  border-color: #a8d5b7;
+  color: #006b3f;
+  box-shadow: none;
+}
+
+.school-sidebar-mark::after {
+  border-color: #ffffff;
+}
+
+.school-sidebar-name,
+.school-sidebar-workspace-title {
+  color: #183126;
+}
+
+.school-sidebar-caption,
+.school-sidebar-group-label {
+  color: #718077;
+}
+
+.school-sidebar-nav {
+  scrollbar-color: #c8dccd transparent;
+}
+
+.school-sidebar-workspace {
+  border-color: #cde6d4;
+  background: #f0f8f3;
+  color: #183126;
+}
+
+.school-sidebar-workspace:hover,
+.school-sidebar-workspace.is-active {
+  border-color: #8fc4a1;
+  background: #e4f3e9;
+}
+
+.school-sidebar-workspace-icon {
+  background: #d7eedf;
+  color: #006b3f;
+}
+
+.school-sidebar-workspace-label,
+.school-sidebar-workspace-pulse {
+  color: #006b3f;
+}
+
+.school-sidebar-item {
+  color: #587064;
+}
+
+.school-sidebar-item:hover,
+.school-sidebar-item:focus-visible {
+  border-color: #dcebe1;
+  background: #f5faf6;
+  color: #183126;
+}
+
+.school-sidebar-item.is-active {
+  border-color: #b8ddc2;
+  background: #e4f3e9;
+  color: #005530;
+  box-shadow: none;
+}
+
+.school-sidebar-item-icon,
+.school-sidebar-item:hover .school-sidebar-item-icon,
+.school-sidebar-item.is-active .school-sidebar-item-icon {
+  background: #f0f8f3;
+  color: #006b3f;
+}
+
+.school-sidebar-item-dot {
+  background: #fcd116;
+  box-shadow: none;
+}
+
+.school-sidebar-footer {
+  border-top-color: #e7f0ea;
+}
+
+.school-sidebar-status {
+  border-color: #cde6d4;
+  background: #f0f8f3;
+}
+
+.school-sidebar-status-mark {
+  background: #dff1e5;
+}
+
+.school-sidebar-status-mark span {
+  background: #00874f;
+  box-shadow: none;
+}
+
+.school-sidebar-status-title {
+  color: #315443;
+}
+
+.school-sidebar-status-caption {
+  color: #718077;
+}
+
+.school-sidebar-status-icon {
+  color: #00874f;
+}
+
+.school-sidebar-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  border: 0;
+  background: rgb(24 49 38 / 0.18);
+}
+
+/* Convert legacy dark action surfaces into the shared green action style. */
+button[class*="bg-black"],
+button[class*="bg-slate-950"],
+button[class*="bg-slate-900"],
+button[class*="bg-neutral-900"],
+button[class*="bg-gray-900"],
+a[class*="bg-black"],
+a[class*="bg-slate-950"],
+a[class*="bg-slate-900"],
+a[class*="bg-neutral-900"],
+a[class*="bg-gray-900"] {
+  border-color: #006b3f !important;
+  background: #006b3f !important;
+  color: #ffffff !important;
+}
+
+[class*="bg-[#111111]"]:not(button):not(a),
+[class*="bg-[#0b0d0c]"]:not(button):not(a),
+[class*="bg-slate-950"]:not(button):not(a),
+[class*="bg-slate-900"]:not(button):not(a),
+[class*="bg-neutral-900"]:not(button):not(a),
+[class*="bg-gray-900"]:not(button):not(a) {
+  background-color: #f0f8f3 !important;
+  color: #183126 !important;
+}
+
+[class*="bg-[#111111]"]:not(button):not(a) h1,
+[class*="bg-[#111111]"]:not(button):not(a) h2,
+[class*="bg-[#111111]"]:not(button):not(a) h3,
+[class*="bg-[#111111]"]:not(button):not(a) p,
+[class*="bg-[#111111]"]:not(button):not(a) span,
+[class*="bg-slate-950"]:not(button):not(a) h1,
+[class*="bg-slate-950"]:not(button):not(a) h2,
+[class*="bg-slate-950"]:not(button):not(a) h3,
+[class*="bg-slate-950"]:not(button):not(a) p,
+[class*="bg-slate-950"]:not(button):not(a) span {
+  color: inherit !important;
+}
+
+button[class*="bg-black"]:hover:not(:disabled),
+button[class*="bg-slate-950"]:hover:not(:disabled),
+button[class*="bg-slate-900"]:hover:not(:disabled),
+button[class*="bg-neutral-900"]:hover:not(:disabled),
+button[class*="bg-gray-900"]:hover:not(:disabled),
+a[class*="bg-black"]:hover,
+a[class*="bg-slate-950"]:hover,
+a[class*="bg-slate-900"]:hover,
+a[class*="bg-neutral-900"]:hover,
+a[class*="bg-gray-900"]:hover {
+  background: #005530 !important;
+}
+
+@media (max-width: 1023px) {
+  .school-sidebar {
+    position: fixed;
+    inset: 0 auto 0 0;
+    display: flex;
+    width: min(86vw, 320px);
+    transform: translateX(-105%);
+    transition: transform 180ms ease;
+  }
+
+  .school-sidebar.is-mobile-open {
+    transform: translateX(0);
+  }
+}
+
+@media (max-width: 639px) {
+  .school-sidebar-brand {
+    padding: 1.25rem 1rem 1rem;
+  }
+
+  .school-sidebar-nav {
+    padding: 1rem 0.625rem;
+  }
+
+  .school-sidebar-groups {
+    gap: 1rem;
+  }
+
+  main {
+    padding-left: 1rem !important;
+    padding-right: 1rem !important;
+  }
+
+  .school-topbar,
+  header.sticky {
+    min-height: 64px;
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+
+  [class*="grid-cols-4"],
+  [class*="grid-cols-3"] {
+    grid-template-columns: repeat(1, minmax(0, 1fr));
+  }
+
+  [class*="grid-cols-2"] {
+    grid-template-columns: repeat(1, minmax(0, 1fr));
+  }
+
+  table {
+    min-width: 640px;
+  }
+
+  .overflow-x-auto {
+    -webkit-overflow-scrolling: touch;
+  }
 }
 
 .text-secondary {

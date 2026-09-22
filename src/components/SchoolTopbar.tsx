@@ -103,10 +103,15 @@ export function SchoolTopbar({
   return (
     <header className="sticky top-0 z-30 flex min-h-[76px] items-center justify-between gap-4 border-b border-slate-200/80 bg-white/90 px-4 backdrop-blur-xl sm:px-6 lg:px-8">
       <div className="flex min-w-0 items-center gap-3">
-        <button type="button" aria-label="Open navigation" className="flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 text-slate-600 lg:hidden">
+        <button
+          type="button"
+          aria-label="Open navigation"
+          onClick={() => window.dispatchEvent(new Event("heisensms:open-navigation"))}
+          className="flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-600 shadow-sm lg:hidden"
+        >
           <Menu className="h-4 w-4" />
         </button>
-        <div className="hidden h-9 w-9 items-center justify-center rounded-xl bg-[#fff8d9] text-[#006b3f] sm:flex">
+        <div className="hidden h-9 w-9 items-center justify-center rounded-xl bg-[#edf7f0] text-[#087443] sm:flex">
           <Sparkles className="h-4 w-4" />
         </div>
         <div className="min-w-0">
@@ -146,13 +151,13 @@ export function SchoolTopbar({
             <kbd className="rounded-md border border-slate-200 bg-white px-1.5 py-0.5 text-[10px] font-semibold text-slate-500">⌘ K</kbd>
           </div>
           {open && (
-            <div className="absolute right-0 top-[calc(100%+0.5rem)] z-50 w-full overflow-hidden rounded-2xl border border-slate-200 bg-white p-2 shadow-xl shadow-slate-900/10">
+            <div className="absolute right-0 top-[calc(100%+0.5rem)] z-50 w-full overflow-hidden rounded-2xl border border-slate-200 bg-white p-2 shadow-xl shadow-emerald-950/10">
               {results.length > 0 ? results.map((result) => (
                 <Link
                   key={`${result.type}-${result.id}`}
                   href={resultHref(result)}
                   onClick={() => { setOpen(false); setQuery(""); }}
-                  className="flex items-center justify-between gap-3 rounded-xl px-3 py-2.5 transition hover:bg-[#e8f3ed]"
+                  className="flex items-center justify-between gap-3 rounded-xl px-3 py-2.5 transition hover:bg-[#edf7f0]"
                 >
                   <span className="min-w-0">
                     <span className="block truncate text-sm font-semibold text-slate-900">{result.title} {result.subtitle ?? ""}</span>
@@ -169,13 +174,13 @@ export function SchoolTopbar({
             </div>
           )}
         </div>
-        <button type="button" aria-label="Notifications" className="relative flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 text-slate-600 transition hover:bg-[#fff8d9] hover:text-slate-900">
+        <button type="button" aria-label="Notifications" className="relative flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-600 transition hover:bg-[#edf7f0] hover:text-slate-900">
           <Bell className="h-[17px] w-[17px]" />
           <span className="absolute right-2 top-2 h-1.5 w-1.5 rounded-full bg-[#ce1126] ring-2 ring-white" />
         </button>
         <div className="hidden h-8 w-px bg-slate-200 sm:block" />
         <button type="button" className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white py-1.5 pl-1.5 pr-2.5 shadow-sm">
-          <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-[#111111] text-[10px] font-bold text-white">SA</span>
+          <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-[#087443] text-[10px] font-bold text-white">SA</span>
           <span className="hidden text-left sm:block"><span className="block text-xs font-semibold text-slate-800">Administrator</span><span className="block text-[10px] text-slate-500">Workspace owner</span></span>
           <ChevronDown className="h-3.5 w-3.5 text-slate-500" />
         </button>
