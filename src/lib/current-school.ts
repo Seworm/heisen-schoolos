@@ -1,4 +1,4 @@
-﻿import { and, eq } from "drizzle-orm";
+import { and, eq, ne } from "drizzle-orm";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { db } from "@/db";
@@ -46,6 +46,10 @@ export async function getCurrentSchool() {
       schoolCode: schools.schoolCode,
       logoUrl: schools.logoUrl,
       status: schools.status,
+      schoolType: schools.schoolType,
+      region: schools.region,
+      district: schools.district,
+      town: schools.town,
       address: schools.address,
       phone: schools.phone,
       email: schools.email,
@@ -55,7 +59,9 @@ export async function getCurrentSchool() {
     .where(
       and(
         eq(schools.id, schoolId),
-        eq(schools.status, "active"),
+        isPlatformUser(user)
+          ? ne(schools.status, "deactivated")
+          : eq(schools.status, "active"),
       ),
     )
     .limit(1);

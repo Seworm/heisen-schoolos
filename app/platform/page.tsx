@@ -6,6 +6,7 @@ import { auditLogs, schoolMemberships, schools, staff, students } from "@/db/sch
 import { requireSuperAdmin } from "@/lib/authorization";
 import PlatformAdminForm from "./PlatformAdminForm";
 import SchoolWorkspaceButton from "./SchoolWorkspaceButton";
+import SchoolSubscriptionControl from "./SchoolSubscriptionControl";
 
 export const dynamic = "force-dynamic";
 
@@ -102,7 +103,8 @@ export default async function PlatformPage() {
                 <span>{school.members} members</span>
                 <span>{school.staff} staff</span>
                 <span>{school.students} students</span>
-                {school.status === "active" && (
+                <SchoolSubscriptionControl schoolId={school.id} status={school.status} />
+                {school.status !== "deactivated" && (
                   <SchoolWorkspaceButton schoolId={school.id} />
                 )}
               </div>

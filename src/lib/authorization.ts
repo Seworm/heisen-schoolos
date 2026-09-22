@@ -1,4 +1,4 @@
-﻿import { and, eq } from "drizzle-orm";
+import { and, eq, ne } from "drizzle-orm";
 import { auth } from "@/../auth";
 import { db } from "@/db";
 import { schoolMemberships, schools } from "@/db/schema";
@@ -73,6 +73,20 @@ export async function requireSchoolMembership(schoolId?: string) {
       );
     }
 
+    const [school] = await db
+      .select({ status: schools.status })
+      .from(schools)
+      .where(eq(schools.id, activeSchoolId))
+      .limit(1);
+
+    if (!school || school.status !== "active") {
+      throw new Error(
+        school?.status === "suspended"
+          ? "This school is suspended because its subscription was not renewed. Contact the platform administrator."
+          : "This school is not currently available.",
+      );
+    }
+
     return user;
   }
 
@@ -91,7 +105,7 @@ export async function requireSchoolMembership(schoolId?: string) {
         .where(
           and(
             eq(schools.id, schoolId),
-            eq(schools.status, "active"),
+            ne(schools.status, "deactivated"),
           ),
         )
         .limit(1);
@@ -137,6 +151,20 @@ export async function requireSchoolMembership(schoolId?: string) {
   ) {
     throw new Error(
       "You are not authorized to access this school.",
+    );
+  }
+
+  const [school] = await db
+    .select({ id: schools.id, status: schools.status })
+    .from(schools)
+    .where(eq(schools.id, activeSchoolId))
+    .limit(1);
+
+  if (!school || school.status !== "active") {
+    throw new Error(
+      school?.status === "suspended"
+        ? "This school is suspended because its subscription was not renewed. Contact the platform administrator."
+        : "This school is not currently available.",
     );
   }
 

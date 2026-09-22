@@ -1,6 +1,6 @@
 "use server";
 
-import { and, eq } from "drizzle-orm";
+import { and, eq, ne } from "drizzle-orm";
 import { cookies } from "next/headers";
 import { revalidatePath } from "next/cache";
 import { db } from "@/db";
@@ -19,7 +19,7 @@ export async function getAvailableSchools() {
       status: schools.status,
     })
     .from(schools)
-    .where(eq(schools.status, "active"))
+    .where(ne(schools.status, "deactivated"))
     .orderBy(schools.name);
 }
 
@@ -27,9 +27,9 @@ export async function switchActiveSchool(schoolId: string) {
   await requireRole(["super_admin", "platform_admin"]);
 
   const [school] = await db
-    .select({ id: schools.id })
+    .select({ id: schools.id, status: schools.status })
     .from(schools)
-    .where(and(eq(schools.id, schoolId), eq(schools.status, "active")))
+    .where(and(eq(schools.id, schoolId), ne(schools.status, "deactivated")))
     .limit(1);
 
   if (!school) {
