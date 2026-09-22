@@ -173,7 +173,7 @@ export function SchoolSidebar() {
 
           <div className="min-w-0">
             <p className="truncate text-[15px] font-bold tracking-tight text-white">
-              Heisen SMS
+              Heisen SchoolOS
             </p>
             <p className="mt-0.5 truncate text-[11px] font-medium text-slate-400">
               School Management

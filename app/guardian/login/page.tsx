@@ -61,7 +61,7 @@ export default function GuardianLoginPage() {
       <form onSubmit={submit} className="relative w-full max-w-md rounded-2xl border border-[#dfe7df] bg-white p-8 shadow-[0_20px_60px_rgba(0,61,34,0.12)]">
         <div className="mb-6 flex items-center gap-3">
           <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#006b3f] text-lg font-bold text-[#fcd116]">H</span>
-          <p className="text-sm font-bold tracking-wide text-[#006b3f]">Heisen SMS</p>
+          <p className="text-sm font-bold tracking-wide text-[#006b3f]">Heisen SchoolOS</p>
         </div>
         <h1 className="mt-1 text-2xl font-semibold">Parent / Guardian Portal</h1>
         <p className="mt-2 text-sm text-slate-500">

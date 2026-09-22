@@ -72,7 +72,7 @@ export default function ChangePasswordPage() {
         className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-8 shadow-sm"
       >
         <p className="text-sm font-medium text-slate-500">
-          Heisen SMS
+          Heisen SchoolOS
         </p>
 
         <h1 className="mt-1 text-2xl font-semibold text-slate-950">

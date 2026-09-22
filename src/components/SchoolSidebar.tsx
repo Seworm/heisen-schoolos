@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import {
@@ -80,11 +81,11 @@ export function SchoolSidebar({ isPlatformAdmin = false }: { isPlatformAdmin?: b
       <aside className={`school-sidebar ${mobileOpen ? "is-mobile-open" : ""}`}>
       <div className="school-sidebar-brand">
         <Link href="/dashboard" className="school-sidebar-logo">
-          <span className="school-sidebar-mark">
-            <img src="/heisen-logo.png" alt="" className="h-8 w-8 object-contain" />
+          <span className="school-sidebar-mark overflow-hidden bg-white">
+            <Image src="/heisen-logo.png" alt="" width={40} height={40} priority className="h-10 w-10 object-contain" />
           </span>
           <span className="min-w-0">
-            <span className="school-sidebar-name">Heisen SMS</span>
+            <span className="school-sidebar-name">Heisen SchoolOS</span>
             <span className="school-sidebar-caption">Education OS</span>
           </span>
         </Link>

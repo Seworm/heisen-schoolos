@@ -1,6 +1,6 @@
-# Heisen SMS
+# Heisen SchoolOS
 
-Heisen SMS (Heisen School Management System) is a multi-school operating system for Ghanaian basic schools, built on Next.js App Router, React, TypeScript, Neon PostgreSQL, Drizzle ORM and Neon Auth.
+Heisen SchoolOS (Heisen School Management System) is a multi-school operating system for Ghanaian basic schools, built on Next.js App Router, React, TypeScript, Neon PostgreSQL, Drizzle ORM and Neon Auth.
 
 ## Architecture
 

@@ -1554,7 +1554,7 @@ select:focus-visible {
 }
 
 /* Keep the legacy application shell visually aligned with the new
-   Heisen SMS product surface. */
+   Heisen SchoolOS product surface. */
 .school-sidebar {
   width: 272px;
   background: #ffffff !important;
@@ -2080,7 +2080,7 @@ tbody tr:last-child {
 }
 
 /* =========================================================
-   HEISEN SMS LIGHT, MOBILE-FIRST SHELL
+   Heisen SchoolOS LIGHT, MOBILE-FIRST SHELL
    ========================================================= */
 
 html,

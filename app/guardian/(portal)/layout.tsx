@@ -26,7 +26,7 @@ export default async function GuardianPortalLayout({ children }: { children: Rea
         <div className="flex h-20 items-center border-b border-slate-200 px-5">
           <div>
             <p className="text-xs font-medium uppercase tracking-[0.2em] text-slate-400">Parent portal</p>
-            <p className="mt-1 text-base font-semibold text-slate-950">Heisen SMS</p>
+            <p className="mt-1 text-base font-semibold text-slate-950">Heisen SchoolOS</p>
           </div>
         </div>
 

@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import { Search, Bell, ChevronDown, Menu, ArrowUpRight, LogOut, Settings, ShieldCheck } from "lucide-react";
 import { switchActiveSchool } from "@/lib/school-workspace";
@@ -113,8 +114,8 @@ export function SchoolTopbar({
         >
           <Menu className="h-4 w-4" />
         </button>
-        <div className="hidden h-9 w-9 items-center justify-center rounded-xl bg-[#edf7f0] sm:flex">
-          <img src="/heisen-logo.png" alt="" className="h-8 w-8 object-contain" />
+        <div className="hidden h-9 w-9 items-center justify-center overflow-hidden rounded-xl bg-white sm:flex">
+          <Image src="/heisen-logo.png" alt="" width={36} height={36} className="h-9 w-9 object-contain" />
         </div>
         <div className="min-w-0">
           <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-slate-400">Active workspace</p>

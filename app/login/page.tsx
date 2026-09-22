@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { authClient } from "@/lib/auth/client";
+import Image from "next/image";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -44,9 +45,7 @@ router.refresh();
       <div className="pointer-events-none absolute -bottom-32 -right-24 h-80 w-80 rounded-full bg-[#006b3f]/15 blur-3xl" />
       <div className="w-full max-w-md">
         <div className="mb-8 text-center">
-          <p className="text-sm font-bold tracking-wide text-[#006b3f]">
-            Heisen SMS
-          </p>
+          <Image src="/heisen-wordmark.png" alt="Heisen SchoolOS" width={220} height={50} priority className="mx-auto h-12 w-auto object-contain" />
 
           <h1 className="mt-2 text-3xl font-semibold tracking-tight text-slate-950">
             Sign in
@@ -125,4 +124,3 @@ router.refresh();
     </main>
   );
 }
-

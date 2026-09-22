@@ -537,7 +537,7 @@ export default function ReportCard({
           </p>
 
           <p className="mt-1 font-semibold">
-            Generated from Heisen SMS
+            Generated from Heisen SchoolOS
           </p>
         </footer>
       </div>

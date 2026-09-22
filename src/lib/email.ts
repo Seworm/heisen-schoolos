@@ -14,8 +14,8 @@ export async function sendInvitationEmail(input: {
     body: JSON.stringify({
       from,
       to: [input.to],
-      subject: `Create your ${input.schoolName} Heisen SMS account`,
-      html: `<p>Hello ${input.name},</p><p>You have been invited to join <strong>${input.schoolName}</strong> on Heisen SMS.</p><p><a href="${input.inviteUrl}">Create your login details</a></p><p>This invitation expires in seven days. Never share your password with anyone.</p>`,
+      subject: `Create your ${input.schoolName} Heisen SchoolOS account`,
+      html: `<p>Hello ${input.name},</p><p>You have been invited to join <strong>${input.schoolName}</strong> on Heisen SchoolOS.</p><p><a href="${input.inviteUrl}">Create your login details</a></p><p>This invitation expires in seven days. Never share your password with anyone.</p>`,
     }),
   });
   if (!response.ok) throw new Error("The invitation was created, but the email could not be sent.");

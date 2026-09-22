@@ -15,8 +15,8 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: {
-    default: "Heisen SMS",
-    template: "%s | Heisen SMS",
+    default: "Heisen SchoolOS",
+    template: "%s | Heisen SchoolOS",
   },
   description: "Heisen School Management System",
   icons: {

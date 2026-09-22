@@ -16,7 +16,7 @@ async function seed() {
   // Load the database only after .env.local has been loaded.
   const { db } = await import("@/db");
 
-  console.log("🌱 Starting Heisen SMS seed...");
+  console.log("🌱 Starting Heisen SchoolOS seed...");
 
   // ============================================================
   // 1. SCHOOL
@@ -344,7 +344,7 @@ async function seed() {
   }
 
   console.log("");
-  console.log("✅ Heisen SMS seed completed successfully.");
+  console.log("✅ Heisen SchoolOS seed completed successfully.");
   console.log(`School: ${school.name}`);
   console.log(`School ID: ${school.id}`);
 }
