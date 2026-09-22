@@ -4,7 +4,7 @@ import { and, eq } from 'drizzle-orm';
 import { redirect } from 'next/navigation';
 
 import { db } from '@/db';
-import { classLevels } from '@/db/schema';
+import { classLevels, streams } from '@/db/schema';
 import { requireCurrentSchool } from '@/lib/current-school';
 
 const VALID_CATEGORIES = [
@@ -57,14 +57,28 @@ export async function createClassLevel(formData: FormData) {
     throw new Error('A class with this name already exists.');
   }
 
-  await db.insert(classLevels).values({
-    schoolId: school.id,
-    name,
-    category,
-    sortOrder,
+  await db.transaction(async (tx) => {
+    const [classLevel] = await tx
+      .insert(classLevels)
+      .values({
+        schoolId: school.id,
+        name,
+        category,
+        sortOrder,
+      })
+      .returning({ id: classLevels.id });
+
+    if (!classLevel) {
+      throw new Error('The class could not be created.');
+    }
+
+    await tx.insert(streams).values({
+      classLevelId: classLevel.id,
+      name: 'A',
+      capacity: 40,
+    });
   });
 
   redirect('/academics/classes');
 }
-
 
