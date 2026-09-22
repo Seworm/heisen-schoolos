@@ -1,4 +1,5 @@
 import { Building2, ShieldCheck } from "lucide-react";
+import Link from "next/link";
 import SchoolWorkspaceButton from "../platform/SchoolWorkspaceButton";
 
 type School = {
@@ -55,10 +56,15 @@ export default function SchoolSelection({ schools }: { schools: School[] }) {
             ))}
           </div>
         ) : (
-          <p className="mt-8 rounded-2xl bg-slate-50 px-4 py-5 text-sm text-slate-600">
-            No active schools are available yet. Create a school from the
-            platform administration area first.
-          </p>
+          <div className="mt-8 rounded-2xl bg-slate-50 px-4 py-5 text-sm text-slate-600">
+            <p>No active schools are available yet. Create your first school from the platform administration area.</p>
+            <Link
+              href="/platform/schools/new"
+              className="mt-4 inline-flex rounded-lg bg-[#087443] px-4 py-2.5 text-sm font-bold text-white transition hover:bg-[#065b35]"
+            >
+              Create a school
+            </Link>
+          </div>
         )}
       </section>
     </main>

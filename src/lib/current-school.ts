@@ -32,7 +32,7 @@ export async function getCurrentSchool() {
 
   if (!schoolId) {
     if (isPlatformUser(user)) {
-      redirect("/dashboard");
+      redirect("/platform");
     }
 
     throw new Error("Select a school before opening the school workspace.");
@@ -68,7 +68,7 @@ export async function getCurrentSchool() {
 
   if (!school) {
     if (isPlatformUser(user)) {
-      redirect("/dashboard");
+      redirect("/platform");
     }
 
     throw new Error("The active school could not be verified.");
