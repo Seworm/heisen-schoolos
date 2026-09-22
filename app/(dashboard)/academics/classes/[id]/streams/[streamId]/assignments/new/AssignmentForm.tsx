@@ -138,6 +138,14 @@ export default function AssignmentForm({
         </select>
       </div>
 
+      {!isClassTeacher && (
+        <div>
+          <label htmlFor="lessonsPerWeek" className="block text-sm font-medium text-slate-900">Periods per week</label>
+          <input id="lessonsPerWeek" name="lessonsPerWeek" type="number" min={1} max={15} defaultValue={3} required disabled={pending} className="mt-2 block w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none focus:border-slate-500 focus:ring-2 focus:ring-slate-200" />
+          <p className="mt-2 text-xs text-slate-500">The intelligent scheduler will create this many lessons for this subject and class each week.</p>
+        </div>
+      )}
+
       <div>
         <label
           htmlFor="assignmentType"

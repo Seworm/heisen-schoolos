@@ -1340,6 +1340,10 @@ export const teacherAssignments = pgTable(
       },
     ),
 
+    lessonsPerWeek: integer("lessons_per_week")
+      .notNull()
+      .default(1),
+
     academicYearId: uuid("academic_year_id")
       .notNull()
       .references(() => academicYears.id, {

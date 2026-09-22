@@ -51,6 +51,7 @@ export async function createStreamAssignment(
   const assignmentType = String(
     formData.get("assignmentType") ?? "",
   ).trim();
+  const lessonsPerWeek = Number(formData.get("lessonsPerWeek") ?? 1);
 
   const subjectId = subjectIdValue || null;
 
@@ -129,6 +130,10 @@ export async function createStreamAssignment(
       error:
         "A class teacher assignment cannot have a subject.",
     };
+  }
+
+  if (!Number.isInteger(lessonsPerWeek) || lessonsPerWeek < 1 || lessonsPerWeek > 15) {
+    return { error: "Periods per week must be between 1 and 15." };
   }
 
   /*
@@ -395,6 +400,7 @@ export async function createStreamAssignment(
       academicYearId,
       isClassTeacher:
         assignmentType === "class_teacher",
+      lessonsPerWeek,
     });
   } catch (error) {
     console.error(

@@ -2,10 +2,11 @@
 
 import { and, eq } from "drizzle-orm";
 import { db } from "@/db";
-import { schoolMemberships, staffInvitations, users } from "@/db/schema";
+import { schoolMemberships, schools, staffInvitations, users } from "@/db/schema";
 import { getNeonAuth } from "@/lib/auth/server";
 import { requireRole } from "@/lib/authorization";
 import { z } from "zod";
+import { sendInvitationEmail } from "@/lib/email";
 
 const staffUserSchema = z.object({
   email: z.string().email(),
@@ -36,7 +37,15 @@ export async function createStaffInvitation(input: unknown) {
     schoolId: targetSchoolId, email, firstName: data.firstName, lastName: data.lastName,
     role: data.role, tokenHash, expiresAt: new Date(Date.now() + 604800000), createdBy: actor.authUserId ?? actor.id,
   });
-  return { success: true, inviteUrl: `${process.env.NEXT_PUBLIC_APP_URL?.replace(/\/$/, "") ?? ""}/auth/accept-invitation?token=${token}` };
+  const inviteUrl = `${process.env.NEXT_PUBLIC_APP_URL?.replace(/\/$/, "") ?? ""}/auth/accept-invitation?token=${token}`;
+  const [school] = await db.select({ name: schools.name }).from(schools).where(eq(schools.id, targetSchoolId)).limit(1);
+  const delivery = await sendInvitationEmail({
+    to: email,
+    name: `${data.firstName} ${data.lastName}`,
+    inviteUrl,
+    schoolName: school?.name ?? "your school",
+  });
+  return { success: true, inviteUrl, emailSent: delivery.sent };
 }
 
 export async function acceptStaffInvitation(input: { token: string }) {

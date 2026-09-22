@@ -5,6 +5,7 @@ import { notFound } from "next/navigation";
 import { db } from "@/db";
 import { staff } from "@/db/schema";
 import { requireCurrentSchool } from "@/lib/current-school";
+import StaffStatusForm from "./StaffStatusForm";
 
 type StaffPageProps = {
   params: Promise<{
@@ -97,6 +98,7 @@ export default async function StaffProfilePage({
             >
               ← Back to staff
             </Link>
+            <StaffStatusForm staffId={member.id} />
 
             <div className="mt-6 flex items-center gap-4">
               <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-slate-900 text-lg font-semibold text-white">

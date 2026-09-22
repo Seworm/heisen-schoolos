@@ -19,6 +19,7 @@ import {
 } from "@/db/schema";
 import { requireCurrentSchool } from "@/lib/current-school";
 import { getInvoiceFinancials } from "@/lib/finance/finance-utils";
+import StudentStatusForm from "./StudentStatusForm";
 
 export const dynamic = "force-dynamic";
 
@@ -518,6 +519,7 @@ export default async function StudentDetailPage({
         >
           View cumulative transcript
         </Link>
+        <StudentStatusForm studentId={student.id} />
       </div>
 
       {/* School context */}

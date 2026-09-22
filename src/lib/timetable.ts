@@ -13,6 +13,7 @@ export type TimetableAssignment = {
   streamId: string;
   subjectId: string;
   staffId: string;
+  lessonsPerWeek?: number;
 };
 
 export type TimetableOccupiedSlot = {
@@ -56,9 +57,10 @@ export function buildTimetablePlan(input: {
   classrooms?: Array<{ id: string }>;
   occupied: TimetableOccupiedSlot[];
   lessonsPerAssignment: number;
+  lessonsPerAssignmentByAssignment?: Record<string, number>;
   existingLessonCounts?: Record<string, number>;
 }): TimetablePlan {
-  const lessonsPerAssignment = Math.max(
+  const defaultLessonsPerAssignment = Math.max(
     1,
     Math.min(5, Math.floor(input.lessonsPerAssignment)),
   );
@@ -99,6 +101,7 @@ export function buildTimetablePlan(input: {
       scheduledByAssignment.get(assignment.id) ??
       0;
 
+    const lessonsPerAssignment = Math.max(1, Math.min(15, Math.floor(input.lessonsPerAssignmentByAssignment?.[assignment.id] ?? assignment.lessonsPerWeek ?? defaultLessonsPerAssignment)));
     for (let lessonNumber = alreadyScheduled + 1; lessonNumber <= lessonsPerAssignment; lessonNumber += 1) {
       const candidatePeriods = periods
         .filter(

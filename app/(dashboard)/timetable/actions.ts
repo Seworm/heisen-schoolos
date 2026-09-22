@@ -68,6 +68,7 @@ export async function generateIntelligentTimetable(formData: FormData) {
         streamId: teacherAssignments.streamId,
         subjectId: teacherAssignments.subjectId,
         staffId: teacherAssignments.staffId,
+        lessonsPerWeek: teacherAssignments.lessonsPerWeek,
       })
       .from(teacherAssignments)
       .innerJoin(staff, eq(staff.id, teacherAssignments.staffId))
@@ -114,7 +115,8 @@ export async function generateIntelligentTimetable(formData: FormData) {
       periods,
       classrooms: availableClassrooms,
       occupied,
-      lessonsPerAssignment,
+      lessonsPerAssignment: 1,
+      lessonsPerAssignmentByAssignment: Object.fromEntries(assignments.map((assignment) => [assignment.id, assignment.lessonsPerWeek])),
       existingLessonCounts: occupied.reduce<Record<string, number>>(
         (counts, entry) => {
           const key = `${entry.streamId}:${entry.subjectId}:${entry.staffId}`;
