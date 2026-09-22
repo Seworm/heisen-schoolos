@@ -1,1 +1,0 @@
-ALTER TABLE "guardians" DROP COLUMN "relationship";

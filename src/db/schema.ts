@@ -3321,7 +3321,6 @@ export const schoolMembershipRoleEnum = pgEnum(
     "parent",
     "student",
     "staff",
-    "super_admin",
   ],
 );
 export const platformRoleEnum = pgEnum(

@@ -1,28 +1,46 @@
-import { pgTable, index, foreignKey, uuid, text, varchar, timestamp, unique, numeric, boolean, jsonb, integer, date, uniqueIndex, primaryKey, pgEnum } from "drizzle-orm/pg-core"
+import { pgTable, index, foreignKey, uuid, text, varchar, timestamp, unique, numeric, boolean, jsonb, integer, date, uniqueIndex, check, primaryKey, pgEnum } from "drizzle-orm/pg-core"
 import { sql } from "drizzle-orm"
 
 export const adjustmentStatus = pgEnum("adjustment_status", ['active', 'cancelled'])
 export const adjustmentType = pgEnum("adjustment_type", ['discount', 'waiver', 'surcharge'])
 export const announcementAudience = pgEnum("announcement_audience", ['school', 'class', 'stream', 'staff', 'parents', 'students', 'individual'])
+export const applicantStatus = pgEnum("applicant_status", ['submitted', 'under_review', 'accepted', 'rejected', 'converted'])
 export const assessmentPeriodStatus = pgEnum("assessment_period_status", ['draft', 'open', 'closed', 'published', 'archived'])
 export const assessmentStatus = pgEnum("assessment_status", ['draft', 'open', 'closed', 'published', 'archived'])
 export const assessmentTypeCategory = pgEnum("assessment_type_category", ['continuous_assessment', 'examination'])
 export const attendanceRecordStatus = pgEnum("attendance_record_status", ['present', 'absent', 'late', 'excused'])
 export const attendanceSessionStatus = pgEnum("attendance_session_status", ['open', 'completed', 'cancelled'])
+export const calendarEventType = pgEnum("calendar_event_type", ['holiday', 'academic', 'meeting', 'activity', 'deadline', 'other'])
 export const classCategory = pgEnum("class_category", ['creche', 'nursery', 'kg', 'primary', 'jhs'])
+export const disciplineIncidentStatus = pgEnum("discipline_incident_status", ['reported', 'investigating', 'resolved', 'dismissed'])
+export const documentRecordStatus = pgEnum("document_record_status", ['draft', 'issued', 'revoked'])
 export const enrollmentStatus = pgEnum("enrollment_status", ['active', 'completed', 'withdrawn', 'transferred'])
 export const gender = pgEnum("gender", ['male', 'female'])
+export const guardianAccountStatus = pgEnum("guardian_account_status", ['pending', 'active', 'disabled'])
+export const inventoryTransactionType = pgEnum("inventory_transaction_type", ['receipt', 'issue', 'adjustment'])
 export const invoiceStatus = pgEnum("invoice_status", ['draft', 'issued', 'partially_paid', 'paid', 'overdue', 'cancelled'])
+export const leaveRequestStatus = pgEnum("leave_request_status", ['pending', 'approved', 'rejected', 'cancelled'])
+export const leaveType = pgEnum("leave_type", ['annual', 'sick', 'maternity', 'paternity', 'unpaid', 'other'])
+export const libraryLoanStatus = pgEnum("library_loan_status", ['borrowed', 'returned', 'overdue', 'lost'])
+export const paymentIntentStatus = pgEnum("payment_intent_status", ['pending', 'processing', 'succeeded', 'failed', 'cancelled', 'expired'])
 export const paymentMethod = pgEnum("payment_method", ['cash', 'mobile_money', 'bank_transfer', 'card', 'other'])
+export const paymentProvider = pgEnum("payment_provider", ['manual', 'mock'])
 export const paymentStatus = pgEnum("payment_status", ['posted', 'reversed'])
+export const paymentTransactionStatus = pgEnum("payment_transaction_status", ['pending', 'confirmed', 'failed', 'reversed'])
+export const payrollFrequency = pgEnum("payroll_frequency", ['monthly', 'weekly', 'hourly'])
+export const payrollPeriodStatus = pgEnum("payroll_period_status", ['draft', 'processed', 'paid', 'void'])
 export const placementStatus = pgEnum("placement_status", ['active', 'completed', 'transferred', 'cancelled'])
+export const platformRole = pgEnum("platform_role", ['platform_admin', 'super_admin'])
+export const procurementStatus = pgEnum("procurement_status", ['draft', 'submitted', 'approved', 'ordered', 'received', 'cancelled'])
 export const promotionStatus = pgEnum("promotion_status", ['pending', 'promoted', 'promoted_with_conditions', 'repeated', 'withdrawn', 'transferred'])
 export const reportCardStatus = pgEnum("report_card_status", ['draft', 'teacher_review', 'headteacher_review', 'approved'])
+export const safeguardingCaseStatus = pgEnum("safeguarding_case_status", ['open', 'monitoring', 'closed'])
 export const schoolMembershipRole = pgEnum("school_membership_role", ['platform_admin', 'school_owner', 'school_admin', 'principal', 'headteacher', 'teacher', 'accountant', 'bursar', 'secretary', 'librarian', 'nurse', 'parent', 'student', 'staff', 'super_admin'])
 export const schoolStatus = pgEnum("school_status", ['pending', 'active', 'suspended', 'deactivated'])
 export const schoolType = pgEnum("school_type", ['private_basic', 'public_basic', 'international', 'montessori', 'faith_based', 'other'])
 export const staffStatus = pgEnum("staff_status", ['active', 'inactive'])
 export const studentAccountStatus = pgEnum("student_account_status", ['pending', 'active', 'disabled'])
+export const transportAssignmentStatus = pgEnum("transport_assignment_status", ['active', 'paused', 'ended'])
 export const userStatus = pgEnum("user_status", ['active', 'inactive', 'suspended'])
 
 
@@ -60,15 +78,15 @@ export const feeStructureItems = pgTable("fee_structure_items", {
 	index("fee_structure_items_category_idx").using("btree", table.feeCategoryId.asc().nullsLast().op("uuid_ops")),
 	index("fee_structure_items_structure_idx").using("btree", table.feeStructureId.asc().nullsLast().op("uuid_ops")),
 	foreignKey({
-			columns: [table.feeStructureId],
-			foreignColumns: [feeStructures.id],
-			name: "fee_structure_items_fee_structure_id_fee_structures_id_fk"
-		}).onDelete("cascade"),
-	foreignKey({
 			columns: [table.feeCategoryId],
 			foreignColumns: [feeCategories.id],
 			name: "fee_structure_items_fee_category_id_fee_categories_id_fk"
 		}).onDelete("restrict"),
+	foreignKey({
+			columns: [table.feeStructureId],
+			foreignColumns: [feeStructures.id],
+			name: "fee_structure_items_fee_structure_id_fee_structures_id_fk"
+		}).onDelete("cascade"),
 	unique("fee_structure_items_unique").on(table.feeCategoryId, table.feeStructureId),
 ]);
 
@@ -181,6 +199,16 @@ export const feeAssignments = pgTable("fee_assignments", {
 	index("fee_assignments_school_idx").using("btree", table.schoolId.asc().nullsLast().op("uuid_ops")),
 	index("fee_assignments_student_idx").using("btree", table.studentId.asc().nullsLast().op("uuid_ops")),
 	foreignKey({
+			columns: [table.academicYearId],
+			foreignColumns: [academicYears.id],
+			name: "fee_assignments_academic_year_id_academic_years_id_fk"
+		}).onDelete("restrict"),
+	foreignKey({
+			columns: [table.feeStructureId],
+			foreignColumns: [feeStructures.id],
+			name: "fee_assignments_fee_structure_id_fee_structures_id_fk"
+		}).onDelete("restrict"),
+	foreignKey({
 			columns: [table.schoolId],
 			foreignColumns: [schools.id],
 			name: "fee_assignments_school_id_schools_id_fk"
@@ -189,16 +217,6 @@ export const feeAssignments = pgTable("fee_assignments", {
 			columns: [table.studentId],
 			foreignColumns: [students.id],
 			name: "fee_assignments_student_id_students_id_fk"
-		}).onDelete("restrict"),
-	foreignKey({
-			columns: [table.feeStructureId],
-			foreignColumns: [feeStructures.id],
-			name: "fee_assignments_fee_structure_id_fee_structures_id_fk"
-		}).onDelete("restrict"),
-	foreignKey({
-			columns: [table.academicYearId],
-			foreignColumns: [academicYears.id],
-			name: "fee_assignments_academic_year_id_academic_years_id_fk"
 		}).onDelete("restrict"),
 	foreignKey({
 			columns: [table.termId],
@@ -330,15 +348,15 @@ export const resultPublicationSubjects = pgTable("result_publication_subjects", 
 	index("result_publication_subjects_student_idx").using("btree", table.publicationStudentId.asc().nullsLast().op("uuid_ops")),
 	index("result_publication_subjects_subject_idx").using("btree", table.subjectId.asc().nullsLast().op("uuid_ops")),
 	foreignKey({
-			columns: [table.subjectId],
-			foreignColumns: [subjects.id],
-			name: "result_publication_subjects_subject_id_subjects_id_fk"
-		}).onDelete("restrict"),
-	foreignKey({
 			columns: [table.publicationStudentId],
 			foreignColumns: [resultPublicationStudents.id],
 			name: "result_publication_subjects_publication_student_id_result_publi"
 		}).onDelete("cascade"),
+	foreignKey({
+			columns: [table.subjectId],
+			foreignColumns: [subjects.id],
+			name: "result_publication_subjects_subject_id_subjects_id_fk"
+		}).onDelete("restrict"),
 	unique("result_publication_subjects_unique").on(table.publicationStudentId, table.subjectId),
 ]);
 
@@ -360,19 +378,19 @@ export const resultPublications = pgTable("result_publications", {
 	index("result_publications_term_idx").using("btree", table.termId.asc().nullsLast().op("uuid_ops")),
 	index("result_publications_year_idx").using("btree", table.academicYearId.asc().nullsLast().op("uuid_ops")),
 	foreignKey({
-			columns: [table.schoolId],
-			foreignColumns: [schools.id],
-			name: "result_publications_school_id_schools_id_fk"
-		}).onDelete("cascade"),
-	foreignKey({
 			columns: [table.academicYearId],
 			foreignColumns: [academicYears.id],
 			name: "result_publications_academic_year_id_academic_years_id_fk"
 		}).onDelete("cascade"),
 	foreignKey({
-			columns: [table.termId],
-			foreignColumns: [terms.id],
-			name: "result_publications_term_id_terms_id_fk"
+			columns: [table.gradingSchemeId],
+			foreignColumns: [gradingSchemes.id],
+			name: "result_publications_grading_scheme_id_grading_schemes_id_fk"
+		}).onDelete("set null"),
+	foreignKey({
+			columns: [table.schoolId],
+			foreignColumns: [schools.id],
+			name: "result_publications_school_id_schools_id_fk"
 		}).onDelete("cascade"),
 	foreignKey({
 			columns: [table.streamId],
@@ -380,10 +398,10 @@ export const resultPublications = pgTable("result_publications", {
 			name: "result_publications_stream_id_streams_id_fk"
 		}).onDelete("cascade"),
 	foreignKey({
-			columns: [table.gradingSchemeId],
-			foreignColumns: [gradingSchemes.id],
-			name: "result_publications_grading_scheme_id_grading_schemes_id_fk"
-		}).onDelete("set null"),
+			columns: [table.termId],
+			foreignColumns: [terms.id],
+			name: "result_publications_term_id_terms_id_fk"
+		}).onDelete("cascade"),
 	unique("result_publications_unique_scope").on(table.academicYearId, table.schoolId, table.streamId, table.termId),
 ]);
 
@@ -402,14 +420,14 @@ export const resultPublicationStudents = pgTable("result_publication_students", 
 	index("result_publication_students_publication_idx").using("btree", table.publicationId.asc().nullsLast().op("uuid_ops")),
 	index("result_publication_students_student_idx").using("btree", table.studentId.asc().nullsLast().op("uuid_ops")),
 	foreignKey({
-			columns: [table.studentId],
-			foreignColumns: [students.id],
-			name: "result_publication_students_student_id_students_id_fk"
-		}).onDelete("cascade"),
-	foreignKey({
 			columns: [table.publicationId],
 			foreignColumns: [resultPublications.id],
 			name: "result_publication_students_publication_id_result_publications_"
+		}).onDelete("cascade"),
+	foreignKey({
+			columns: [table.studentId],
+			foreignColumns: [students.id],
+			name: "result_publication_students_student_id_students_id_fk"
 		}).onDelete("cascade"),
 	unique("result_publication_students_unique").on(table.publicationId, table.studentId),
 ]);
@@ -435,11 +453,6 @@ export const reportCards = pgTable("report_cards", {
 	index("report_cards_school_status_idx").using("btree", table.schoolId.asc().nullsLast().op("enum_ops"), table.status.asc().nullsLast().op("enum_ops")),
 	index("report_cards_status_idx").using("btree", table.status.asc().nullsLast().op("enum_ops")),
 	foreignKey({
-			columns: [table.schoolId],
-			foreignColumns: [schools.id],
-			name: "report_cards_school_id_schools_id_fk"
-		}).onDelete("cascade"),
-	foreignKey({
 			columns: [table.publicationId],
 			foreignColumns: [resultPublications.id],
 			name: "report_cards_publication_id_result_publications_id_fk"
@@ -448,6 +461,11 @@ export const reportCards = pgTable("report_cards", {
 			columns: [table.publicationStudentId],
 			foreignColumns: [resultPublicationStudents.id],
 			name: "report_cards_publication_student_id_result_publication_students"
+		}).onDelete("cascade"),
+	foreignKey({
+			columns: [table.schoolId],
+			foreignColumns: [schools.id],
+			name: "report_cards_school_id_schools_id_fk"
 		}).onDelete("cascade"),
 	unique("report_cards_publication_student_unique").on(table.publicationId, table.publicationStudentId),
 ]);
@@ -465,6 +483,16 @@ export const studentScholarships = pgTable("student_scholarships", {
 	index("student_scholarships_school_idx").using("btree", table.schoolId.asc().nullsLast().op("uuid_ops")),
 	index("student_scholarships_student_idx").using("btree", table.studentId.asc().nullsLast().op("uuid_ops")),
 	foreignKey({
+			columns: [table.academicYearId],
+			foreignColumns: [academicYears.id],
+			name: "student_scholarships_academic_year_id_academic_years_id_fk"
+		}).onDelete("restrict"),
+	foreignKey({
+			columns: [table.scholarshipId],
+			foreignColumns: [scholarships.id],
+			name: "student_scholarships_scholarship_id_scholarships_id_fk"
+		}).onDelete("restrict"),
+	foreignKey({
 			columns: [table.schoolId],
 			foreignColumns: [schools.id],
 			name: "student_scholarships_school_id_schools_id_fk"
@@ -475,20 +503,47 @@ export const studentScholarships = pgTable("student_scholarships", {
 			name: "student_scholarships_student_id_students_id_fk"
 		}).onDelete("restrict"),
 	foreignKey({
-			columns: [table.scholarshipId],
-			foreignColumns: [scholarships.id],
-			name: "student_scholarships_scholarship_id_scholarships_id_fk"
-		}).onDelete("restrict"),
-	foreignKey({
-			columns: [table.academicYearId],
-			foreignColumns: [academicYears.id],
-			name: "student_scholarships_academic_year_id_academic_years_id_fk"
-		}).onDelete("restrict"),
-	foreignKey({
 			columns: [table.termId],
 			foreignColumns: [terms.id],
 			name: "student_scholarships_term_id_terms_id_fk"
 		}).onDelete("restrict"),
+]);
+
+export const users = pgTable("users", {
+	id: uuid().defaultRandom().primaryKey().notNull(),
+	email: text().notNull(),
+	passwordHash: text("password_hash"),
+	firstName: text("first_name").notNull(),
+	lastName: text("last_name").notNull(),
+	status: userStatus().default('active').notNull(),
+	createdAt: timestamp("created_at", { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
+	updatedAt: timestamp("updated_at", { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
+	platformRole: platformRole("platform_role"),
+}, (table) => [
+	index("users_status_idx").using("btree", table.status.asc().nullsLast().op("enum_ops")),
+	unique("users_email_unique").on(table.email),
+]);
+
+export const studentUserAccounts = pgTable("student_user_accounts", {
+	id: uuid().defaultRandom().primaryKey().notNull(),
+	studentId: uuid("student_id").notNull(),
+	email: text().notNull(),
+	lastLoginAt: timestamp("last_login_at", { withTimezone: true, mode: 'string' }),
+	status: studentAccountStatus().default('active').notNull(),
+	createdAt: timestamp("created_at", { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
+	updatedAt: timestamp("updated_at", { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
+	mustChangePassword: boolean("must_change_password").default(true).notNull(),
+	passwordExpiresAt: timestamp("password_expires_at", { withTimezone: true, mode: 'string' }),
+}, (table) => [
+	index("student_user_accounts_status_idx").using("btree", table.status.asc().nullsLast().op("enum_ops")),
+	index("student_user_accounts_student_idx").using("btree", table.studentId.asc().nullsLast().op("uuid_ops")),
+	foreignKey({
+			columns: [table.studentId],
+			foreignColumns: [students.id],
+			name: "student_user_accounts_student_id_students_id_fk"
+		}).onDelete("cascade"),
+	unique("student_user_accounts_student_id_unique").on(table.studentId),
+	unique("student_user_accounts_email_unique").on(table.email),
 ]);
 
 export const schoolMemberships = pgTable("school_memberships", {
@@ -505,51 +560,16 @@ export const schoolMemberships = pgTable("school_memberships", {
 	index("school_memberships_school_idx").using("btree", table.schoolId.asc().nullsLast().op("uuid_ops")),
 	index("school_memberships_user_idx").using("btree", table.userId.asc().nullsLast().op("uuid_ops")),
 	foreignKey({
-			columns: [table.userId],
-			foreignColumns: [users.id],
-			name: "school_memberships_user_id_users_id_fk"
-		}).onDelete("cascade"),
-	foreignKey({
 			columns: [table.schoolId],
 			foreignColumns: [schools.id],
 			name: "school_memberships_school_id_schools_id_fk"
 		}).onDelete("cascade"),
-	unique("school_memberships_unique").on(table.schoolId, table.userId),
-]);
-
-export const users = pgTable("users", {
-	id: uuid().defaultRandom().primaryKey().notNull(),
-	email: text().notNull(),
-	passwordHash: text("password_hash"),
-	firstName: text("first_name").notNull(),
-	lastName: text("last_name").notNull(),
-	status: userStatus().default('active').notNull(),
-	createdAt: timestamp("created_at", { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
-	updatedAt: timestamp("updated_at", { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
-}, (table) => [
-	index("users_status_idx").using("btree", table.status.asc().nullsLast().op("enum_ops")),
-	unique("users_email_unique").on(table.email),
-]);
-
-export const studentUserAccounts = pgTable("student_user_accounts", {
-	id: uuid().defaultRandom().primaryKey().notNull(),
-	studentId: uuid("student_id").notNull(),
-	email: text().notNull(),
-	lastLoginAt: timestamp("last_login_at", { withTimezone: true, mode: 'string' }),
-	status: studentAccountStatus().default('active').notNull(),
-	createdAt: timestamp("created_at", { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
-	updatedAt: timestamp("updated_at", { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
-	mustChangePassword: boolean("must_change_password").default(true).notNull(),
-}, (table) => [
-	index("student_user_accounts_status_idx").using("btree", table.status.asc().nullsLast().op("enum_ops")),
-	index("student_user_accounts_student_idx").using("btree", table.studentId.asc().nullsLast().op("uuid_ops")),
 	foreignKey({
-			columns: [table.studentId],
-			foreignColumns: [students.id],
-			name: "student_user_accounts_student_id_students_id_fk"
+			columns: [table.userId],
+			foreignColumns: [users.id],
+			name: "school_memberships_user_id_users_id_fk"
 		}).onDelete("cascade"),
-	unique("student_user_accounts_student_id_unique").on(table.studentId),
-	unique("student_user_accounts_email_unique").on(table.email),
+	unique("school_memberships_unique").on(table.schoolId, table.userId),
 ]);
 
 export const studentStatusHistory = pgTable("student_status_history", {
@@ -593,19 +613,29 @@ export const timetableEntries = pgTable("timetable_entries", {
 	index("timetable_school_idx").using("btree", table.schoolId.asc().nullsLast().op("uuid_ops")),
 	index("timetable_stream_idx").using("btree", table.streamId.asc().nullsLast().op("uuid_ops")),
 	foreignKey({
-			columns: [table.schoolId],
-			foreignColumns: [schools.id],
-			name: "timetable_entries_school_id_schools_id_fk"
-		}).onDelete("cascade"),
-	foreignKey({
 			columns: [table.academicYearId],
 			foreignColumns: [academicYears.id],
 			name: "timetable_entries_academic_year_id_academic_years_id_fk"
 		}).onDelete("restrict"),
 	foreignKey({
-			columns: [table.termId],
-			foreignColumns: [terms.id],
-			name: "timetable_entries_term_id_terms_id_fk"
+			columns: [table.classroomId],
+			foreignColumns: [classrooms.id],
+			name: "timetable_entries_classroom_id_classrooms_id_fk"
+		}).onDelete("set null"),
+	foreignKey({
+			columns: [table.periodId],
+			foreignColumns: [timetablePeriods.id],
+			name: "timetable_entries_period_id_timetable_periods_id_fk"
+		}).onDelete("cascade"),
+	foreignKey({
+			columns: [table.schoolId],
+			foreignColumns: [schools.id],
+			name: "timetable_entries_school_id_schools_id_fk"
+		}).onDelete("cascade"),
+	foreignKey({
+			columns: [table.staffId],
+			foreignColumns: [staff.id],
+			name: "timetable_entries_staff_id_staff_id_fk"
 		}).onDelete("restrict"),
 	foreignKey({
 			columns: [table.streamId],
@@ -618,20 +648,10 @@ export const timetableEntries = pgTable("timetable_entries", {
 			name: "timetable_entries_subject_id_subjects_id_fk"
 		}).onDelete("restrict"),
 	foreignKey({
-			columns: [table.staffId],
-			foreignColumns: [staff.id],
-			name: "timetable_entries_staff_id_staff_id_fk"
+			columns: [table.termId],
+			foreignColumns: [terms.id],
+			name: "timetable_entries_term_id_terms_id_fk"
 		}).onDelete("restrict"),
-	foreignKey({
-			columns: [table.periodId],
-			foreignColumns: [timetablePeriods.id],
-			name: "timetable_entries_period_id_timetable_periods_id_fk"
-		}).onDelete("cascade"),
-	foreignKey({
-			columns: [table.classroomId],
-			foreignColumns: [classrooms.id],
-			name: "timetable_entries_classroom_id_classrooms_id_fk"
-		}).onDelete("set null"),
 	unique("timetable_room_period_unique").on(table.classroomId, table.periodId),
 	unique("timetable_class_period_unique").on(table.periodId, table.streamId),
 	unique("timetable_teacher_period_unique").on(table.periodId, table.staffId),
@@ -672,24 +692,24 @@ export const feeStructures = pgTable("fee_structures", {
 	index("fee_structures_term_idx").using("btree", table.termId.asc().nullsLast().op("uuid_ops")),
 	index("fee_structures_year_idx").using("btree", table.academicYearId.asc().nullsLast().op("uuid_ops")),
 	foreignKey({
-			columns: [table.schoolId],
-			foreignColumns: [schools.id],
-			name: "fee_structures_school_id_schools_id_fk"
-		}).onDelete("cascade"),
-	foreignKey({
 			columns: [table.academicYearId],
 			foreignColumns: [academicYears.id],
 			name: "fee_structures_academic_year_id_academic_years_id_fk"
 		}).onDelete("cascade"),
 	foreignKey({
-			columns: [table.termId],
-			foreignColumns: [terms.id],
-			name: "fee_structures_term_id_terms_id_fk"
-		}).onDelete("cascade"),
-	foreignKey({
 			columns: [table.classLevelId],
 			foreignColumns: [classLevels.id],
 			name: "fee_structures_class_level_id_class_levels_id_fk"
+		}).onDelete("cascade"),
+	foreignKey({
+			columns: [table.schoolId],
+			foreignColumns: [schools.id],
+			name: "fee_structures_school_id_schools_id_fk"
+		}).onDelete("cascade"),
+	foreignKey({
+			columns: [table.termId],
+			foreignColumns: [terms.id],
+			name: "fee_structures_term_id_terms_id_fk"
 		}).onDelete("cascade"),
 	unique("fee_structures_scope_name_unique").on(table.academicYearId, table.classLevelId, table.name, table.schoolId, table.termId),
 ]);
@@ -717,6 +737,8 @@ export const students = pgTable("students", {
 }, (table) => [
 	index("students_last_name_idx").using("btree", table.lastName.asc().nullsLast().op("text_ops")),
 	index("students_school_idx").using("btree", table.schoolId.asc().nullsLast().op("uuid_ops")),
+	index("students_school_name_idx").using("btree", table.schoolId.asc().nullsLast().op("uuid_ops"), table.lastName.asc().nullsLast().op("text_ops"), table.firstName.asc().nullsLast().op("uuid_ops")),
+	index("students_status_idx").using("btree", table.status.asc().nullsLast().op("text_ops")),
 	foreignKey({
 			columns: [table.schoolId],
 			foreignColumns: [schools.id],
@@ -821,14 +843,14 @@ export const paymentAllocations = pgTable("payment_allocations", {
 	index("payment_allocations_invoice_idx").using("btree", table.invoiceId.asc().nullsLast().op("uuid_ops")),
 	index("payment_allocations_payment_idx").using("btree", table.paymentId.asc().nullsLast().op("uuid_ops")),
 	foreignKey({
-			columns: [table.paymentId],
-			foreignColumns: [payments.id],
-			name: "payment_allocations_payment_id_payments_id_fk"
-		}).onDelete("restrict"),
-	foreignKey({
 			columns: [table.invoiceId],
 			foreignColumns: [studentInvoices.id],
 			name: "payment_allocations_invoice_id_student_invoices_id_fk"
+		}).onDelete("restrict"),
+	foreignKey({
+			columns: [table.paymentId],
+			foreignColumns: [payments.id],
+			name: "payment_allocations_payment_id_payments_id_fk"
 		}).onDelete("restrict"),
 	unique("payment_allocations_unique").on(table.invoiceId, table.paymentId),
 ]);
@@ -848,11 +870,6 @@ export const studentEnrollments = pgTable("student_enrollments", {
 	index("enrollments_student_idx").using("btree", table.studentId.asc().nullsLast().op("uuid_ops")),
 	index("enrollments_year_idx").using("btree", table.academicYearId.asc().nullsLast().op("uuid_ops")),
 	foreignKey({
-			columns: [table.studentId],
-			foreignColumns: [students.id],
-			name: "student_enrollments_student_id_students_id_fk"
-		}).onDelete("cascade"),
-	foreignKey({
 			columns: [table.academicYearId],
 			foreignColumns: [academicYears.id],
 			name: "student_enrollments_academic_year_id_academic_years_id_fk"
@@ -862,6 +879,11 @@ export const studentEnrollments = pgTable("student_enrollments", {
 			foreignColumns: [streams.id],
 			name: "student_enrollments_stream_id_streams_id_fk"
 		}).onDelete("restrict"),
+	foreignKey({
+			columns: [table.studentId],
+			foreignColumns: [students.id],
+			name: "student_enrollments_student_id_students_id_fk"
+		}).onDelete("cascade"),
 	unique("student_year_unique").on(table.academicYearId, table.studentId),
 ]);
 
@@ -899,6 +921,11 @@ export const teacherAssignments = pgTable("teacher_assignments", {
 	uniqueIndex("teacher_assignments_unique_subject_idx").using("btree", table.staffId.asc().nullsLast().op("uuid_ops"), table.streamId.asc().nullsLast().op("uuid_ops"), table.subjectId.asc().nullsLast().op("uuid_ops"), table.academicYearId.asc().nullsLast().op("uuid_ops")).where(sql`(subject_id IS NOT NULL)`),
 	index("teacher_assignments_year_idx").using("btree", table.academicYearId.asc().nullsLast().op("uuid_ops")),
 	foreignKey({
+			columns: [table.academicYearId],
+			foreignColumns: [academicYears.id],
+			name: "teacher_assignments_academic_year_id_academic_years_id_fk"
+		}).onDelete("cascade"),
+	foreignKey({
 			columns: [table.staffId],
 			foreignColumns: [staff.id],
 			name: "teacher_assignments_staff_id_staff_id_fk"
@@ -913,11 +940,6 @@ export const teacherAssignments = pgTable("teacher_assignments", {
 			foreignColumns: [subjects.id],
 			name: "teacher_assignments_subject_id_subjects_id_fk"
 		}).onDelete("set null"),
-	foreignKey({
-			columns: [table.academicYearId],
-			foreignColumns: [academicYears.id],
-			name: "teacher_assignments_academic_year_id_academic_years_id_fk"
-		}).onDelete("cascade"),
 ]);
 
 export const terms = pgTable("terms", {
@@ -1004,24 +1026,24 @@ export const attendanceSessions = pgTable("attendance_sessions", {
 	index("attendance_sessions_term_idx").using("btree", table.termId.asc().nullsLast().op("uuid_ops")),
 	index("attendance_sessions_year_idx").using("btree", table.academicYearId.asc().nullsLast().op("uuid_ops")),
 	foreignKey({
-			columns: [table.schoolId],
-			foreignColumns: [schools.id],
-			name: "attendance_sessions_school_id_schools_id_fk"
-		}).onDelete("cascade"),
-	foreignKey({
 			columns: [table.academicYearId],
 			foreignColumns: [academicYears.id],
 			name: "attendance_sessions_academic_year_id_academic_years_id_fk"
 		}).onDelete("cascade"),
 	foreignKey({
-			columns: [table.termId],
-			foreignColumns: [terms.id],
-			name: "attendance_sessions_term_id_terms_id_fk"
+			columns: [table.schoolId],
+			foreignColumns: [schools.id],
+			name: "attendance_sessions_school_id_schools_id_fk"
 		}).onDelete("cascade"),
 	foreignKey({
 			columns: [table.streamId],
 			foreignColumns: [streams.id],
 			name: "attendance_sessions_stream_id_streams_id_fk"
+		}).onDelete("cascade"),
+	foreignKey({
+			columns: [table.termId],
+			foreignColumns: [terms.id],
+			name: "attendance_sessions_term_id_terms_id_fk"
 		}).onDelete("cascade"),
 	unique("attendance_sessions_unique_stream_date").on(table.attendanceDate, table.streamId),
 ]);
@@ -1039,14 +1061,14 @@ export const attendanceRecords = pgTable("attendance_records", {
 	index("attendance_records_status_idx").using("btree", table.status.asc().nullsLast().op("enum_ops")),
 	index("attendance_records_student_idx").using("btree", table.studentId.asc().nullsLast().op("uuid_ops")),
 	foreignKey({
-			columns: [table.studentId],
-			foreignColumns: [students.id],
-			name: "attendance_records_student_id_students_id_fk"
-		}).onDelete("cascade"),
-	foreignKey({
 			columns: [table.attendanceSessionId],
 			foreignColumns: [attendanceSessions.id],
 			name: "attendance_records_attendance_session_id_attendance_sessions_id"
+		}).onDelete("cascade"),
+	foreignKey({
+			columns: [table.studentId],
+			foreignColumns: [students.id],
+			name: "attendance_records_student_id_students_id_fk"
 		}).onDelete("cascade"),
 	unique("attendance_records_unique_session_student").on(table.attendanceSessionId, table.studentId),
 ]);
@@ -1094,14 +1116,14 @@ export const assessmentPeriods = pgTable("assessment_periods", {
 	index("assessment_periods_term_idx").using("btree", table.termId.asc().nullsLast().op("uuid_ops")),
 	index("assessment_periods_year_idx").using("btree", table.academicYearId.asc().nullsLast().op("uuid_ops")),
 	foreignKey({
-			columns: [table.schoolId],
-			foreignColumns: [schools.id],
-			name: "assessment_periods_school_id_schools_id_fk"
-		}).onDelete("cascade"),
-	foreignKey({
 			columns: [table.academicYearId],
 			foreignColumns: [academicYears.id],
 			name: "assessment_periods_academic_year_id_academic_years_id_fk"
+		}).onDelete("cascade"),
+	foreignKey({
+			columns: [table.schoolId],
+			foreignColumns: [schools.id],
+			name: "assessment_periods_school_id_schools_id_fk"
 		}).onDelete("cascade"),
 	foreignKey({
 			columns: [table.termId],
@@ -1137,24 +1159,24 @@ export const assessments = pgTable("assessments", {
 	index("assessments_type_idx").using("btree", table.assessmentTypeId.asc().nullsLast().op("uuid_ops")),
 	index("assessments_year_idx").using("btree", table.academicYearId.asc().nullsLast().op("uuid_ops")),
 	foreignKey({
-			columns: [table.schoolId],
-			foreignColumns: [schools.id],
-			name: "assessments_school_id_schools_id_fk"
-		}).onDelete("cascade"),
-	foreignKey({
 			columns: [table.academicYearId],
 			foreignColumns: [academicYears.id],
 			name: "assessments_academic_year_id_academic_years_id_fk"
 		}).onDelete("cascade"),
 	foreignKey({
-			columns: [table.termId],
-			foreignColumns: [terms.id],
-			name: "assessments_term_id_terms_id_fk"
-		}).onDelete("cascade"),
-	foreignKey({
 			columns: [table.assessmentPeriodId],
 			foreignColumns: [assessmentPeriods.id],
 			name: "assessments_assessment_period_id_assessment_periods_id_fk"
+		}).onDelete("cascade"),
+	foreignKey({
+			columns: [table.assessmentTypeId],
+			foreignColumns: [assessmentTypes.id],
+			name: "assessments_assessment_type_id_assessment_types_id_fk"
+		}).onDelete("restrict"),
+	foreignKey({
+			columns: [table.schoolId],
+			foreignColumns: [schools.id],
+			name: "assessments_school_id_schools_id_fk"
 		}).onDelete("cascade"),
 	foreignKey({
 			columns: [table.streamId],
@@ -1167,10 +1189,10 @@ export const assessments = pgTable("assessments", {
 			name: "assessments_subject_id_subjects_id_fk"
 		}).onDelete("restrict"),
 	foreignKey({
-			columns: [table.assessmentTypeId],
-			foreignColumns: [assessmentTypes.id],
-			name: "assessments_assessment_type_id_assessment_types_id_fk"
-		}).onDelete("restrict"),
+			columns: [table.termId],
+			foreignColumns: [terms.id],
+			name: "assessments_term_id_terms_id_fk"
+		}).onDelete("cascade"),
 ]);
 
 export const promotionDecisions = pgTable("promotion_decisions", {
@@ -1188,6 +1210,11 @@ export const promotionDecisions = pgTable("promotion_decisions", {
 	index("promotion_decisions_school_idx").using("btree", table.schoolId.asc().nullsLast().op("uuid_ops")),
 	index("promotion_decisions_student_idx").using("btree", table.studentId.asc().nullsLast().op("uuid_ops")),
 	foreignKey({
+			columns: [table.fromEnrollmentId],
+			foreignColumns: [studentEnrollments.id],
+			name: "promotion_decisions_from_enrollment_id_student_enrollments_id_f"
+		}).onDelete("restrict"),
+	foreignKey({
 			columns: [table.schoolId],
 			foreignColumns: [schools.id],
 			name: "promotion_decisions_school_id_schools_id_fk"
@@ -1201,11 +1228,6 @@ export const promotionDecisions = pgTable("promotion_decisions", {
 			columns: [table.toEnrollmentId],
 			foreignColumns: [studentEnrollments.id],
 			name: "promotion_decisions_to_enrollment_id_student_enrollments_id_fk"
-		}).onDelete("restrict"),
-	foreignKey({
-			columns: [table.fromEnrollmentId],
-			foreignColumns: [studentEnrollments.id],
-			name: "promotion_decisions_from_enrollment_id_student_enrollments_id_f"
 		}).onDelete("restrict"),
 ]);
 
@@ -1324,15 +1346,15 @@ export const gradingSchemeItems = pgTable("grading_scheme_items", {
 	index("grading_scheme_items_scheme_idx").using("btree", table.gradingSchemeId.asc().nullsLast().op("uuid_ops")),
 	index("grading_scheme_items_type_idx").using("btree", table.assessmentTypeId.asc().nullsLast().op("uuid_ops")),
 	foreignKey({
-			columns: [table.gradingSchemeId],
-			foreignColumns: [gradingSchemes.id],
-			name: "grading_scheme_items_grading_scheme_id_grading_schemes_id_fk"
-		}).onDelete("cascade"),
-	foreignKey({
 			columns: [table.assessmentTypeId],
 			foreignColumns: [assessmentTypes.id],
 			name: "grading_scheme_items_assessment_type_id_assessment_types_id_fk"
 		}).onDelete("restrict"),
+	foreignKey({
+			columns: [table.gradingSchemeId],
+			foreignColumns: [gradingSchemes.id],
+			name: "grading_scheme_items_grading_scheme_id_grading_schemes_id_fk"
+		}).onDelete("cascade"),
 	unique("grading_scheme_items_unique").on(table.assessmentTypeId, table.gradingSchemeId),
 ]);
 
@@ -1347,15 +1369,15 @@ export const studentInvoiceItems = pgTable("student_invoice_items", {
 	index("student_invoice_items_category_idx").using("btree", table.feeCategoryId.asc().nullsLast().op("uuid_ops")),
 	index("student_invoice_items_invoice_idx").using("btree", table.invoiceId.asc().nullsLast().op("uuid_ops")),
 	foreignKey({
-			columns: [table.invoiceId],
-			foreignColumns: [studentInvoices.id],
-			name: "student_invoice_items_invoice_id_student_invoices_id_fk"
-		}).onDelete("cascade"),
-	foreignKey({
 			columns: [table.feeCategoryId],
 			foreignColumns: [feeCategories.id],
 			name: "student_invoice_items_fee_category_id_fee_categories_id_fk"
 		}).onDelete("restrict"),
+	foreignKey({
+			columns: [table.invoiceId],
+			foreignColumns: [studentInvoices.id],
+			name: "student_invoice_items_invoice_id_student_invoices_id_fk"
+		}).onDelete("cascade"),
 ]);
 
 export const studentDocuments = pgTable("student_documents", {
@@ -1403,6 +1425,11 @@ export const studentInvoices = pgTable("student_invoices", {
 	index("student_invoices_term_idx").using("btree", table.termId.asc().nullsLast().op("uuid_ops")),
 	index("student_invoices_year_idx").using("btree", table.academicYearId.asc().nullsLast().op("uuid_ops")),
 	foreignKey({
+			columns: [table.academicYearId],
+			foreignColumns: [academicYears.id],
+			name: "student_invoices_academic_year_id_academic_years_id_fk"
+		}).onDelete("restrict"),
+	foreignKey({
 			columns: [table.schoolId],
 			foreignColumns: [schools.id],
 			name: "student_invoices_school_id_schools_id_fk"
@@ -1411,11 +1438,6 @@ export const studentInvoices = pgTable("student_invoices", {
 			columns: [table.studentId],
 			foreignColumns: [students.id],
 			name: "student_invoices_student_id_students_id_fk"
-		}).onDelete("restrict"),
-	foreignKey({
-			columns: [table.academicYearId],
-			foreignColumns: [academicYears.id],
-			name: "student_invoices_academic_year_id_academic_years_id_fk"
 		}).onDelete("restrict"),
 	foreignKey({
 			columns: [table.termId],
@@ -1493,6 +1515,617 @@ export const notifications = pgTable("notifications", {
 		}).onDelete("cascade"),
 ]);
 
+export const payrollPeriods = pgTable("payroll_periods", {
+	id: uuid().defaultRandom().primaryKey().notNull(),
+	schoolId: uuid("school_id").notNull(),
+	name: varchar({ length: 100 }).notNull(),
+	periodStart: date("period_start").notNull(),
+	periodEnd: date("period_end").notNull(),
+	payDate: date("pay_date").notNull(),
+	status: payrollPeriodStatus().default('draft').notNull(),
+	createdAt: timestamp("created_at", { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
+	updatedAt: timestamp("updated_at", { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
+}, (table) => [
+	index("payroll_period_school_idx").using("btree", table.schoolId.asc().nullsLast().op("uuid_ops")),
+	index("payroll_period_status_idx").using("btree", table.status.asc().nullsLast().op("enum_ops")),
+	foreignKey({
+			columns: [table.schoolId],
+			foreignColumns: [schools.id],
+			name: "payroll_periods_school_id_fkey"
+		}).onDelete("cascade"),
+	unique("payroll_period_school_name_unique").on(table.name, table.schoolId),
+	check("payroll_period_dates_valid", sql`period_end >= period_start`),
+]);
+
+export const payrollProfiles = pgTable("payroll_profiles", {
+	id: uuid().defaultRandom().primaryKey().notNull(),
+	schoolId: uuid("school_id").notNull(),
+	staffId: uuid("staff_id").notNull(),
+	frequency: payrollFrequency().default('monthly').notNull(),
+	baseSalary: numeric("base_salary", { precision: 12, scale:  2 }).default('0').notNull(),
+	allowances: numeric({ precision: 12, scale:  2 }).default('0').notNull(),
+	taxDeduction: numeric("tax_deduction", { precision: 12, scale:  2 }).default('0').notNull(),
+	pensionDeduction: numeric("pension_deduction", { precision: 12, scale:  2 }).default('0').notNull(),
+	otherDeduction: numeric("other_deduction", { precision: 12, scale:  2 }).default('0').notNull(),
+	bankName: varchar("bank_name", { length: 120 }),
+	bankAccountNumber: varchar("bank_account_number", { length: 80 }),
+	createdAt: timestamp("created_at", { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
+	updatedAt: timestamp("updated_at", { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
+}, (table) => [
+	index("payroll_profile_school_idx").using("btree", table.schoolId.asc().nullsLast().op("uuid_ops")),
+	index("payroll_profile_staff_idx").using("btree", table.staffId.asc().nullsLast().op("uuid_ops")),
+	foreignKey({
+			columns: [table.schoolId],
+			foreignColumns: [schools.id],
+			name: "payroll_profiles_school_id_fkey"
+		}).onDelete("cascade"),
+	foreignKey({
+			columns: [table.staffId],
+			foreignColumns: [staff.id],
+			name: "payroll_profiles_staff_id_fkey"
+		}).onDelete("cascade"),
+	unique("payroll_profile_staff_unique").on(table.schoolId, table.staffId),
+]);
+
+export const payrollRuns = pgTable("payroll_runs", {
+	id: uuid().defaultRandom().primaryKey().notNull(),
+	schoolId: uuid("school_id").notNull(),
+	periodId: uuid("period_id").notNull(),
+	grossTotal: numeric("gross_total", { precision: 14, scale:  2 }).default('0').notNull(),
+	deductionsTotal: numeric("deductions_total", { precision: 14, scale:  2 }).default('0').notNull(),
+	netTotal: numeric("net_total", { precision: 14, scale:  2 }).default('0').notNull(),
+	processedBy: text("processed_by"),
+	processedAt: timestamp("processed_at", { withTimezone: true, mode: 'string' }),
+	createdAt: timestamp("created_at", { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
+}, (table) => [
+	index("payroll_run_school_idx").using("btree", table.schoolId.asc().nullsLast().op("uuid_ops")),
+	foreignKey({
+			columns: [table.periodId],
+			foreignColumns: [payrollPeriods.id],
+			name: "payroll_runs_period_id_fkey"
+		}).onDelete("cascade"),
+	foreignKey({
+			columns: [table.schoolId],
+			foreignColumns: [schools.id],
+			name: "payroll_runs_school_id_fkey"
+		}).onDelete("cascade"),
+	unique("payroll_run_period_unique").on(table.periodId),
+]);
+
+export const payrollItems = pgTable("payroll_items", {
+	id: uuid().defaultRandom().primaryKey().notNull(),
+	runId: uuid("run_id").notNull(),
+	schoolId: uuid("school_id").notNull(),
+	staffId: uuid("staff_id").notNull(),
+	baseSalary: numeric("base_salary", { precision: 12, scale:  2 }).notNull(),
+	allowances: numeric({ precision: 12, scale:  2 }).notNull(),
+	grossPay: numeric("gross_pay", { precision: 12, scale:  2 }).notNull(),
+	taxDeduction: numeric("tax_deduction", { precision: 12, scale:  2 }).notNull(),
+	pensionDeduction: numeric("pension_deduction", { precision: 12, scale:  2 }).notNull(),
+	otherDeduction: numeric("other_deduction", { precision: 12, scale:  2 }).notNull(),
+	totalDeductions: numeric("total_deductions", { precision: 12, scale:  2 }).notNull(),
+	netPay: numeric("net_pay", { precision: 12, scale:  2 }).notNull(),
+	createdAt: timestamp("created_at", { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
+}, (table) => [
+	index("payroll_item_run_idx").using("btree", table.runId.asc().nullsLast().op("uuid_ops")),
+	index("payroll_item_school_idx").using("btree", table.schoolId.asc().nullsLast().op("uuid_ops")),
+	foreignKey({
+			columns: [table.runId],
+			foreignColumns: [payrollRuns.id],
+			name: "payroll_items_run_id_fkey"
+		}).onDelete("cascade"),
+	foreignKey({
+			columns: [table.schoolId],
+			foreignColumns: [schools.id],
+			name: "payroll_items_school_id_fkey"
+		}).onDelete("cascade"),
+	foreignKey({
+			columns: [table.staffId],
+			foreignColumns: [staff.id],
+			name: "payroll_items_staff_id_fkey"
+		}).onDelete("restrict"),
+	unique("payroll_item_run_staff_unique").on(table.runId, table.staffId),
+]);
+
+export const paymentIntents = pgTable("payment_intents", {
+	id: uuid().defaultRandom().primaryKey().notNull(),
+	schoolId: uuid("school_id").notNull(),
+	studentId: uuid("student_id").notNull(),
+	amount: numeric({ precision: 12, scale:  2 }).notNull(),
+	currency: varchar({ length: 3 }).default('GHS').notNull(),
+	provider: paymentProvider().default('manual').notNull(),
+	status: paymentIntentStatus().default('pending').notNull(),
+	clientReference: varchar("client_reference", { length: 100 }).notNull(),
+	providerReference: varchar("provider_reference", { length: 150 }),
+	metadata: jsonb().default({}).notNull(),
+	expiresAt: timestamp("expires_at", { withTimezone: true, mode: 'string' }),
+	createdAt: timestamp("created_at", { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
+	updatedAt: timestamp("updated_at", { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
+}, (table) => [
+	index("payment_intents_school_idx").using("btree", table.schoolId.asc().nullsLast().op("uuid_ops")),
+	index("payment_intents_status_idx").using("btree", table.status.asc().nullsLast().op("enum_ops")),
+	index("payment_intents_student_idx").using("btree", table.studentId.asc().nullsLast().op("uuid_ops")),
+	foreignKey({
+			columns: [table.schoolId],
+			foreignColumns: [schools.id],
+			name: "payment_intents_school_id_fkey"
+		}).onDelete("cascade"),
+	foreignKey({
+			columns: [table.studentId],
+			foreignColumns: [students.id],
+			name: "payment_intents_student_id_fkey"
+		}).onDelete("restrict"),
+	unique("payment_intents_school_client_reference_unique").on(table.clientReference, table.schoolId),
+]);
+
+export const paymentTransactions = pgTable("payment_transactions", {
+	id: uuid().defaultRandom().primaryKey().notNull(),
+	schoolId: uuid("school_id").notNull(),
+	intentId: uuid("intent_id").notNull(),
+	paymentId: uuid("payment_id"),
+	provider: paymentProvider().notNull(),
+	providerTransactionId: varchar("provider_transaction_id", { length: 150 }).notNull(),
+	amount: numeric({ precision: 12, scale:  2 }).notNull(),
+	currency: varchar({ length: 3 }).default('GHS').notNull(),
+	status: paymentTransactionStatus().default('pending').notNull(),
+	rawResponse: jsonb("raw_response").default({}).notNull(),
+	failureReason: text("failure_reason"),
+	verifiedAt: timestamp("verified_at", { withTimezone: true, mode: 'string' }),
+	createdAt: timestamp("created_at", { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
+	updatedAt: timestamp("updated_at", { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
+}, (table) => [
+	index("payment_transactions_intent_idx").using("btree", table.intentId.asc().nullsLast().op("uuid_ops")),
+	index("payment_transactions_school_idx").using("btree", table.schoolId.asc().nullsLast().op("uuid_ops")),
+	index("payment_transactions_status_idx").using("btree", table.status.asc().nullsLast().op("enum_ops")),
+	foreignKey({
+			columns: [table.intentId],
+			foreignColumns: [paymentIntents.id],
+			name: "payment_transactions_intent_id_fkey"
+		}).onDelete("restrict"),
+	foreignKey({
+			columns: [table.paymentId],
+			foreignColumns: [payments.id],
+			name: "payment_transactions_payment_id_fkey"
+		}).onDelete("set null"),
+	foreignKey({
+			columns: [table.schoolId],
+			foreignColumns: [schools.id],
+			name: "payment_transactions_school_id_fkey"
+		}).onDelete("cascade"),
+	unique("payment_transactions_provider_reference_unique").on(table.provider, table.providerTransactionId),
+]);
+
+export const applicants = pgTable("applicants", {
+	id: uuid().defaultRandom().primaryKey().notNull(),
+	schoolId: uuid("school_id").notNull(),
+	applicationNumber: varchar("application_number", { length: 50 }).notNull(),
+	firstName: varchar("first_name", { length: 100 }).notNull(),
+	middleName: varchar("middle_name", { length: 100 }),
+	lastName: varchar("last_name", { length: 100 }).notNull(),
+	gender: gender(),
+	dateOfBirth: date("date_of_birth"),
+	guardianName: varchar("guardian_name", { length: 200 }).notNull(),
+	guardianPhone: varchar("guardian_phone", { length: 30 }).notNull(),
+	guardianEmail: varchar("guardian_email", { length: 255 }),
+	requestedGrade: varchar("requested_grade", { length: 100 }),
+	notes: text(),
+	status: applicantStatus().default('submitted').notNull(),
+	decisionNotes: text("decision_notes"),
+	convertedStudentId: uuid("converted_student_id"),
+	submittedAt: timestamp("submitted_at", { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
+	reviewedAt: timestamp("reviewed_at", { withTimezone: true, mode: 'string' }),
+	decidedAt: timestamp("decided_at", { withTimezone: true, mode: 'string' }),
+	createdAt: timestamp("created_at", { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
+	updatedAt: timestamp("updated_at", { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
+}, (table) => [
+	index("applicants_school_idx").using("btree", table.schoolId.asc().nullsLast().op("uuid_ops")),
+	index("applicants_status_idx").using("btree", table.status.asc().nullsLast().op("enum_ops")),
+	foreignKey({
+			columns: [table.convertedStudentId],
+			foreignColumns: [students.id],
+			name: "applicants_converted_student_id_fkey"
+		}).onDelete("set null"),
+	foreignKey({
+			columns: [table.schoolId],
+			foreignColumns: [schools.id],
+			name: "applicants_school_id_fkey"
+		}).onDelete("cascade"),
+	unique("applicants_school_number_unique").on(table.applicationNumber, table.schoolId),
+]);
+
+export const schoolCalendarEvents = pgTable("school_calendar_events", {
+	id: uuid().defaultRandom().primaryKey().notNull(),
+	schoolId: uuid("school_id").notNull(),
+	title: varchar({ length: 200 }).notNull(),
+	description: text(),
+	type: calendarEventType().default('other').notNull(),
+	startsAt: timestamp("starts_at", { withTimezone: true, mode: 'string' }).notNull(),
+	endsAt: timestamp("ends_at", { withTimezone: true, mode: 'string' }).notNull(),
+	allDay: boolean("all_day").default(false).notNull(),
+	createdBy: text("created_by").notNull(),
+	createdAt: timestamp("created_at", { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
+	updatedAt: timestamp("updated_at", { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
+}, (table) => [
+	index("school_calendar_events_school_idx").using("btree", table.schoolId.asc().nullsLast().op("uuid_ops")),
+	index("school_calendar_events_starts_idx").using("btree", table.startsAt.asc().nullsLast().op("timestamptz_ops")),
+	foreignKey({
+			columns: [table.schoolId],
+			foreignColumns: [schools.id],
+			name: "school_calendar_events_school_id_fkey"
+		}).onDelete("cascade"),
+	check("school_calendar_events_time_check", sql`ends_at >= starts_at`),
+]);
+
+export const procurementRequestItems = pgTable("procurement_request_items", {
+	id: uuid().defaultRandom().primaryKey().notNull(),
+	requestId: uuid("request_id").notNull(),
+	itemId: uuid("item_id"),
+	description: varchar({ length: 200 }).notNull(),
+	quantity: integer().notNull(),
+	unitPrice: numeric("unit_price", { precision: 12, scale:  2 }).notNull(),
+}, (table) => [
+	index("procurement_request_items_request_idx").using("btree", table.requestId.asc().nullsLast().op("uuid_ops")),
+	foreignKey({
+			columns: [table.itemId],
+			foreignColumns: [inventoryItems.id],
+			name: "procurement_request_items_item_id_fkey"
+		}).onDelete("restrict"),
+	foreignKey({
+			columns: [table.requestId],
+			foreignColumns: [procurementRequests.id],
+			name: "procurement_request_items_request_id_fkey"
+		}).onDelete("cascade"),
+]);
+
+export const staffLeaveRequests = pgTable("staff_leave_requests", {
+	id: uuid().defaultRandom().primaryKey().notNull(),
+	schoolId: uuid("school_id").notNull(),
+	staffId: uuid("staff_id").notNull(),
+	requestedBy: text("requested_by").notNull(),
+	leaveType: leaveType("leave_type").notNull(),
+	startsOn: date("starts_on").notNull(),
+	endsOn: date("ends_on").notNull(),
+	reason: text(),
+	status: leaveRequestStatus().default('pending').notNull(),
+	reviewedBy: text("reviewed_by"),
+	reviewedAt: timestamp("reviewed_at", { withTimezone: true, mode: 'string' }),
+	reviewNote: text("review_note"),
+	createdAt: timestamp("created_at", { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
+	updatedAt: timestamp("updated_at", { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
+}, (table) => [
+	index("staff_leave_requests_school_idx").using("btree", table.schoolId.asc().nullsLast().op("uuid_ops")),
+	index("staff_leave_requests_staff_idx").using("btree", table.staffId.asc().nullsLast().op("uuid_ops")),
+	index("staff_leave_requests_status_idx").using("btree", table.status.asc().nullsLast().op("enum_ops")),
+	foreignKey({
+			columns: [table.schoolId],
+			foreignColumns: [schools.id],
+			name: "staff_leave_requests_school_id_fkey"
+		}).onDelete("cascade"),
+	foreignKey({
+			columns: [table.staffId],
+			foreignColumns: [staff.id],
+			name: "staff_leave_requests_staff_id_fkey"
+		}).onDelete("cascade"),
+	check("staff_leave_requests_date_check", sql`ends_on >= starts_on`),
+]);
+
+export const notificationAutomations = pgTable("notification_automations", {
+	id: uuid().defaultRandom().primaryKey().notNull(),
+	schoolId: uuid("school_id").notNull(),
+	name: varchar({ length: 120 }).notNull(),
+	trigger: varchar({ length: 60 }).notNull(),
+	enabled: boolean().default(true).notNull(),
+	daysBefore: integer("days_before").default(1).notNull(),
+	createdBy: text("created_by").notNull(),
+	createdAt: timestamp("created_at", { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
+}, (table) => [
+	index("notification_automations_school_idx").using("btree", table.schoolId.asc().nullsLast().op("uuid_ops")),
+	foreignKey({
+			columns: [table.schoolId],
+			foreignColumns: [schools.id],
+			name: "notification_automations_school_id_fkey"
+		}).onDelete("cascade"),
+	unique("notification_automations_school_name_unique").on(table.name, table.schoolId),
+]);
+
+export const inventoryItems = pgTable("inventory_items", {
+	id: uuid().defaultRandom().primaryKey().notNull(),
+	schoolId: uuid("school_id").notNull(),
+	sku: varchar({ length: 80 }).notNull(),
+	name: varchar({ length: 200 }).notNull(),
+	category: varchar({ length: 100 }),
+	unit: varchar({ length: 30 }).default('unit').notNull(),
+	reorderLevel: integer("reorder_level").default(0).notNull(),
+	quantityOnHand: integer("quantity_on_hand").default(0).notNull(),
+	isActive: boolean("is_active").default(true).notNull(),
+	createdAt: timestamp("created_at", { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
+	updatedAt: timestamp("updated_at", { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
+}, (table) => [
+	index("inventory_items_school_idx").using("btree", table.schoolId.asc().nullsLast().op("uuid_ops")),
+	foreignKey({
+			columns: [table.schoolId],
+			foreignColumns: [schools.id],
+			name: "inventory_items_school_id_fkey"
+		}).onDelete("cascade"),
+	unique("inventory_items_school_sku_unique").on(table.schoolId, table.sku),
+]);
+
+export const inventoryTransactions = pgTable("inventory_transactions", {
+	id: uuid().defaultRandom().primaryKey().notNull(),
+	schoolId: uuid("school_id").notNull(),
+	itemId: uuid("item_id").notNull(),
+	type: inventoryTransactionType().notNull(),
+	quantity: integer().notNull(),
+	reference: varchar({ length: 150 }),
+	notes: text(),
+	actorId: text("actor_id").notNull(),
+	createdAt: timestamp("created_at", { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
+}, (table) => [
+	index("inventory_transactions_item_idx").using("btree", table.itemId.asc().nullsLast().op("uuid_ops")),
+	index("inventory_transactions_school_idx").using("btree", table.schoolId.asc().nullsLast().op("uuid_ops")),
+	foreignKey({
+			columns: [table.itemId],
+			foreignColumns: [inventoryItems.id],
+			name: "inventory_transactions_item_id_fkey"
+		}).onDelete("restrict"),
+	foreignKey({
+			columns: [table.schoolId],
+			foreignColumns: [schools.id],
+			name: "inventory_transactions_school_id_fkey"
+		}).onDelete("cascade"),
+]);
+
+export const procurementRequests = pgTable("procurement_requests", {
+	id: uuid().defaultRandom().primaryKey().notNull(),
+	schoolId: uuid("school_id").notNull(),
+	requestedBy: text("requested_by").notNull(),
+	supplier: varchar({ length: 200 }),
+	status: procurementStatus().default('draft').notNull(),
+	notes: text(),
+	totalAmount: numeric("total_amount", { precision: 12, scale:  2 }).default('0').notNull(),
+	createdAt: timestamp("created_at", { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
+	updatedAt: timestamp("updated_at", { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
+}, (table) => [
+	index("procurement_requests_school_idx").using("btree", table.schoolId.asc().nullsLast().op("uuid_ops")),
+	index("procurement_requests_status_idx").using("btree", table.status.asc().nullsLast().op("enum_ops")),
+	foreignKey({
+			columns: [table.schoolId],
+			foreignColumns: [schools.id],
+			name: "procurement_requests_school_id_fkey"
+		}).onDelete("cascade"),
+]);
+
+export const documentRecords = pgTable("document_records", {
+	id: uuid().defaultRandom().primaryKey().notNull(),
+	schoolId: uuid("school_id").notNull(),
+	studentId: uuid("student_id"),
+	documentType: varchar("document_type", { length: 80 }).notNull(),
+	documentNumber: varchar("document_number", { length: 100 }).notNull(),
+	title: varchar({ length: 200 }).notNull(),
+	payload: jsonb().default({}).notNull(),
+	status: documentRecordStatus().default('draft').notNull(),
+	issuedAt: timestamp("issued_at", { withTimezone: true, mode: 'string' }),
+	issuedBy: text("issued_by").notNull(),
+	createdAt: timestamp("created_at", { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
+}, (table) => [
+	index("document_records_school_idx").using("btree", table.schoolId.asc().nullsLast().op("uuid_ops")),
+	index("document_records_student_idx").using("btree", table.studentId.asc().nullsLast().op("uuid_ops")),
+	foreignKey({
+			columns: [table.schoolId],
+			foreignColumns: [schools.id],
+			name: "document_records_school_id_fkey"
+		}).onDelete("cascade"),
+	foreignKey({
+			columns: [table.studentId],
+			foreignColumns: [students.id],
+			name: "document_records_student_id_fkey"
+		}).onDelete("cascade"),
+	unique("document_records_school_number_unique").on(table.documentNumber, table.schoolId),
+]);
+
+export const libraryBooks = pgTable("library_books", {
+	id: uuid().defaultRandom().primaryKey().notNull(),
+	schoolId: uuid("school_id").notNull(),
+	isbn: varchar({ length: 30 }),
+	title: varchar({ length: 240 }).notNull(),
+	author: varchar({ length: 180 }),
+	category: varchar({ length: 100 }),
+	copiesTotal: integer("copies_total").default(1).notNull(),
+	copiesAvailable: integer("copies_available").default(1).notNull(),
+	createdAt: timestamp("created_at", { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
+	updatedAt: timestamp("updated_at", { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
+}, (table) => [
+	index("library_books_school_idx").using("btree", table.schoolId.asc().nullsLast().op("uuid_ops")),
+	foreignKey({
+			columns: [table.schoolId],
+			foreignColumns: [schools.id],
+			name: "library_books_school_id_fkey"
+		}).onDelete("cascade"),
+	unique("library_books_school_isbn_unique").on(table.isbn, table.schoolId),
+]);
+
+export const libraryLoans = pgTable("library_loans", {
+	id: uuid().defaultRandom().primaryKey().notNull(),
+	schoolId: uuid("school_id").notNull(),
+	bookId: uuid("book_id").notNull(),
+	studentId: uuid("student_id").notNull(),
+	issuedBy: text("issued_by").notNull(),
+	issuedAt: timestamp("issued_at", { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
+	dueAt: date("due_at").notNull(),
+	returnedAt: timestamp("returned_at", { withTimezone: true, mode: 'string' }),
+	status: libraryLoanStatus().default('borrowed').notNull(),
+}, (table) => [
+	index("library_loans_school_idx").using("btree", table.schoolId.asc().nullsLast().op("uuid_ops")),
+	index("library_loans_status_idx").using("btree", table.status.asc().nullsLast().op("enum_ops")),
+	index("library_loans_student_idx").using("btree", table.studentId.asc().nullsLast().op("uuid_ops")),
+	foreignKey({
+			columns: [table.bookId],
+			foreignColumns: [libraryBooks.id],
+			name: "library_loans_book_id_fkey"
+		}).onDelete("restrict"),
+	foreignKey({
+			columns: [table.schoolId],
+			foreignColumns: [schools.id],
+			name: "library_loans_school_id_fkey"
+		}).onDelete("cascade"),
+	foreignKey({
+			columns: [table.studentId],
+			foreignColumns: [students.id],
+			name: "library_loans_student_id_fkey"
+		}).onDelete("restrict"),
+]);
+
+export const transportRoutes = pgTable("transport_routes", {
+	id: uuid().defaultRandom().primaryKey().notNull(),
+	schoolId: uuid("school_id").notNull(),
+	name: varchar({ length: 120 }).notNull(),
+	vehicleNumber: varchar("vehicle_number", { length: 50 }),
+	driverName: varchar("driver_name", { length: 160 }),
+	driverPhone: varchar("driver_phone", { length: 30 }),
+	stops: jsonb().default([]).notNull(),
+	active: boolean().default(true).notNull(),
+	createdAt: timestamp("created_at", { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
+}, (table) => [
+	index("transport_routes_school_idx").using("btree", table.schoolId.asc().nullsLast().op("uuid_ops")),
+	foreignKey({
+			columns: [table.schoolId],
+			foreignColumns: [schools.id],
+			name: "transport_routes_school_id_fkey"
+		}).onDelete("cascade"),
+	unique("transport_routes_school_name_unique").on(table.name, table.schoolId),
+]);
+
+export const transportAssignments = pgTable("transport_assignments", {
+	id: uuid().defaultRandom().primaryKey().notNull(),
+	schoolId: uuid("school_id").notNull(),
+	routeId: uuid("route_id").notNull(),
+	studentId: uuid("student_id").notNull(),
+	pickupStop: varchar("pickup_stop", { length: 160 }),
+	dropoffStop: varchar("dropoff_stop", { length: 160 }),
+	status: transportAssignmentStatus().default('active').notNull(),
+	assignedAt: timestamp("assigned_at", { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
+}, (table) => [
+	index("transport_assignments_school_idx").using("btree", table.schoolId.asc().nullsLast().op("uuid_ops")),
+	foreignKey({
+			columns: [table.routeId],
+			foreignColumns: [transportRoutes.id],
+			name: "transport_assignments_route_id_fkey"
+		}).onDelete("restrict"),
+	foreignKey({
+			columns: [table.schoolId],
+			foreignColumns: [schools.id],
+			name: "transport_assignments_school_id_fkey"
+		}).onDelete("cascade"),
+	foreignKey({
+			columns: [table.studentId],
+			foreignColumns: [students.id],
+			name: "transport_assignments_student_id_fkey"
+		}).onDelete("restrict"),
+	unique("transport_assignments_route_student_unique").on(table.routeId, table.studentId),
+]);
+
+export const studentHealthRecords = pgTable("student_health_records", {
+	id: uuid().defaultRandom().primaryKey().notNull(),
+	schoolId: uuid("school_id").notNull(),
+	studentId: uuid("student_id").notNull(),
+	recordedBy: text("recorded_by").notNull(),
+	recordType: varchar("record_type", { length: 60 }).notNull(),
+	details: text().notNull(),
+	occurredAt: timestamp("occurred_at", { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
+	followUp: text("follow_up"),
+	confidential: boolean().default(true).notNull(),
+	createdAt: timestamp("created_at", { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
+}, (table) => [
+	index("student_health_school_idx").using("btree", table.schoolId.asc().nullsLast().op("uuid_ops")),
+	index("student_health_student_idx").using("btree", table.studentId.asc().nullsLast().op("uuid_ops")),
+	foreignKey({
+			columns: [table.schoolId],
+			foreignColumns: [schools.id],
+			name: "student_health_records_school_id_fkey"
+		}).onDelete("cascade"),
+	foreignKey({
+			columns: [table.studentId],
+			foreignColumns: [students.id],
+			name: "student_health_records_student_id_fkey"
+		}).onDelete("cascade"),
+]);
+
+export const safeguardingCases = pgTable("safeguarding_cases", {
+	id: uuid().defaultRandom().primaryKey().notNull(),
+	schoolId: uuid("school_id").notNull(),
+	studentId: uuid("student_id").notNull(),
+	reportedBy: text("reported_by").notNull(),
+	assignedTo: text("assigned_to"),
+	summary: text().notNull(),
+	actionsTaken: text("actions_taken"),
+	status: safeguardingCaseStatus().default('open').notNull(),
+	confidential: boolean().default(true).notNull(),
+	createdAt: timestamp("created_at", { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
+	updatedAt: timestamp("updated_at", { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
+}, (table) => [
+	index("safeguarding_cases_school_idx").using("btree", table.schoolId.asc().nullsLast().op("uuid_ops")),
+	index("safeguarding_cases_student_idx").using("btree", table.studentId.asc().nullsLast().op("uuid_ops")),
+	foreignKey({
+			columns: [table.schoolId],
+			foreignColumns: [schools.id],
+			name: "safeguarding_cases_school_id_fkey"
+		}).onDelete("cascade"),
+	foreignKey({
+			columns: [table.studentId],
+			foreignColumns: [students.id],
+			name: "safeguarding_cases_student_id_fkey"
+		}).onDelete("restrict"),
+]);
+
+export const disciplineIncidents = pgTable("discipline_incidents", {
+	id: uuid().defaultRandom().primaryKey().notNull(),
+	schoolId: uuid("school_id").notNull(),
+	studentId: uuid("student_id").notNull(),
+	reportedBy: text("reported_by").notNull(),
+	incidentDate: date("incident_date").notNull(),
+	category: varchar({ length: 80 }).notNull(),
+	description: text().notNull(),
+	actionTaken: text("action_taken"),
+	status: disciplineIncidentStatus().default('reported').notNull(),
+	createdAt: timestamp("created_at", { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
+	updatedAt: timestamp("updated_at", { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
+}, (table) => [
+	index("discipline_incidents_school_idx").using("btree", table.schoolId.asc().nullsLast().op("uuid_ops")),
+	index("discipline_incidents_student_idx").using("btree", table.studentId.asc().nullsLast().op("uuid_ops")),
+	foreignKey({
+			columns: [table.schoolId],
+			foreignColumns: [schools.id],
+			name: "discipline_incidents_school_id_fkey"
+		}).onDelete("cascade"),
+	foreignKey({
+			columns: [table.studentId],
+			foreignColumns: [students.id],
+			name: "discipline_incidents_student_id_fkey"
+		}).onDelete("restrict"),
+]);
+
+export const guardianUserAccounts = pgTable("guardian_user_accounts", {
+	id: uuid().defaultRandom().primaryKey().notNull(),
+	guardianId: uuid("guardian_id").notNull(),
+	email: text().notNull(),
+	mustChangePassword: boolean("must_change_password").default(true).notNull(),
+	passwordExpiresAt: timestamp("password_expires_at", { withTimezone: true, mode: 'string' }),
+	lastLoginAt: timestamp("last_login_at", { withTimezone: true, mode: 'string' }),
+	status: guardianAccountStatus().default('active').notNull(),
+	createdAt: timestamp("created_at", { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
+	updatedAt: timestamp("updated_at", { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
+}, (table) => [
+	index("guardian_user_accounts_guardian_idx").using("btree", table.guardianId.asc().nullsLast().op("uuid_ops")),
+	index("guardian_user_accounts_status_idx").using("btree", table.status.asc().nullsLast().op("enum_ops")),
+	foreignKey({
+			columns: [table.guardianId],
+			foreignColumns: [guardians.id],
+			name: "guardian_user_accounts_guardian_id_fkey"
+		}).onDelete("cascade"),
+	unique("guardian_user_accounts_guardian_id_key").on(table.guardianId),
+	unique("guardian_user_accounts_email_key").on(table.email),
+]);
+
 export const studentGuardians = pgTable("student_guardians", {
 	studentId: uuid("student_id").notNull(),
 	guardianId: uuid("guardian_id").notNull(),
@@ -1502,14 +2135,14 @@ export const studentGuardians = pgTable("student_guardians", {
 	index("student_guardians_guardian_idx").using("btree", table.guardianId.asc().nullsLast().op("uuid_ops")),
 	uniqueIndex("student_guardians_one_primary_idx").using("btree", table.studentId.asc().nullsLast().op("uuid_ops")).where(sql`(is_primary = true)`),
 	foreignKey({
-			columns: [table.studentId],
-			foreignColumns: [students.id],
-			name: "student_guardians_student_id_students_id_fk"
-		}).onDelete("cascade"),
-	foreignKey({
 			columns: [table.guardianId],
 			foreignColumns: [guardians.id],
 			name: "student_guardians_guardian_id_guardians_id_fk"
+		}).onDelete("cascade"),
+	foreignKey({
+			columns: [table.studentId],
+			foreignColumns: [students.id],
+			name: "student_guardians_student_id_students_id_fk"
 		}).onDelete("cascade"),
 	primaryKey({ columns: [table.guardianId, table.studentId], name: "student_guardians_student_id_guardian_id_pk"}),
 ]);

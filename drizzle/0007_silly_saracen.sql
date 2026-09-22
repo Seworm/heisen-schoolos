@@ -1,3 +1,0 @@
-CREATE UNIQUE INDEX "teacher_assignments_one_class_teacher_idx" ON "teacher_assignments" USING btree ("stream_id","academic_year_id") WHERE "teacher_assignments"."is_class_teacher" = true;--> statement-breakpoint
-CREATE UNIQUE INDEX "teacher_assignments_unique_subject_idx" ON "teacher_assignments" USING btree ("staff_id","stream_id","subject_id","academic_year_id") WHERE "teacher_assignments"."subject_id" IS NOT NULL;--> statement-breakpoint
-CREATE UNIQUE INDEX "teacher_assignments_unique_class_teacher_idx" ON "teacher_assignments" USING btree ("staff_id","stream_id","academic_year_id") WHERE "teacher_assignments"."subject_id" IS NULL AND "teacher_assignments"."is_class_teacher" = true;
