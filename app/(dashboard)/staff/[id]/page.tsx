@@ -5,7 +5,10 @@ import { notFound } from "next/navigation";
 import { db } from "@/db";
 import { staff } from "@/db/schema";
 import { requireCurrentSchool } from "@/lib/current-school";
+import { getApplicationSession } from "@/lib/auth/compat";
 import StaffStatusForm from "./StaffStatusForm";
+import StaffAccountForm from "./StaffAccountForm";
+import { getStaffAccountStatus } from "./actions";
 
 type StaffPageProps = {
   params: Promise<{
@@ -48,9 +51,21 @@ export default async function StaffProfilePage({
 )
     .limit(1);
 
-  if (!member || member.id === undefined) {
-    notFound();
-  }
+   if (!member || member.id === undefined) {
+     notFound();
+   }
+
+   const accountStatus = await getStaffAccountStatus(member.id);
+   const session = await getApplicationSession();
+   const allowedInviteRoles = [
+     "super_admin", "platform_admin", "school_owner", "school_admin",
+     "principal", "headteacher", "accountant", "bursar",
+   ];
+   const canInvite = Boolean(
+     session?.user?.isPlatformAdmin ||
+     session?.user?.isSuperAdmin ||
+     (session?.user?.role && allowedInviteRoles.includes(session.user.role)),
+   );
 
   /*
    * The staff table is school-scoped.
@@ -335,13 +350,76 @@ export default async function StaffProfilePage({
                   Last updated
                 </p>
 
-                <p className="mt-1 text-sm text-slate-700">
-                  {formatDate(member.updatedAt)}
-                </p>
-              </div>
-            </div>
-          </section>
-        </div>
+            <p className="mt-1 text-sm text-slate-700">
+                   {formatDate(member.updatedAt)}
+                 </p>
+               </div>
+             </div>
+           </section>
+
+           <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm lg:col-span-3">
+             <h2 className="text-base font-semibold text-slate-950">
+               Login account
+             </h2>
+             <p className="mt-1 text-sm text-slate-500">
+               {member.email
+                 ? `Manage the login account for ${member.firstName} ${member.lastName}.`
+                 : "This staff member has no email address on file."}
+             </p>
+
+             <div className="mt-5">
+               {accountStatus?.hasAccount && accountStatus.user ? (
+                 <div className="rounded-xl border border-slate-200 bg-slate-50 p-5">
+                   <div className="flex items-center justify-between">
+                     <div>
+                       <p className="font-semibold text-slate-900">
+                         Account exists
+                       </p>
+                       <p className="mt-1 text-sm text-slate-500">
+                         {accountStatus.user.firstName}{" "}
+                         {accountStatus.user.lastName} ·{" "}
+                         {accountStatus.user.status === "active"
+                           ? "Active"
+                           : "Inactive"}
+                       </p>
+                     </div>
+                     {accountStatus.membership && (
+                       <span className="text-sm text-slate-600">
+                         School role:{" "}
+                         <span className="font-medium">
+                           {accountStatus.membership.role.replace("_", " ")}
+                         </span>
+                         {" · "}
+                         <span className={
+                           accountStatus.membership.isActive
+                             ? "text-emerald-700"
+                             : "text-rose-700"
+                         }>
+                           {accountStatus.membership.isActive
+                             ? "Active"
+                             : "Inactive"}
+                         </span>
+                       </span>
+                     )}
+                   </div>
+                 </div>
+               ) : canInvite ? (
+                 <StaffAccountForm
+                   staffId={member.id}
+                   firstName={member.firstName}
+                   lastName={member.lastName}
+                   email={member.email}
+                   canInvite={canInvite}
+                 />
+               ) : (
+                 <p className="text-sm text-slate-500">
+                   You do not have permission to create a login account
+                   for this staff member.
+                 </p>
+               )}
+             </div>
+           </section>
+         </div>
       </div>
     </main>
   );

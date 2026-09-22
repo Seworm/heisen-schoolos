@@ -1,10 +1,13 @@
 "use server";
 
 import { and, eq } from "drizzle-orm";
+import { revalidatePath } from "next/cache";
 import { db } from "@/db";
 import { schoolMemberships, staff, users } from "@/db/schema";
 import { requireCurrentSchool } from "@/lib/current-school";
 import { requireRole } from "@/lib/authorization";
+import { writeAuditLog } from "@/lib/audit";
+import { createStaffInvitation } from "@/../app/(dashboard)/admin/actions";
 
 export async function archiveStaff(formData: FormData) {
   const school = await requireCurrentSchool();
@@ -16,4 +19,146 @@ export async function archiveStaff(formData: FormData) {
     const [matchingUser] = await db.select({ id: users.id }).from(users).where(eq(users.email, member.email.toLowerCase())).limit(1);
     if (matchingUser) await db.update(schoolMemberships).set({ isActive: false, updatedAt: new Date() }).where(and(eq(schoolMemberships.userId, matchingUser.id), eq(schoolMemberships.schoolId, school.id)));
   }
+}
+
+export async function getStaffAccountStatus(staffId: string) {
+  const school = await requireCurrentSchool();
+  const [member] = await db
+    .select({ id: staff.id, email: staff.email })
+    .from(staff)
+    .where(and(eq(staff.id, staffId), eq(staff.schoolId, school.id)))
+    .limit(1);
+  if (!member) return null;
+  if (!member.email) return { hasAccount: false } as const;
+  const [userRow] = await db
+    .select({
+      id: users.id,
+      status: users.status,
+      firstName: users.firstName,
+      lastName: users.lastName,
+    })
+    .from(users)
+    .where(eq(users.email, member.email.toLowerCase()))
+    .limit(1);
+  if (!userRow) return { hasAccount: false } as const;
+  const [membership] = await db
+    .select({ role: schoolMemberships.role, isActive: schoolMemberships.isActive })
+    .from(schoolMemberships)
+    .where(
+      and(
+        eq(schoolMemberships.userId, userRow.id),
+        eq(schoolMemberships.schoolId, school.id),
+      ),
+    )
+    .limit(1);
+  return {
+    hasAccount: true,
+    user: userRow,
+    membership: membership ?? null,
+  };
+}
+
+const validStaffRoles = [
+  "school_owner",
+  "school_admin",
+  "principal",
+  "headteacher",
+  "teacher",
+  "accountant",
+  "bursar",
+  "secretary",
+  "librarian",
+  "nurse",
+  "staff",
+] as const;
+
+export type InviteStaffAccountResult = {
+  error?: string;
+  success?: string;
+};
+
+export async function inviteStaffAccount(
+  _prevState: InviteStaffAccountResult | null,
+  formData: FormData,
+): Promise<InviteStaffAccountResult> {
+  const school = await requireCurrentSchool();
+  const actor = await requireRole(
+    [
+      "super_admin",
+      "platform_admin",
+      "school_owner",
+      "school_admin",
+      "principal",
+      "headteacher",
+      "accountant",
+      "bursar",
+    ],
+    school.id,
+  );
+  const staffId = String(formData.get("staffId") ?? "");
+  const role = String(formData.get("role") ?? "teacher").trim();
+
+  if (!validStaffRoles.includes(role as (typeof validStaffRoles)[number])) {
+    return { error: "Invalid account role selected." };
+  }
+
+  const [member] = await db
+    .select({
+      id: staff.id,
+      email: staff.email,
+      firstName: staff.firstName,
+      lastName: staff.lastName,
+    })
+    .from(staff)
+    .where(and(eq(staff.id, staffId), eq(staff.schoolId, school.id)))
+    .limit(1);
+
+  if (!member) return { error: "Staff record not found." };
+  if (!member.email) {
+    return {
+      error:
+        "This staff member has no email address on file. Add an email to the staff profile before creating a login account.",
+    };
+  }
+
+  const [userRow] = await db
+    .select({ id: users.id })
+    .from(users)
+    .where(eq(users.email, member.email.toLowerCase()))
+    .limit(1);
+
+  if (userRow) {
+    return { error: "This staff member already has a login account." };
+  }
+
+  try {
+    await createStaffInvitation({
+      email: member.email,
+      firstName: member.firstName,
+      lastName: member.lastName,
+      role,
+      schoolId: school.id,
+    });
+  } catch (error) {
+    console.error("Failed to invite staff account:", error);
+    return {
+      error:
+        "The invitation could not be created. Please check the details and try again.",
+    };
+  }
+
+  await writeAuditLog({
+    schoolId: school.id,
+    actorAuthUserId: actor.authUserId ?? actor.id,
+    action: "staff_account_invited",
+    entity: "staff",
+    entityId: staffId,
+    metadata: { role },
+  });
+
+  revalidatePath(`/staff/${staffId}`);
+  return {
+    success:
+      "Invitation sent. The staff member will receive an email to create their password.",
+  };
 }

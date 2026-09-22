@@ -1,5 +1,6 @@
+import Link from "next/link";
 import { and, asc, desc, eq } from "drizzle-orm";
-import { Banknote, CheckCircle2, Users } from "lucide-react";
+import { Banknote, CheckCircle2, Eye, Users } from "lucide-react";
 import { db } from "@/db";
 import {
   payrollPeriods,
@@ -100,10 +101,10 @@ export default async function PayrollPage() {
           <div className="divide-y divide-slate-100">
             {periods.map((period) => (
               <div key={period.id} className="flex flex-wrap items-center justify-between gap-4 px-5 py-4">
-                <div><p className="font-semibold text-slate-900">{period.name}</p><p className="mt-1 text-xs text-slate-500">{period.periodStart} — {period.periodEnd} · Pay {period.payDate}</p></div>
+                <div><Link href={`/payroll/${period.id}`} className="font-semibold text-slate-900 hover:text-emerald-700 hover:underline">{period.name}</Link><p className="mt-1 text-xs text-slate-500">{period.periodStart} — {period.periodEnd} · Pay {period.payDate}</p></div>
                 <div className="flex items-center gap-4 text-right">
                   <div><p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Net pay</p><p className="font-bold text-slate-900">{period.netTotal ? money(period.netTotal) : "Not processed"}</p></div>
-                  {period.status === "draft" ? <form action={processPayroll}><input type="hidden" name="periodId" value={period.id} /><button className="rounded-lg bg-slate-950 px-3 py-2 text-xs font-bold text-white">Process payroll</button></form> : <span className="rounded-full bg-emerald-50 px-3 py-1.5 text-xs font-bold capitalize text-emerald-700">{period.status}</span>}
+                  {period.status === "draft" ? <form action={processPayroll}><input type="hidden" name="periodId" value={period.id} /><button className="rounded-lg bg-slate-950 px-3 py-2 text-xs font-bold text-white">Process payroll</button></form> : <div className="flex items-center gap-2"><span className="rounded-full bg-emerald-50 px-3 py-1.5 text-xs font-bold capitalize text-emerald-700">{period.status}</span><Link href={`/payroll/${period.id}`} className="inline-flex items-center gap-1 rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50"><Eye className="h-3 w-3" />View</Link></div>}
                 </div>
               </div>
             ))}
