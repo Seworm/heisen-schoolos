@@ -11,6 +11,7 @@
     "test": "tsx --test src/lib/*.test.ts",
     "db:migrate:platform": "node scripts/apply-platform-migration.mjs",
     "db:migrate:staff-invitations": "node scripts/apply-staff-invitations-migration.mjs",
+    "db:migrate:timetable": "node scripts/apply-timetable-migration.mjs",
     "db:reset:deployment": "node scripts/reset-for-deployment.mjs",
     "typecheck": "tsc --noEmit",
     "verify": "npm run typecheck && npm run lint && npm test && npm run build",

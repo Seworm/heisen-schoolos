@@ -908,6 +908,7 @@ export const teacherAssignments = pgTable("teacher_assignments", {
 	staffId: uuid("staff_id").notNull(),
 	streamId: uuid("stream_id").notNull(),
 	subjectId: uuid("subject_id"),
+	lessonsPerWeek: integer("lessons_per_week").default(1).notNull(),
 	academicYearId: uuid("academic_year_id").notNull(),
 	isClassTeacher: boolean("is_class_teacher").default(false).notNull(),
 	createdAt: timestamp("created_at", { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
