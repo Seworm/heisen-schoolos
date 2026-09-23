@@ -222,6 +222,13 @@ const overdueAmount = activeInvoices.reduce(
         "Configure fees by academic year, term and class.",
     },
     {
+      href: "/finance/feeding",
+      icon: HandCoins,
+      title: "Feeding Fees",
+      description:
+        "Set daily class rates and record daily student collections.",
+    },
+    {
       href: "/finance/scholarships",
       icon: GraduationCap,
       title: "Scholarships",

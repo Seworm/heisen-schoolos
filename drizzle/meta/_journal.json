@@ -29,6 +29,13 @@
       "when": 1790250000000,
       "tag": "0003_ghanaian_curriculum",
       "breakpoints": false
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1790253600000,
+      "tag": "0004_daily_feeding_fees",
+      "breakpoints": false
     }
   ]
 }

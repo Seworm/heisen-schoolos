@@ -2903,6 +2903,11 @@ export const paymentMethodEnum = pgEnum("payment_method", [
   "other",
 ]);
 
+export const feedingPaymentModeEnum = pgEnum("feeding_payment_mode", [
+  "termly",
+  "daily",
+]);
+
 export const paymentIntentStatusEnum = pgEnum("payment_intent_status", [
   "pending",
   "processing",
@@ -3722,8 +3727,58 @@ export const feeAssignments = pgTable("fee_assignments", {
   academicYearId: uuid("academic_year_id").notNull().references(() => academicYears.id, { onDelete: "restrict" }),
   termId: uuid("term_id").notNull().references(() => terms.id, { onDelete: "restrict" }),
   status: varchar("status", { length: 30 }).notNull().default("active"),
+
+  feedingPaymentMode: feedingPaymentModeEnum("feeding_payment_mode")
+    .notNull()
+    .default("termly"),
   assignedAt: timestamp("assigned_at", { withTimezone: true }).notNull().defaultNow(),
 }, (table) => [unique("fee_assignments_unique").on(table.studentId, table.feeStructureId, table.termId), index("fee_assignments_school_idx").on(table.schoolId), index("fee_assignments_student_idx").on(table.studentId)]);
+
+export const feedingFeeSettings = pgTable(
+  "feeding_fee_settings",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    schoolId: uuid("school_id").notNull().references(() => schools.id, { onDelete: "cascade" }),
+    academicYearId: uuid("academic_year_id").notNull().references(() => academicYears.id, { onDelete: "cascade" }),
+    classLevelId: uuid("class_level_id").notNull().references(() => classLevels.id, { onDelete: "cascade" }),
+    dailyAmount: numeric("daily_amount", { precision: 12, scale: 2 }).notNull(),
+    termlyAmount: numeric("termly_amount", { precision: 12, scale: 2 }),
+    active: boolean("active").notNull().default(true),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    unique("feeding_fee_settings_scope_unique").on(table.schoolId, table.academicYearId, table.classLevelId),
+    index("feeding_fee_settings_school_idx").on(table.schoolId),
+    index("feeding_fee_settings_class_idx").on(table.classLevelId),
+  ],
+);
+
+export const feedingFeeCollections = pgTable(
+  "feeding_fee_collections",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    schoolId: uuid("school_id").notNull().references(() => schools.id, { onDelete: "cascade" }),
+    studentId: uuid("student_id").notNull().references(() => students.id, { onDelete: "restrict" }),
+    classLevelId: uuid("class_level_id").notNull().references(() => classLevels.id, { onDelete: "restrict" }),
+    streamId: uuid("stream_id").references(() => streams.id, { onDelete: "restrict" }),
+    academicYearId: uuid("academic_year_id").notNull().references(() => academicYears.id, { onDelete: "restrict" }),
+    collectionDate: date("collection_date").notNull(),
+    amount: numeric("amount", { precision: 12, scale: 2 }).notNull(),
+    method: paymentMethodEnum("method").notNull().default("cash"),
+    receiptNumber: varchar("receipt_number", { length: 50 }).notNull(),
+    collectedBy: text("collected_by").notNull(),
+    notes: text("notes"),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    unique("feeding_fee_collection_student_date_unique").on(table.schoolId, table.studentId, table.collectionDate),
+    index("feeding_fee_collections_school_date_idx").on(table.schoolId, table.collectionDate),
+    index("feeding_fee_collections_class_date_idx").on(table.classLevelId, table.collectionDate),
+    index("feeding_fee_collections_student_idx").on(table.studentId),
+  ],
+);
 
 export const scholarships = pgTable("scholarships", {
   id: uuid("id").defaultRandom().primaryKey(),

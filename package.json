@@ -14,6 +14,7 @@
     "db:migrate:timetable": "node scripts/apply-timetable-migration.mjs",
     "db:migrate:default-stream": "node scripts/apply-default-stream-migration.mjs",
     "db:migrate:curriculum": "node -e \"import('./scripts/apply-curriculum-migration.mjs')\"",
+    "db:migrate:feeding": "node scripts/apply-feeding-migration.mjs",
     "db:seed:curriculum": "node scripts/seed-curriculum.mjs",
     "db:reset:deployment": "node scripts/reset-for-deployment.mjs",
     "typecheck": "tsc --noEmit",
