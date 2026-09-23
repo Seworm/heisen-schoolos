@@ -157,8 +157,14 @@ export function validateCurriculumSelections(
   const definitions = CURRICULUM[stage].subjects;
   const byCode = new Map(definitions.map((definition) => [definition.code, definition]));
   const errors: string[] = [];
+  const selectedCodes = new Set<string>();
 
   for (const selection of selections) {
+    if (selectedCodes.has(selection.subjectCode)) {
+      errors.push(`Subject ${selection.subjectCode} was configured more than once.`);
+      continue;
+    }
+    selectedCodes.add(selection.subjectCode);
     const definition = byCode.get(selection.subjectCode);
     if (!definition) {
       errors.push(`Subject ${selection.subjectCode} is not available for ${stage}.`);
@@ -171,6 +177,8 @@ export function validateCurriculumSelections(
       if (!selection.languageCode || !isGhanaianLanguageCode(selection.languageCode)) {
         errors.push(`${definition.name} requires a valid Ghanaian language.`);
       }
+    } else if (selection.languageCode) {
+      errors.push(`${definition.name} does not accept a language parameter.`);
     }
     if (definition.activityBased && definition.examinable) {
       errors.push(`${definition.name} cannot be examinable because it is activity-based.`);

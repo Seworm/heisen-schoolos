@@ -1,6 +1,6 @@
 "use server";
 
-import { and, eq, isNull } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import { redirect } from "next/navigation";
 import { db } from "@/db";
 import {
@@ -54,10 +54,21 @@ export async function saveCurriculumConfiguration(formData: FormData) {
       } else {
         await tx.insert(schoolCurriculumConfigurations).values({ schoolId: school.id, classLevelId: classLevel.id, curriculumSubjectId: definition.id, offered, languageId: definition.parameterized ? languageId : null });
       }
-      const subjectLanguageFilter = definition.parameterized && languageCode
-        ? eq(subjects.languageCode, languageCode)
-        : isNull(subjects.languageCode);
-      const [schoolSubject] = await tx.select({ id: subjects.id }).from(subjects).where(and(eq(subjects.schoolId, school.id), eq(subjects.curriculumCode, definition.code), subjectLanguageFilter)).limit(1);
+      const schoolSubjects = await tx
+        .select({ id: subjects.id, languageCode: subjects.languageCode })
+        .from(subjects)
+        .where(and(
+          eq(subjects.schoolId, school.id),
+          eq(subjects.curriculumCode, definition.code),
+        ));
+      const configuredSubject = schoolSubjects.find((item) =>
+        definition.parameterized
+          ? item.languageCode === languageCode
+          : item.languageCode === null,
+      );
+      const staleSubjectIds = schoolSubjects
+        .filter((item) => item.id !== configuredSubject?.id)
+        .map((item) => item.id);
       if (offered) {
         const languageName = languageCode
           ? GHANAIAN_LANGUAGES.find((language) => language.code === languageCode)?.name
@@ -65,10 +76,23 @@ export async function saveCurriculumConfiguration(formData: FormData) {
         const displayName = definition.parameterized && languageName
           ? `${definition.name} (${languageName})`
           : definition.name;
-        const subject = schoolSubject ?? (await tx.insert(subjects).values({ schoolId: school.id, name: displayName, code: definition.code, curriculumCode: definition.code, languageCode: definition.parameterized ? languageCode : null, examinable: definition.examinable, activityBased: definition.activityBased }).returning({ id: subjects.id }))[0];
+        const subject = configuredSubject ?? (await tx.insert(subjects).values({ schoolId: school.id, name: displayName, code: definition.code, curriculumCode: definition.code, languageCode: definition.parameterized ? languageCode : null, examinable: definition.examinable, activityBased: definition.activityBased }).returning({ id: subjects.id }))[0];
         if (!subject) throw new Error(`Could not create ${definition.name}.`);
         const [linked] = await tx.select({ id: classSubjects.id }).from(classSubjects).where(and(eq(classSubjects.classLevelId, classLevel.id), eq(classSubjects.subjectId, subject.id))).limit(1);
         if (!linked) await tx.insert(classSubjects).values({ classLevelId: classLevel.id, subjectId: subject.id });
+        for (const staleSubjectId of staleSubjectIds) {
+          await tx.delete(classSubjects).where(and(
+            eq(classSubjects.classLevelId, classLevel.id),
+            eq(classSubjects.subjectId, staleSubjectId),
+          ));
+        }
+      } else {
+        for (const schoolSubject of schoolSubjects) {
+          await tx.delete(classSubjects).where(and(
+            eq(classSubjects.classLevelId, classLevel.id),
+            eq(classSubjects.subjectId, schoolSubject.id),
+          ));
+        }
       }
     }
   });

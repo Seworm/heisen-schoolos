@@ -424,6 +424,8 @@ export async function createAssessment(
   const [subject] = await db
     .select({
       id: subjects.id,
+      activityBased: subjects.activityBased,
+      examinable: subjects.examinable,
     })
     .from(subjects)
     .where(
@@ -444,6 +446,13 @@ export async function createAssessment(
     return {
       error:
         "The selected subject is invalid.",
+    };
+  }
+
+  if (subject.activityBased || !subject.examinable) {
+    return {
+      error:
+        "Activity-based subjects cannot be used for examinable assessments.",
     };
   }
 
@@ -581,4 +590,3 @@ export async function createAssessment(
     };
   }
 }
-

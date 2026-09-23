@@ -8,6 +8,27 @@
       "when": 1790070580083,
       "tag": "0000_baseline",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1790070590000,
+      "tag": "0001_lessons_per_week",
+      "breakpoints": false
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1790070600000,
+      "tag": "0002_default_stream_a",
+      "breakpoints": false
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1790250000000,
+      "tag": "0003_ghanaian_curriculum",
+      "breakpoints": false
     }
   ]
 }
