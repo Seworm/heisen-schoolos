@@ -191,12 +191,6 @@ const overdueAmount = activeInvoices.reduce(
       title: "Fee structure",
       description: "Configure fees for a class",
     },
-    {
-      href: "/finance/scholarships/new",
-      icon: GraduationCap,
-      title: "Scholarship",
-      description: "Create a scholarship award",
-    },
   ];
 
   const modules = [
@@ -227,13 +221,6 @@ const overdueAmount = activeInvoices.reduce(
       title: "Feeding Fees",
       description:
         "Set daily class rates and record daily student collections.",
-    },
-    {
-      href: "/finance/scholarships",
-      icon: GraduationCap,
-      title: "Scholarships",
-      description:
-        "Manage scholarships and student awards.",
     },
     {
       href: "/finance/reports",
