@@ -160,29 +160,27 @@ export function SchoolSidebar() {
   }
 
   return (
-    <aside className="sticky top-0 hidden h-screen w-[284px] shrink-0 border-r border-white/10 bg-[#071c34] text-slate-50 lg:flex lg:flex-col">
-      {/* Brand */}
+    <aside className="sticky top-0 hidden h-screen w-[284px] shrink-0 border-r border-[#19324d] bg-[#0f213c] text-slate-50 lg:flex lg:flex-col">
       <div className="flex h-20 shrink-0 items-center border-b border-white/10 px-5">
         <Link
           href="/dashboard"
-          className="flex min-w-0 items-center gap-3 rounded-lg outline-none transition-opacity hover:opacity-90 focus-visible:ring-2 focus-visible:ring-[#f6a53a]"
+          className="flex min-w-0 items-center gap-3 rounded-lg outline-none transition-opacity hover:opacity-90 focus-visible:ring-2 focus-visible:ring-[#a6e4b2]"
         >
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#f6a53a] shadow-lg shadow-[#f6a53a]/30">
-            <GraduationCap className="h-5 w-5 text-[#081c35]" strokeWidth={2.2} />
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#dff5e3] shadow-lg shadow-black/20">
+            <GraduationCap className="h-5 w-5 text-[#0d2139]" strokeWidth={2.2} />
           </div>
 
           <div className="min-w-0">
             <p className="truncate text-[15px] font-bold tracking-tight text-white">
               Heisen SchoolOS
             </p>
-            <p className="mt-0.5 truncate text-[11px] font-medium text-slate-300">
-              Your school, connected
+            <p className="mt-0.5 truncate text-[10px] font-medium uppercase tracking-[0.18em] text-slate-300/80">
+              Education OS
             </p>
           </div>
         </Link>
       </div>
 
-      {/* Navigation */}
       <nav className="flex-1 overflow-y-auto px-3 py-5">
         <div className="space-y-6">
           {sections.map((section) => {
@@ -216,9 +214,9 @@ export function SchoolSidebar() {
                           href={item.href}
                           className={[
                             "group flex items-center gap-3 rounded-lg px-3 py-2.5 text-[13px] font-medium transition-all",
-                            "outline-none focus-visible:ring-2 focus-visible:ring-[#f6a53a]",
+                            "outline-none focus-visible:ring-2 focus-visible:ring-[#a6e4b2]",
                             active
-                              ? "bg-[#f6a53a]/12 text-white shadow-md shadow-[#f6a53a]/10"
+                              ? "bg-[#dff5e3] text-[#0d2139] shadow-md shadow-black/10"
                               : "text-slate-300 hover:bg-white/5 hover:text-white",
                           ].join(" ")}
                         >
@@ -226,7 +224,7 @@ export function SchoolSidebar() {
                             className={[
                               "flex h-8 w-8 shrink-0 items-center justify-center rounded-md transition-colors",
                               active
-                                ? "bg-[#f6a53a]/18 text-[#f9d49f]"
+                                ? "bg-[#c6ebcf] text-[#0d2139]"
                                 : "bg-white/5 text-slate-300 group-hover:bg-white/10 group-hover:text-white",
                             ].join(" ")}
                           >
@@ -239,7 +237,7 @@ export function SchoolSidebar() {
                           <span className="truncate">{item.label}</span>
 
                           {active && (
-                            <span className="ml-auto h-1.5 w-1.5 rounded-full bg-[#f6a53a]" />
+                            <span className="ml-auto h-1.5 w-1.5 rounded-full bg-[#0d2139]" />
                           )}
                         </Link>
                       );
@@ -252,11 +250,10 @@ export function SchoolSidebar() {
         </div>
       </nav>
 
-      {/* Bottom status */}
       <div className="shrink-0 border-t border-white/10 p-3">
-        <div className="rounded-xl border border-white/10 bg-[#0d2346] p-3">
+        <div className="rounded-xl border border-[#214b66] bg-[#16314d] p-3">
           <div className="flex items-center gap-3">
-            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[#f6a53a]/10 text-[#f9d49f]">
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[#dff5e3] text-[#0d2139]">
               <ShieldCheck className="h-4.5 w-4.5" strokeWidth={2} />
             </div>
 
@@ -269,7 +266,7 @@ export function SchoolSidebar() {
               </p>
             </div>
 
-            <span className="ml-auto h-2 w-2 rounded-full bg-[#f6a53a] shadow-sm shadow-[#f6a53a]/50" />
+            <span className="ml-auto h-2 w-2 rounded-full bg-[#a6e4b2] shadow-sm shadow-[#a6e4b2]/50" />
           </div>
         </div>
       </div>
