@@ -162,6 +162,7 @@ export default async function OutstandingReportPage() {
             Review invoices with unpaid balances and
             identify overdue amounts.
           </p>
+          <a href="/finance/reports/outstanding/export" className="mt-4 inline-flex rounded-lg border px-4 py-2 text-sm font-medium hover:bg-muted">Export CSV</a>
         </div>
       </section>
 

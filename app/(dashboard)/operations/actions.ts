@@ -45,21 +45,26 @@ export async function createCalendarEvent(_state: State, form: FormData): Promis
   } catch (error) { return { error: error instanceof Error ? error.message : "Could not create event." }; }
 }
 
-export async function deleteCalendarEvent(form: FormData): Promise<void> {
+export async function cancelCalendarEvent(form: FormData): Promise<void> {
   const { user, school } = await context();
   await requireRole(SCHOOL_ADMIN_ROLES, school.id);
   const id = required(form, "id");
-  const [event] = await db.delete(schoolCalendarEvents)
-    .where(and(eq(schoolCalendarEvents.id, id), eq(schoolCalendarEvents.schoolId, school.id)))
+  const [event] = await db.update(schoolCalendarEvents)
+    .set({ status: "cancelled", updatedAt: new Date() })
+    .where(and(
+      eq(schoolCalendarEvents.id, id),
+      eq(schoolCalendarEvents.schoolId, school.id),
+      eq(schoolCalendarEvents.status, "scheduled"),
+    ))
     .returning({ id: schoolCalendarEvents.id, title: schoolCalendarEvents.title });
   if (!event) throw new Error("Calendar event not found.");
   await writeAuditLog({
     schoolId: school.id,
     actorAuthUserId: user.id,
-    action: "delete",
+    action: "cancel",
     entity: "school_calendar_event",
     entityId: event.id,
-    metadata: { title: event.title },
+    metadata: { title: event.title, status: "cancelled" },
   });
   revalidatePath("/calendar");
 }

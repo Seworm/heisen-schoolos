@@ -3913,6 +3913,9 @@ export const notifications = pgTable("notifications", {
 export const calendarEventTypeEnum = pgEnum("calendar_event_type", [
   "holiday", "academic", "meeting", "activity", "deadline", "other",
 ]);
+export const calendarEventStatusEnum = pgEnum("calendar_event_status", [
+  "scheduled", "cancelled",
+]);
 export const leaveRequestStatusEnum = pgEnum("leave_request_status", [
   "pending", "approved", "rejected", "cancelled",
 ]);
@@ -3926,6 +3929,7 @@ export const schoolCalendarEvents = pgTable("school_calendar_events", {
   title: varchar("title", { length: 200 }).notNull(),
   description: text("description"),
   type: calendarEventTypeEnum("type").notNull().default("other"),
+  status: calendarEventStatusEnum("status").notNull().default("scheduled"),
   startsAt: timestamp("starts_at", { withTimezone: true }).notNull(),
   endsAt: timestamp("ends_at", { withTimezone: true }).notNull(),
   allDay: boolean("all_day").notNull().default(false),

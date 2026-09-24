@@ -15,7 +15,7 @@ export default async function FeedingFeesPage() {
   return <main className="mx-auto max-w-6xl space-y-8 p-6 lg:p-8">
     <header className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
       <div><p className="text-sm text-muted-foreground">Finance</p><h1 className="text-3xl font-semibold">Feeding fees</h1><p className="mt-2 text-sm text-muted-foreground">Set class-level rates and record daily payments for students configured for daily payment.</p></div>
-      <Link href="/finance/feeding/collect" className="rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground">Record daily collection</Link>
+      <div className="flex flex-wrap gap-2"><Link href="/finance/feeding/collect" className="rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground">Record daily collection</Link><a href="/finance/feeding/export" className="rounded-lg border px-4 py-2.5 text-sm font-medium">Export collections CSV</a></div>
     </header>
     <section className="rounded-xl border bg-card p-6">
       <h2 className="font-semibold">Set feeding fee by class</h2>

@@ -11,6 +11,7 @@ export const assessmentTypeCategory = pgEnum("assessment_type_category", ['conti
 export const attendanceRecordStatus = pgEnum("attendance_record_status", ['present', 'absent', 'late', 'excused'])
 export const attendanceSessionStatus = pgEnum("attendance_session_status", ['open', 'completed', 'cancelled'])
 export const calendarEventType = pgEnum("calendar_event_type", ['holiday', 'academic', 'meeting', 'activity', 'deadline', 'other'])
+export const calendarEventStatus = pgEnum("calendar_event_status", ['scheduled', 'cancelled'])
 export const classCategory = pgEnum("class_category", ['creche', 'nursery', 'kg', 'primary', 'jhs'])
 export const disciplineIncidentStatus = pgEnum("discipline_incident_status", ['reported', 'investigating', 'resolved', 'dismissed'])
 export const documentRecordStatus = pgEnum("document_record_status", ['draft', 'issued', 'revoked'])
@@ -1740,6 +1741,7 @@ export const schoolCalendarEvents = pgTable("school_calendar_events", {
 	title: varchar({ length: 200 }).notNull(),
 	description: text(),
 	type: calendarEventType().default('other').notNull(),
+	status: calendarEventStatus().default('scheduled').notNull(),
 	startsAt: timestamp("starts_at", { withTimezone: true, mode: 'string' }).notNull(),
 	endsAt: timestamp("ends_at", { withTimezone: true, mode: 'string' }).notNull(),
 	allDay: boolean("all_day").default(false).notNull(),
