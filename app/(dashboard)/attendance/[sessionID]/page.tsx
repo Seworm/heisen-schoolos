@@ -282,14 +282,22 @@ export default async function AttendanceSessionPage({
       </div>
 
       <div className="mb-6">
-        <AttendanceSessionActions
-          sessionId={session.id}
-          status={session.status}
-          streamId={session.streamId}
-          attendanceDate={
-            session.attendanceDate
-          }
-        />
+        <div className="flex flex-wrap items-center gap-3">
+          <AttendanceSessionActions
+            sessionId={session.id}
+            status={session.status}
+            streamId={session.streamId}
+            attendanceDate={
+              session.attendanceDate
+            }
+          />
+          <a
+            href={`/attendance/${session.id}/export`}
+            className="inline-flex items-center rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
+          >
+            Export CSV
+          </a>
+        </div>
       </div>
 
       <div className="overflow-hidden rounded-xl border border-slate-200 bg-white">
