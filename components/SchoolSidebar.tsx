@@ -160,14 +160,14 @@ export function SchoolSidebar() {
   }
 
   return (
-    <aside className="sticky top-0 hidden h-screen w-[284px] shrink-0 border-r border-[#173b2a] bg-[#0d2118] text-white lg:flex lg:flex-col">
+    <aside className="sticky top-0 hidden h-screen w-[284px] shrink-0 border-r border-slate-200 bg-slate-950 text-slate-50 lg:flex lg:flex-col">
       {/* Brand */}
-      <div className="flex h-20 shrink-0 items-center border-b border-[#173b2a] px-5">
+      <div className="flex h-20 shrink-0 items-center border-b border-slate-800 px-5">
         <Link
           href="/dashboard"
-          className="flex min-w-0 items-center gap-3 rounded-lg outline-none transition-opacity hover:opacity-90 focus-visible:ring-2 focus-visible:ring-[#fcd116]"
+          className="flex min-w-0 items-center gap-3 rounded-lg outline-none transition-opacity hover:opacity-90 focus-visible:ring-2 focus-visible:ring-sky-400"
         >
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#006b3f] shadow-lg shadow-black/30">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-sky-500 to-blue-700 shadow-lg shadow-sky-500/20">
             <GraduationCap className="h-5 w-5 text-white" strokeWidth={2.2} />
           </div>
 
@@ -175,7 +175,7 @@ export function SchoolSidebar() {
             <p className="truncate text-[15px] font-bold tracking-tight text-white">
               Heisen SchoolOS
             </p>
-            <p className="mt-0.5 truncate text-[11px] font-medium text-emerald-200/60">
+            <p className="mt-0.5 truncate text-[11px] font-medium text-slate-300">
               Your school, connected
             </p>
           </div>
@@ -193,7 +193,7 @@ export function SchoolSidebar() {
                 <button
                   type="button"
                   onClick={() => toggleSection(section.label)}
-                  className="mb-2 flex w-full items-center justify-between px-3 text-[10px] font-bold uppercase tracking-[0.14em] text-slate-500 transition-colors hover:text-slate-300"
+                  className="mb-2 flex w-full items-center justify-between px-3 text-[10px] font-bold uppercase tracking-[0.14em] text-slate-400 transition-colors hover:text-slate-200"
                 >
                   <span>{section.label}</span>
 
@@ -216,18 +216,18 @@ export function SchoolSidebar() {
                           href={item.href}
                           className={[
                             "group flex items-center gap-3 rounded-lg px-3 py-2.5 text-[13px] font-medium transition-all",
-                            "outline-none focus-visible:ring-2 focus-visible:ring-[#fcd116]",
+                            "outline-none focus-visible:ring-2 focus-visible:ring-sky-400",
                             active
-                              ? "bg-[#087443] text-white shadow-md shadow-black/30"
-                              : "text-emerald-50/70 hover:bg-[#173b2a] hover:text-white",
+                              ? "bg-sky-500/15 text-white shadow-md shadow-sky-500/10"
+                              : "text-slate-300 hover:bg-slate-800 hover:text-white",
                           ].join(" ")}
                         >
                           <span
                             className={[
                               "flex h-8 w-8 shrink-0 items-center justify-center rounded-md transition-colors",
                               active
-                                ? "bg-white/15 text-white"
-                                : "bg-[#173b2a] text-emerald-100/60 group-hover:bg-[#225239] group-hover:text-white",
+                                ? "bg-sky-500/20 text-sky-100"
+                                : "bg-slate-800 text-slate-300 group-hover:bg-slate-700 group-hover:text-white",
                             ].join(" ")}
                           >
                             <Icon
@@ -239,7 +239,7 @@ export function SchoolSidebar() {
                           <span className="truncate">{item.label}</span>
 
                           {active && (
-                            <span className="ml-auto h-1.5 w-1.5 rounded-full bg-white" />
+                            <span className="ml-auto h-1.5 w-1.5 rounded-full bg-sky-400" />
                           )}
                         </Link>
                       );
@@ -253,10 +253,10 @@ export function SchoolSidebar() {
       </nav>
 
       {/* Bottom status */}
-      <div className="shrink-0 border-t border-[#173b2a] p-3">
-        <div className="rounded-xl border border-[#225239] bg-[#102c20] p-3">
+      <div className="shrink-0 border-t border-slate-800 p-3">
+        <div className="rounded-xl border border-slate-700 bg-slate-900 p-3">
           <div className="flex items-center gap-3">
-            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-emerald-500/10 text-emerald-400">
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-sky-500/10 text-sky-300">
               <ShieldCheck className="h-4.5 w-4.5" strokeWidth={2} />
             </div>
 
@@ -264,12 +264,12 @@ export function SchoolSidebar() {
               <p className="text-xs font-semibold text-slate-200">
                 System Secure
               </p>
-              <p className="mt-0.5 text-[10px] text-slate-500">
+              <p className="mt-0.5 text-[10px] text-slate-400">
                 SchoolOS is operational
               </p>
             </div>
 
-            <span className="ml-auto h-2 w-2 rounded-full bg-emerald-400 shadow-sm shadow-emerald-400/50" />
+            <span className="ml-auto h-2 w-2 rounded-full bg-sky-400 shadow-sm shadow-sky-400/50" />
           </div>
         </div>
       </div>
