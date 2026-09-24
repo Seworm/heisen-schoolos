@@ -4,6 +4,9 @@ import {
   feeAssignments,
   feeStructureItems,
   feeStructures,
+  invoiceAdjustments,
+  scholarships,
+  studentScholarships,
   studentInvoiceItems,
   studentInvoices,
   students,
@@ -219,6 +222,37 @@ export async function generateInvoiceForAssignment(input: {
         amount: parsePositiveMoney(item.amount, "Invoice amount"),
       })),
     );
+
+    const [aid] = await tx
+      .select({
+        percentage: scholarships.percentage,
+        maxAmount: scholarships.maxAmount,
+        amount: studentScholarships.amount,
+        name: scholarships.name,
+      })
+      .from(studentScholarships)
+      .innerJoin(scholarships, eq(scholarships.id, studentScholarships.scholarshipId))
+      .where(and(
+        eq(studentScholarships.schoolId, schoolId),
+        eq(studentScholarships.studentId, assignment.studentId),
+        eq(studentScholarships.academicYearId, assignment.academicYearId),
+        eq(studentScholarships.termId, assignment.termId),
+        eq(scholarships.active, true),
+      ))
+      .limit(1);
+    if (aid) {
+      const subtotal = items.reduce((sum, item) => sum + Number(item.amount), 0);
+      const calculated = aid.amount ? Number(aid.amount) : subtotal * (Number(aid.percentage) / 100);
+      const discount = Math.min(subtotal, aid.maxAmount ? Math.min(calculated, Number(aid.maxAmount)) : calculated);
+      if (discount > 0) {
+        await tx.insert(invoiceAdjustments).values({
+          invoiceId: invoice.id,
+          type: "discount",
+          amount: discount.toFixed(2),
+          reason: `${aid.name} scholarship`,
+        });
+      }
+    }
 
     await tx
       .update(studentInvoices)

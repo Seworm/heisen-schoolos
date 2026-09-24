@@ -3,6 +3,7 @@ import { CalendarDays, CheckCircle2, Clock3, Sparkles, Users } from "lucide-reac
 import { db } from "@/db";
 import {
   academicYears,
+  classrooms,
   staff,
   streams,
   subjects,
@@ -44,6 +45,7 @@ export default async function TimetablePage({
       day: timetablePeriods.dayOfWeek,
       startsAt: timetablePeriods.startsAt,
       endsAt: timetablePeriods.endsAt,
+      classroom: classrooms.name,
       subject: subjects.name,
       stream: streams.name,
       teacher: staff.firstName,
@@ -54,6 +56,7 @@ export default async function TimetablePage({
     .innerJoin(subjects, eq(subjects.id, timetableEntries.subjectId))
     .innerJoin(streams, eq(streams.id, timetableEntries.streamId))
     .innerJoin(staff, eq(staff.id, timetableEntries.staffId))
+    .leftJoin(classrooms, eq(classrooms.id, timetableEntries.classroomId))
     .where(and(eq(timetableEntries.schoolId, school.id), ...(selectedYearId ? [eq(timetableEntries.academicYearId, selectedYearId)] : []), ...(selectedTermId ? [eq(timetableEntries.termId, selectedTermId)] : [])))
     .orderBy(asc(timetablePeriods.dayOfWeek), asc(timetablePeriods.sortOrder));
   const periods = await db
@@ -128,7 +131,7 @@ export default async function TimetablePage({
 
       <section className="overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-sm">
         <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 px-5 py-5"><div><h2 className="font-bold">Weekly timetable</h2><p className="mt-1 text-xs text-slate-500">Teacher and class assignments for the selected academic period.</p></div><div className="flex gap-3 text-xs text-slate-500"><span className="inline-flex items-center gap-1.5"><Clock3 className="h-3.5 w-3.5" /> {entries.length} lessons</span><span className="inline-flex items-center gap-1.5"><Users className="h-3.5 w-3.5" /> {new Set(entries.map((entry) => `${entry.teacher} ${entry.teacherLast}`)).size} teachers</span></div></div>
-        <div className="overflow-x-auto"><table className="w-full min-w-[760px] text-left text-sm"><thead className="bg-slate-50 text-[11px] uppercase tracking-[0.14em] text-slate-500"><tr><th className="px-5 py-3">Day</th><th className="px-5 py-3">Period</th><th className="px-5 py-3">Class</th><th className="px-5 py-3">Subject</th><th className="px-5 py-3">Teacher</th></tr></thead><tbody className="divide-y divide-slate-100">{entries.map((entry) => <tr key={entry.id} className="transition hover:bg-emerald-50/30"><td className="px-5 py-4 font-semibold text-slate-700">{days[entry.day] ?? entry.day}</td><td className="px-5 py-4 text-slate-500">{entry.period}<span className="ml-1 text-xs text-slate-400">{entry.startsAt}–{entry.endsAt}</span></td><td className="px-5 py-4">{entry.stream}</td><td className="px-5 py-4 font-semibold text-slate-900">{entry.subject}</td><td className="px-5 py-4 text-slate-600">{entry.teacher} {entry.teacherLast}</td></tr>)}{entries.length === 0 && <tr><td colSpan={5} className="px-5 py-16 text-center"><CalendarDays className="mx-auto h-8 w-8 text-slate-300" /><p className="mt-3 font-semibold text-slate-700">No lessons scheduled yet</p><p className="mt-1 text-sm text-slate-500">Assign teachers and generate a timetable to get started.</p></td></tr>}</tbody></table></div>
+        <div className="overflow-x-auto"><table className="w-full min-w-[900px] text-left text-sm"><thead className="bg-slate-50 text-[11px] uppercase tracking-[0.14em] text-slate-500"><tr><th className="px-5 py-3">Day</th><th className="px-5 py-3">Period</th><th className="px-5 py-3">Class</th><th className="px-5 py-3">Subject</th><th className="px-5 py-3">Teacher</th><th className="px-5 py-3">Room</th></tr></thead><tbody className="divide-y divide-slate-100">{entries.map((entry) => <tr key={entry.id} className="transition hover:bg-emerald-50/30"><td className="px-5 py-4 font-semibold text-slate-700">{days[entry.day] ?? entry.day}</td><td className="px-5 py-4 text-slate-500">{entry.period}<span className="ml-1 text-xs text-slate-400">{entry.startsAt}–{entry.endsAt}</span></td><td className="px-5 py-4">{entry.stream}</td><td className="px-5 py-4 font-semibold text-slate-900">{entry.subject}</td><td className="px-5 py-4 text-slate-600">{entry.teacher} {entry.teacherLast}</td><td className="px-5 py-4 text-slate-500">{entry.classroom || "—"}</td></tr>)}{entries.length === 0 && <tr><td colSpan={6} className="px-5 py-16 text-center"><CalendarDays className="mx-auto h-8 w-8 text-slate-300" /><p className="mt-3 font-semibold text-slate-700">No lessons scheduled yet</p><p className="mt-1 text-sm text-slate-500">Assign teachers and generate a timetable to get started.</p></td></tr>}</tbody></table></div>
       </section>
     </main>
   );

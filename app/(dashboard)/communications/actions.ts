@@ -16,6 +16,7 @@ import { requirePermission } from "@/lib/authorization";
 import { getApplicationSession } from "@/lib/auth/compat";
 import { requireCurrentSchool } from "@/lib/current-school";
 import { createAnnouncementNotifications } from "@/lib/communications/recipients";
+import { sendTransactionalSms } from "@/lib/sms";
 
 const AUDIENCES = [
   "school",
@@ -205,6 +206,7 @@ async function parseAnnouncement(formData: FormData) {
 
   const targetId = targetValue || null;
   const expiresAt = parseDate(formData.get("expiresAt"));
+  const sendSms = formData.get("sendSms") === "on";
 
   if (expiresAt && expiresAt <= new Date()) {
     throw new Error("Expiry date must be in the future.");
@@ -216,7 +218,34 @@ async function parseAnnouncement(formData: FormData) {
     audience: audienceValue,
     targetId,
     expiresAt,
+    sendSms,
   };
+}
+
+async function sendAnnouncementSms(input: {
+  schoolId: string;
+  announcementId: string;
+  audience: Audience;
+  targetId: string | null;
+  title: string;
+  body: string;
+}) {
+  if (input.audience !== "parents" || !input.targetId) {
+    throw new Error("SMS announcements require a selected parent/guardian audience.");
+  }
+  const [guardian] = await db
+    .select({ phone: guardians.phone })
+    .from(guardians)
+    .where(and(eq(guardians.id, input.targetId), eq(guardians.schoolId, input.schoolId)))
+    .limit(1);
+  if (!guardian?.phone) throw new Error("The selected parent/guardian has no phone number.");
+  await sendTransactionalSms({
+    recipient: guardian.phone,
+    content: `${input.title}: ${input.body}`,
+  });
+  await db.update(announcements)
+    .set({ smsSentAt: new Date(), updatedAt: new Date() })
+    .where(and(eq(announcements.id, input.announcementId), eq(announcements.schoolId, input.schoolId)));
 }
 
 export async function createAnnouncement(
@@ -279,6 +308,16 @@ export async function createAnnouncement(
         audience: data.audience,
         targetId,
       });
+      if (data.sendSms) {
+        await sendAnnouncementSms({
+          schoolId: school.id,
+          announcementId: announcement.id,
+          audience: data.audience,
+          targetId,
+          title: data.title,
+          body: data.body,
+        });
+      }
     }
 
     revalidatePath("/communications");

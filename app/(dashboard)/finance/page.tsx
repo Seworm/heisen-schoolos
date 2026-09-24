@@ -230,6 +230,13 @@ const overdueAmount = activeInvoices.reduce(
         "Track school income, expenses and net cash position.",
     },
     {
+      href: "/finance/scholarships",
+      icon: GraduationCap,
+      title: "Scholarships",
+      description:
+        "Manage financial aid programmes and term-specific student awards.",
+    },
+    {
       href: "/finance/reports",
       icon: BarChart3,
       title: "Financial Reports",

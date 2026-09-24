@@ -18,6 +18,7 @@
     "db:migrate:cashbook": "node scripts/apply-cashbook-migration.mjs",
     "db:migrate:cashbook-links": "node scripts/apply-cashbook-source-links-migration.mjs",
     "db:migrate:cashbook-reversals": "node scripts/apply-cashbook-reversals-migration.mjs",
+    "db:migrate:announcement-sms": "node scripts/apply-announcement-sms-migration.mjs",
     "db:seed:curriculum": "node scripts/seed-curriculum.mjs",
     "db:reset:deployment": "node scripts/reset-for-deployment.mjs",
     "typecheck": "tsc --noEmit",

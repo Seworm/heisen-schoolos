@@ -3875,6 +3875,7 @@ export const announcements = pgTable("announcements", {
   targetId: uuid("target_id"),
   publishedAt: timestamp("published_at", { withTimezone: true }),
   expiresAt: timestamp("expires_at", { withTimezone: true }),
+  smsSentAt: timestamp("sms_sent_at", { withTimezone: true }),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
 }, (table) => [index("announcements_school_idx").on(table.schoolId), index("announcements_published_idx").on(table.publishedAt)]);

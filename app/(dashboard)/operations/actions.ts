@@ -10,6 +10,7 @@ import {
 import { getApplicationSession } from "@/lib/auth/compat";
 import { requireCurrentSchool } from "@/lib/current-school";
 import { requireRole, SCHOOL_ADMIN_ROLES } from "@/lib/authorization";
+import { writeAuditLog } from "@/lib/audit";
 
 type State = { error?: string; success?: string } | null;
 
@@ -42,6 +43,25 @@ export async function createCalendarEvent(_state: State, form: FormData): Promis
     revalidatePath("/calendar");
     return { success: "Event created." };
   } catch (error) { return { error: error instanceof Error ? error.message : "Could not create event." }; }
+}
+
+export async function deleteCalendarEvent(form: FormData): Promise<void> {
+  const { user, school } = await context();
+  await requireRole(SCHOOL_ADMIN_ROLES, school.id);
+  const id = required(form, "id");
+  const [event] = await db.delete(schoolCalendarEvents)
+    .where(and(eq(schoolCalendarEvents.id, id), eq(schoolCalendarEvents.schoolId, school.id)))
+    .returning({ id: schoolCalendarEvents.id, title: schoolCalendarEvents.title });
+  if (!event) throw new Error("Calendar event not found.");
+  await writeAuditLog({
+    schoolId: school.id,
+    actorAuthUserId: user.id,
+    action: "delete",
+    entity: "school_calendar_event",
+    entityId: event.id,
+    metadata: { title: event.title },
+  });
+  revalidatePath("/calendar");
 }
 
 export async function requestStaffLeave(_state: State, form: FormData): Promise<State> {
