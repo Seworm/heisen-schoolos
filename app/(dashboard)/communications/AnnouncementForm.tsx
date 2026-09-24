@@ -174,7 +174,7 @@ export default function AnnouncementForm({
 
       <label className="flex items-start gap-3 rounded-xl border border-slate-200 bg-slate-50 p-4 text-sm">
         <input type="checkbox" name="sendSms" className="mt-0.5" />
-        <span><span className="font-medium text-slate-800">Send SMS to the selected parent/guardian</span><span className="mt-1 block text-xs text-slate-500">Available when the audience is Parents / guardians and the selected guardian has a valid phone number.</span></span>
+        <span><span className="font-medium text-slate-800">Send SMS to announcement recipients</span><span className="mt-1 block text-xs text-slate-500">Available for a selected parent, class, or stream. Class and stream messages are sent to linked guardians with valid phone numbers.</span></span>
       </label>
 
       <div className="space-y-2">

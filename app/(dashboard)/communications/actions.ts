@@ -10,6 +10,9 @@ import {
   announcementSmsDeliveries,
   classLevels,
   guardians,
+  studentEnrollments,
+  studentGuardians,
+  studentPlacements,
   students,
   streams,
 } from "@/db/schema";
@@ -231,44 +234,85 @@ async function sendAnnouncementSms(input: {
   title: string;
   body: string;
 }) {
-  if (input.audience !== "parents" || !input.targetId) {
-    throw new Error("SMS announcements require a selected parent/guardian audience.");
+  if (
+    !["parents", "class", "stream"].includes(input.audience) ||
+    !input.targetId
+  ) {
+    throw new Error("SMS announcements require a selected parent, class, or stream target.");
   }
-  const [guardian] = await db
-    .select({ phone: guardians.phone })
-    .from(guardians)
-    .where(and(eq(guardians.id, input.targetId), eq(guardians.schoolId, input.schoolId)))
-    .limit(1);
-  if (!guardian?.phone) throw new Error("The selected parent/guardian has no phone number.");
-  const attemptedAt = new Date();
-  try {
-    const delivery = await sendTransactionalSms({
-      recipient: guardian.phone,
-      content: `${input.title}: ${input.body}`,
-    });
-    await db.insert(announcementSmsDeliveries).values({
-      schoolId: input.schoolId,
-      announcementId: input.announcementId,
-      guardianId: input.targetId,
-      recipient: delivery.recipient,
-      status: "sent",
-      providerMessageId: delivery.messageId == null ? null : String(delivery.messageId),
-      attemptedAt,
-    });
+
+  const guardianTargets = input.audience === "parents"
+    ? await db
+        .select({ id: guardians.id, phone: guardians.phone })
+        .from(guardians)
+        .where(and(eq(guardians.id, input.targetId!), eq(guardians.schoolId, input.schoolId)))
+    : await db
+        .selectDistinct({ id: guardians.id, phone: guardians.phone })
+        .from(studentGuardians)
+        .innerJoin(guardians, eq(guardians.id, studentGuardians.guardianId))
+        .innerJoin(students, eq(students.id, studentGuardians.studentId))
+        .innerJoin(studentEnrollments, eq(studentEnrollments.studentId, students.id))
+        .innerJoin(studentPlacements, eq(studentPlacements.studentEnrollmentId, studentEnrollments.id))
+        .innerJoin(streams, eq(streams.id, studentPlacements.streamId))
+        .where(and(
+          eq(guardians.schoolId, input.schoolId),
+          eq(students.schoolId, input.schoolId),
+          eq(studentEnrollments.status, "active"),
+          eq(studentPlacements.status, "active"),
+          input.audience === "class"
+            ? eq(streams.classLevelId, input.targetId!)
+            : eq(streams.id, input.targetId!),
+        ));
+
+  if (guardianTargets.length === 0) {
+    throw new Error("No guardians with phone numbers were found for this announcement target.");
+  }
+
+  const failures: string[] = [];
+  let delivered = 0;
+  for (const guardian of guardianTargets) {
+    if (!guardian.phone) {
+      failures.push("A selected guardian has no phone number.");
+      continue;
+    }
+    const attemptedAt = new Date();
+    try {
+      const delivery = await sendTransactionalSms({
+        recipient: guardian.phone,
+        content: `${input.title}: ${input.body}`,
+      });
+      await db.insert(announcementSmsDeliveries).values({
+        schoolId: input.schoolId,
+        announcementId: input.announcementId,
+        guardianId: guardian.id,
+        recipient: delivery.recipient,
+        status: "sent",
+        providerMessageId: delivery.messageId == null ? null : String(delivery.messageId),
+        attemptedAt,
+      });
+      delivered += 1;
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "SMS delivery failed.";
+      failures.push(message);
+      await db.insert(announcementSmsDeliveries).values({
+        schoolId: input.schoolId,
+        announcementId: input.announcementId,
+        guardianId: guardian.id,
+        recipient: guardian.phone,
+        status: "failed",
+        errorMessage: message,
+        attemptedAt,
+      });
+    }
+  }
+
+  if (delivered > 0) {
     await db.update(announcements)
-      .set({ smsSentAt: attemptedAt, updatedAt: new Date() })
+      .set({ smsSentAt: new Date(), updatedAt: new Date() })
       .where(and(eq(announcements.id, input.announcementId), eq(announcements.schoolId, input.schoolId)));
-  } catch (error) {
-    await db.insert(announcementSmsDeliveries).values({
-      schoolId: input.schoolId,
-      announcementId: input.announcementId,
-      guardianId: input.targetId,
-      recipient: guardian.phone,
-      status: "failed",
-      errorMessage: error instanceof Error ? error.message : "SMS delivery failed.",
-      attemptedAt,
-    });
-    throw error;
+  }
+  if (failures.length > 0) {
+    throw new Error(`SMS sent to ${delivered} recipient(s); ${failures.length} delivery attempt(s) failed.`);
   }
 }
 
