@@ -28,30 +28,30 @@ export function SchoolTopbar({ school }: SchoolTopbarProps) {
   const schoolName = school?.name?.trim() || "School";
 
   return (
-    <header className="sticky top-0 z-30 flex h-20 items-center border-b border-slate-200 bg-white/90 px-4 backdrop-blur sm:px-6 lg:px-8">
+    <header className="sticky top-0 z-30 flex h-20 items-center border-b border-white/10 bg-[#081c35] px-4 text-white backdrop-blur sm:px-6 lg:px-8">
       <div className="flex min-w-0 flex-1 items-center gap-4">
         {/* Mobile menu */}
         <button
           type="button"
           aria-label="Open navigation"
           onClick={() => setMobileOpen((open) => !open)}
-          className="flex h-10 w-10 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-600 transition-colors hover:bg-slate-50 hover:text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-500 lg:hidden"
+          className="flex h-10 w-10 items-center justify-center rounded-lg border border-white/10 bg-white/5 text-slate-200 transition-colors hover:bg-white/10 hover:text-white focus:outline-none focus:ring-2 focus:ring-[#f6a53a] lg:hidden"
         >
           <Menu className="h-5 w-5" />
         </button>
 
         {/* School identity */}
         <div className="min-w-0">
-          <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-slate-400">
+          <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-slate-300">
             SchoolOS workspace
           </p>
 
-          <h1 className="mt-0.5 truncate text-base font-bold tracking-tight text-slate-900 sm:text-lg">
+          <h1 className="mt-0.5 truncate text-base font-bold tracking-tight text-white sm:text-lg">
             {schoolName}
           </h1>
         </div>
         {mobileOpen && (
-          <div className="absolute left-0 right-0 top-20 border-b border-slate-200 bg-white p-4 shadow-xl lg:hidden">
+          <div className="absolute left-0 right-0 top-20 border-b border-white/10 bg-[#081c35] p-4 shadow-xl lg:hidden">
             <nav className="grid gap-1 sm:grid-cols-2">
               {[
                 ["Dashboard", "/dashboard"],
@@ -63,7 +63,7 @@ export function SchoolTopbar({ school }: SchoolTopbarProps) {
                 ["Communications", "/communications"],
                 ["Settings", "/settings"],
               ].map(([label, href]) => (
-                  <Link key={href} href={href} onClick={() => setMobileOpen(false)} className="rounded-xl px-4 py-3 text-sm font-semibold text-slate-700 hover:bg-slate-100 hover:text-sky-700">
+                  <Link key={href} href={href} onClick={() => setMobileOpen(false)} className="rounded-xl px-4 py-3 text-sm font-semibold text-slate-200 hover:bg-white/5 hover:text-white">
                   {label}
                 </Link>
               ))}
@@ -72,8 +72,8 @@ export function SchoolTopbar({ school }: SchoolTopbarProps) {
         )}
       </div>
 
-      <div className="hidden items-center gap-2 rounded-xl bg-sky-50 px-3 py-2 text-xs font-semibold text-sky-700 xl:flex">
-        <span className="h-2 w-2 rounded-full bg-sky-500" />
+      <div className="hidden items-center gap-2 rounded-xl bg-[#f6a53a]/10 px-3 py-2 text-xs font-semibold text-[#f9d49f] xl:flex">
+        <span className="h-2 w-2 rounded-full bg-[#f6a53a]" />
         Operations running normally
       </div>
 
@@ -83,11 +83,11 @@ export function SchoolTopbar({ school }: SchoolTopbarProps) {
         <button
           type="button"
           aria-label="Search"
-          className="hidden h-10 items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 text-sm font-medium text-slate-500 transition-colors hover:border-slate-300 hover:bg-slate-50 hover:text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-500 md:flex"
+          className="hidden h-10 items-center gap-2 rounded-lg border border-white/10 bg-white/5 px-3 text-sm font-medium text-slate-200 transition-colors hover:border-white/15 hover:bg-white/10 hover:text-white focus:outline-none focus:ring-2 focus:ring-[#f6a53a] md:flex"
         >
           <Search className="h-4 w-4" />
           <span>Search</span>
-          <kbd className="ml-2 rounded border border-slate-200 bg-slate-50 px-1.5 py-0.5 text-[10px] font-semibold text-slate-400">
+          <kbd className="ml-2 rounded border border-white/10 bg-white/5 px-1.5 py-0.5 text-[10px] font-semibold text-slate-300">
             /
           </kbd>
         </button>
@@ -96,7 +96,7 @@ export function SchoolTopbar({ school }: SchoolTopbarProps) {
         <button
           type="button"
           aria-label="Search"
-          className="flex h-10 w-10 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-600 transition-colors hover:bg-slate-50 hover:text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-500 md:hidden"
+          className="flex h-10 w-10 items-center justify-center rounded-lg border border-white/10 bg-white/5 text-slate-200 transition-colors hover:bg-white/10 hover:text-white focus:outline-none focus:ring-2 focus:ring-[#f6a53a] md:hidden"
         >
           <Search className="h-4 w-4" />
         </button>
@@ -105,11 +105,11 @@ export function SchoolTopbar({ school }: SchoolTopbarProps) {
         <button
           type="button"
           aria-label="Notifications"
-          className="relative flex h-10 w-10 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-600 transition-colors hover:bg-slate-50 hover:text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-500"
+          className="relative flex h-10 w-10 items-center justify-center rounded-lg border border-white/10 bg-white/5 text-slate-200 transition-colors hover:bg-white/10 hover:text-white focus:outline-none focus:ring-2 focus:ring-[#f6a53a]"
         >
           <Bell className="h-[18px] w-[18px]" strokeWidth={2} />
 
-          <span className="absolute right-2 top-2 h-2 w-2 rounded-full bg-[#ce1126] ring-2 ring-white" />
+          <span className="absolute right-2 top-2 h-2 w-2 rounded-full bg-[#f6a53a] ring-2 ring-[#081c35]" />
         </button>
 
         {/* Divider */}
@@ -121,36 +121,36 @@ export function SchoolTopbar({ school }: SchoolTopbarProps) {
             type="button"
             onClick={() => setProfileOpen((open) => !open)}
             aria-expanded={profileOpen}
-            className="flex h-10 items-center gap-2 rounded-lg border border-slate-200 bg-white px-2 transition-colors hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-sky-500 sm:px-2.5"
+            className="flex h-10 items-center gap-2 rounded-lg border border-white/10 bg-white/5 px-2 transition-colors hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-[#f6a53a] sm:px-2.5"
           >
-            <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-slate-900 text-white">
+            <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#f6a53a] text-[#081c35]">
               <User className="h-4 w-4" strokeWidth={2} />
             </span>
 
             <span className="hidden max-w-[150px] text-left sm:block">
-              <span className="block truncate text-xs font-semibold text-slate-900">
+              <span className="block truncate text-xs font-semibold text-white">
                 Administrator
               </span>
 
-              <span className="block truncate text-[10px] font-medium text-slate-400">
+              <span className="block truncate text-[10px] font-medium text-slate-300">
                 School Admin
               </span>
             </span>
 
             <ChevronDown
-              className={`hidden h-4 w-4 text-slate-400 transition-transform sm:block ${
+              className={`hidden h-4 w-4 text-slate-300 transition-transform sm:block ${
                 profileOpen ? "rotate-180" : ""
               }`}
             />
           </button>
 
           {profileOpen && (
-            <div className="absolute right-0 top-[calc(100%+8px)] w-56 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-xl shadow-slate-900/10">
-              <div className="border-b border-slate-100 px-4 py-3">
-                <p className="text-sm font-semibold text-slate-900">
+            <div className="absolute right-0 top-[calc(100%+8px)] w-56 overflow-hidden rounded-xl border border-white/10 bg-[#0d2346] shadow-xl shadow-black/20">
+              <div className="border-b border-white/10 px-4 py-3">
+                <p className="text-sm font-semibold text-white">
                   Administrator
                 </p>
-                <p className="mt-0.5 text-xs text-slate-500">
+                <p className="mt-0.5 text-xs text-slate-300">
                   School administrator
                 </p>
               </div>
@@ -158,17 +158,17 @@ export function SchoolTopbar({ school }: SchoolTopbarProps) {
               <div className="p-1.5">
                 <Link
                   href="/settings"
-                  className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm font-medium text-slate-700 transition-colors hover:bg-slate-50 hover:text-slate-900"
+                  className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm font-medium text-slate-200 transition-colors hover:bg-white/5 hover:text-white"
                 >
-                  <Settings className="h-4 w-4 text-slate-400" />
+                  <Settings className="h-4 w-4 text-slate-300" />
                   Settings
                 </Link>
               </div>
 
-              <div className="border-t border-slate-100 p-1.5">
+              <div className="border-t border-white/10 p-1.5">
                 <Link
                   href="/login"
-                  className="flex w-full items-center rounded-lg px-3 py-2.5 text-left text-sm font-semibold text-red-600 transition-colors hover:bg-red-50"
+                  className="flex w-full items-center rounded-lg px-3 py-2.5 text-left text-sm font-semibold text-[#f9d49f] transition-colors hover:bg-[#f6a53a]/10"
                 >
                   Sign out
                 </Link>

@@ -3,8 +3,8 @@
 
 /* =========================================================
    HEISEN SCHOOL OS
-   Institutional Design System
-   Cleaner modern slate / navy / teal palette
+   Adesuapa-inspired design system
+   Dark navy + white + warm amber accent
    ========================================================= */
 
 :root {
@@ -12,50 +12,50 @@
      CORE
      ======================================================= */
 
-  --background: #f3f7fb;
-  --foreground: #0f172a;
+  --background: #081c35;
+  --foreground: #ecf4ff;
 
   --card: #ffffff;
-  --card-foreground: #0f172a;
+  --card-foreground: #0b1730;
 
   /* =======================================================
      PRIMARY BRAND
      ======================================================= */
 
-  --primary: #0f172a;
+  --primary: #0b1f3a;
   --primary-foreground: #ffffff;
 
-  --primary-hover: #1e293b;
-  --primary-active: #020617;
+  --primary-hover: #12284a;
+  --primary-active: #07172c;
 
-  --primary-soft: #e8f1ff;
-  --primary-soft-foreground: #0f172a;
+  --primary-soft: #ecf5ff;
+  --primary-soft-foreground: #0b1f3a;
 
   /* =======================================================
      BRAND SCALE
      ======================================================= */
 
-  --brand-950: #020817;
-  --brand-900: #0f172a;
-  --brand-800: #172554;
-  --brand-700: #1d4ed8;
-  --brand-600: #2563eb;
-  --brand-500: #7dd3fc;
-  --brand-400: #bae6fd;
-  --brand-300: #dbeafe;
-  --brand-200: #e0f2fe;
-  --brand-100: #f0f9ff;
-  --brand-50: #f8fbff;
+  --brand-950: #040d1b;
+  --brand-900: #081c35;
+  --brand-800: #0d2b4d;
+  --brand-700: #153e68;
+  --brand-600: #1d5287;
+  --brand-500: #f6a53a;
+  --brand-400: #f9c97d;
+  --brand-300: #fce6bb;
+  --brand-200: #fef1d8;
+  --brand-100: #fff8ee;
+  --brand-50: #fffaf3;
 
   /* =======================================================
      SECONDARY
      ======================================================= */
 
-  --secondary: #2563eb;
-  --secondary-foreground: #ffffff;
+  --secondary: #f6a53a;
+  --secondary-foreground: #091b2f;
 
-  --secondary-hover: #1e293b;
-  --secondary-active: #020617;
+  --secondary-hover: #e9952a;
+  --secondary-active: #d8841d;
 
   /* =======================================================
      MUTED / NEUTRAL
@@ -64,8 +64,8 @@
   --muted: #edf3fb;
   --muted-foreground: #526074;
 
-  --accent: #dbeafe;
-  --accent-foreground: #0f172a;
+  --accent: #fff1d5;
+  --accent-foreground: #0b1730;
 
   /* =======================================================
      BORDERS
@@ -76,7 +76,7 @@
 
   --input: #bfd4ee;
 
-  --ring: #2563eb;
+  --ring: #f6a53a;
 
   /* =======================================================
      SEMANTIC COLOURS
@@ -87,8 +87,8 @@
   --success-soft: #dff7f5;
   --success-border: #99f6e4;
 
-  --warning: #b45309;
-  --warning-hover: #92400e;
+  --warning: #d97706;
+  --warning-hover: #b45309;
   --warning-soft: #fff7ed;
   --warning-border: #fdba74;
 
@@ -97,9 +97,9 @@
   --danger-soft: #fff0f1;
   --danger-border: #ef9aa5;
 
-  --info: #2563eb;
-  --info-hover: #1d4ed8;
-  --info-soft: #eff6ff;
+  --info: #153e68;
+  --info-hover: #0d2b4d;
+  --info-soft: #edf6ff;
   --info-border: #93c5fd;
 
   /* =======================================================
@@ -445,8 +445,8 @@ body {
   margin: 0;
 
   background:
-    radial-gradient(circle at top left, rgb(96 165 250 / 0.18), transparent 23rem),
-    radial-gradient(circle at bottom right, rgb(14 165 233 / 0.10), transparent 24rem),
+    radial-gradient(circle at top left, rgb(246 165 58 / 0.12), transparent 22rem),
+    radial-gradient(circle at bottom right, rgb(17 87 134 / 0.10), transparent 26rem),
     var(--background);
 
   color: var(--foreground);
