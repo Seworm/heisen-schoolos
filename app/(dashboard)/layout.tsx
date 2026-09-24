@@ -31,13 +31,13 @@ export default async function DashboardLayout({
     isPlatformAdmin ? await getAvailableSchools() : [];
 
   return (
-    <div className="min-h-screen bg-[radial-gradient(circle_at_top_left,_rgba(37,99,235,0.12),transparent_20%),radial-gradient(circle_at_bottom_right,_rgba(14,165,233,0.10),transparent_22%),#f3f7fb] text-slate-900">
+    <div className="min-h-screen bg-[radial-gradient(circle_at_top_left,_rgba(246,165,58,0.08),transparent_18%),radial-gradient(circle_at_bottom_right,_rgba(255,255,255,0.04),transparent_22%),#071c34] text-slate-100">
       <div className="mx-auto flex min-h-screen max-w-[1800px] gap-5 px-3 py-3 lg:px-4">
         <div className="hidden lg:block">
           <SchoolSidebar isPlatformAdmin={isPlatformAdmin} />
         </div>
 
-        <div className="min-w-0 flex-1 rounded-[28px] border border-slate-200 bg-white/90 shadow-[0_18px_60px_rgba(15,23,42,0.06)] backdrop-blur-xl">
+        <div className="min-w-0 flex-1 rounded-[28px] border border-white/10 bg-[#0b1f3a]/95 shadow-[0_18px_60px_rgba(0,0,0,0.26)] backdrop-blur-xl">
           <SchoolTopbar
             school={school}
             availableSchools={availableSchools}

@@ -603,7 +603,7 @@ select:focus-visible {
 .page-shell {
   width: 100%;
   min-height: calc(100vh - 5rem);
-  background: var(--background);
+  background: transparent;
 }
 
 .page-container {
@@ -627,7 +627,7 @@ select:focus-visible {
 
 .page-title {
   margin: 0;
-  color: var(--text-primary);
+  color: #f8fbff;
   font-size: 24px;
   line-height: 1.25;
   font-weight: 700;
@@ -636,7 +636,7 @@ select:focus-visible {
 
 .page-description {
   margin-top: 6px;
-  color: var(--text-muted);
+  color: rgba(226, 232, 240, 0.82);
   font-size: 14px;
   line-height: 1.5;
 }
