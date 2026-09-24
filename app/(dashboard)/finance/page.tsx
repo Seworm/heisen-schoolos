@@ -246,42 +246,63 @@ const overdueAmount = activeInvoices.reduce(
   ];
 
   return (
-    <main className="space-y-8 p-6 lg:p-8">
-      {/* Header */}
-      <section className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
-        <div>
-          <div className="mb-2 flex items-center gap-2 text-sm font-medium text-muted-foreground">
-            <Banknote className="h-4 w-4" />
-            Finance
+    <main className="space-y-8">
+      <section className="relative overflow-hidden rounded-[28px] border border-[#dfece4] bg-[linear-gradient(135deg,#0f1f1a_0%,#123a2d_34%,#0a6a46_100%)] p-6 text-white shadow-[0_25px_80px_rgba(12,31,24,0.22)] sm:p-8">
+        <div className="absolute right-[-35px] top-[-30px] h-40 w-40 rounded-full bg-[#fcd116]/20 blur-2xl" />
+        <div className="absolute bottom-[-20px] left-16 h-28 w-28 rounded-full bg-white/10 blur-2xl" />
+
+        <div className="relative flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
+          <div>
+            <div className="mb-2 flex items-center gap-2 text-xs font-bold uppercase tracking-[0.18em] text-emerald-100/80">
+              <Banknote className="h-4 w-4" />
+              Finance
+            </div>
+
+            <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">
+              Financial operations
+            </h1>
+            <p className="mt-3 max-w-2xl text-sm leading-6 text-emerald-50/80">
+              Track collections, outstanding balances, fee structures, feeding, and cash position across the school.
+            </p>
           </div>
-
-          <h1 className="text-3xl font-semibold tracking-tight">
-            Finance
-          </h1>
-
-          <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
-            Manage school fees, invoices, payments,
-            scholarships and financial reporting from one
-            place.
-          </p>
-        </div>
-
-        <div className="flex flex-wrap gap-2">
-          <Link
-            href="/finance/invoices/new"
-            className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground shadow-sm transition hover:opacity-90"
-          >
-            <FileText className="h-4 w-4" />
-            New invoice
-          </Link>
 
           <Link
             href="/finance/payments/new"
-            className="inline-flex items-center gap-2 rounded-lg border bg-background px-4 py-2.5 text-sm font-medium shadow-sm transition hover:bg-muted"
+            className="inline-flex items-center justify-center rounded-xl bg-[#fcd116] px-5 py-3 text-sm font-bold text-[#0f1f1a] shadow-lg shadow-[#fcd116]/20 transition hover:bg-[#ffe36b]"
           >
-            <HandCoins className="h-4 w-4" />
             Record payment
           </Link>
+        </div>
+      </section>
+
+      <section className="rounded-[28px] border border-[#dfece4] bg-white p-5 shadow-sm">
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-emerald-700">
+              School finance
+            </p>
+            <h2 className="mt-2 text-xl font-semibold text-slate-900">
+              Manage fees, invoices, payments and financial reporting from one place.
+            </h2>
+          </div>
+
+          <div className="flex flex-wrap gap-2">
+            <Link
+              href="/finance/invoices/new"
+              className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground shadow-sm transition hover:opacity-90"
+            >
+              <FileText className="h-4 w-4" />
+              New invoice
+            </Link>
+
+            <Link
+              href="/finance/payments/new"
+              className="inline-flex items-center gap-2 rounded-lg border bg-background px-4 py-2.5 text-sm font-medium shadow-sm transition hover:bg-muted"
+            >
+              <HandCoins className="h-4 w-4" />
+              Record payment
+            </Link>
+          </div>
         </div>
       </section>
 

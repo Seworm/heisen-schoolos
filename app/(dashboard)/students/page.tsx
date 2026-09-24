@@ -35,124 +35,63 @@ export default async function StudentsPage() {
   const studentCount = Number(studentCountResult[0]?.value ?? 0);
 
   return (
-    <div className="mx-auto max-w-7xl px-6 py-8 lg:px-8">
-      {/* Header */}
-      <div className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
-        <div>
-          <p className="text-sm font-medium text-slate-500">
-            Student Management
-          </p>
+    <div className="space-y-6">
+      <section className="relative overflow-hidden rounded-[28px] border border-[#dfece4] bg-[linear-gradient(135deg,#0f221b_0%,#0f382b_36%,#0c7a4f_100%)] p-6 text-white shadow-[0_25px_80px_rgba(12,31,24,0.22)] sm:p-8">
+        <div className="absolute right-[-40px] top-[-40px] h-48 w-48 rounded-full bg-[#fcd116]/20 blur-3xl" />
+        <div className="absolute bottom-[-30px] left-20 h-28 w-28 rounded-full bg-white/10 blur-2xl" />
 
-          <div className="mt-1 flex items-center gap-3">
-            <h1 className="text-3xl font-semibold tracking-tight text-slate-950">
-              Students
-            </h1>
-
-            <span className="rounded-full border border-slate-200 bg-slate-50 px-2.5 py-1 text-xs font-medium text-slate-600">
-              {studentCount}{" "}
-              {studentCount === 1 ? "student" : "students"}
-            </span>
+        <div className="relative flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
+          <div>
+            <p className="text-xs font-bold uppercase tracking-[0.18em] text-emerald-100/80">Student management</p>
+            <h1 className="mt-3 text-3xl font-bold tracking-tight sm:text-4xl">Student records</h1>
+            <p className="mt-3 max-w-2xl text-sm leading-6 text-emerald-50/80">
+              Keep admissions, personal profiles, and active enrollment information organized for {school.name}.
+            </p>
           </div>
 
-          <p className="mt-2 max-w-2xl text-sm text-slate-500">
-            Manage student records, personal information, and enrollment
-            information for {school.name}.
-          </p>
-        </div>
-
-        <Link
-          href="/students/new"
-          className="inline-flex items-center justify-center gap-2 rounded-lg bg-[#006b3f] px-4 py-2.5 text-sm font-bold text-white shadow-sm transition hover:bg-[#005530] focus:outline-none focus:ring-2 focus:ring-[#fcd116] focus:ring-offset-2"
-        >
-          <span className="text-lg leading-none">+</span>
-          Add Student
-        </Link>
-      </div>
-
-      {/* Summary */}
-      <section className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <div className="group rounded-xl border border-slate-200 bg-white p-5 shadow-sm transition hover:border-slate-300 hover:shadow-md">
-          <div className="flex items-start justify-between">
-            <div>
-              <p className="text-sm font-medium text-slate-500">
-                Total Students
-              </p>
-
-              <p className="mt-2 text-3xl font-semibold tracking-tight text-slate-950">
-                {studentCount}
-              </p>
-            </div>
-
-            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-slate-100 text-sm font-semibold text-slate-700">
-              ST
-            </div>
-          </div>
-
-          <p className="mt-4 text-xs text-slate-400">
-            Registered students
-          </p>
-        </div>
-
-        <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-          <p className="text-sm font-medium text-slate-500">
-            Active Records
-          </p>
-
-          <p className="mt-2 text-3xl font-semibold tracking-tight text-slate-950">
-            {studentCount}
-          </p>
-
-          <p className="mt-4 text-xs text-slate-400">
-            Current student records
-          </p>
-        </div>
-
-        <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-          <p className="text-sm font-medium text-slate-500">
-            School
-          </p>
-
-          <p className="mt-2 truncate text-lg font-semibold text-slate-950">
-            {school.name}
-          </p>
-
-          <p className="mt-4 text-xs text-slate-400">
-            Current school context
-          </p>
-        </div>
-
-        <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-          <p className="text-sm font-medium text-slate-500">
-            Student Management
-          </p>
-
-          <p className="mt-2 text-lg font-semibold text-slate-950">
-            Ready
-          </p>
-
-          <p className="mt-4 text-xs text-slate-400">
-            Admissions and records
-          </p>
+          <Link
+            href="/students/new"
+            className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#fcd116] px-5 py-3 text-sm font-bold text-[#0f1f1a] shadow-lg shadow-[#fcd116]/20 transition hover:bg-[#ffe36b]"
+          >
+            <span className="text-lg leading-none">+</span>
+            Add student
+          </Link>
         </div>
       </section>
 
-      {/* Student Records */}
-      <section className="mt-6 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
-        <div className="flex flex-col gap-4 border-b border-slate-200 px-6 py-5 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <h2 className="text-base font-semibold text-slate-950">
-              Student records
-            </h2>
+      <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="rounded-[24px] border border-[#dfece4] bg-white p-5 shadow-sm">
+          <p className="text-sm font-medium text-slate-500">Total students</p>
+          <p className="mt-3 text-3xl font-bold tracking-tight text-slate-950">{studentCount}</p>
+        </div>
 
-            <p className="mt-1 text-sm text-slate-500">
-              Students registered under {school.name}.
-            </p>
+        <div className="rounded-[24px] border border-[#dfece4] bg-white p-5 shadow-sm">
+          <p className="text-sm font-medium text-slate-500">Active records</p>
+          <p className="mt-3 text-3xl font-bold tracking-tight text-slate-950">{studentCount}</p>
+        </div>
+
+        <div className="rounded-[24px] border border-[#dfece4] bg-white p-5 shadow-sm">
+          <p className="text-sm font-medium text-slate-500">School</p>
+          <p className="mt-3 truncate text-lg font-bold text-slate-950">{school.name}</p>
+        </div>
+
+        <div className="rounded-[24px] border border-[#dfece4] bg-white p-5 shadow-sm">
+          <p className="text-sm font-medium text-slate-500">Status</p>
+          <p className="mt-3 text-lg font-bold text-slate-950">Ready</p>
+        </div>
+      </section>
+
+      <section className="overflow-hidden rounded-[28px] border border-[#dfece4] bg-white shadow-[0_16px_45px_rgba(15,23,42,0.04)]">
+        <div className="flex flex-col gap-4 border-b border-[#e7efe9] bg-[#f7faf8] px-6 py-5 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <h2 className="text-base font-semibold text-slate-950">Student directory</h2>
+            <p className="mt-1 text-sm text-slate-500">Students registered under {school.name}.</p>
           </div>
 
           {studentList.length > 0 && (
             <Link
               href="/students/new"
-              className="inline-flex items-center justify-center rounded-lg border border-[#006b3f]/25 bg-[#e8f3ed] px-3.5 py-2 text-sm font-bold text-[#006b3f] transition hover:bg-[#fff8d9]"
+              className="inline-flex items-center justify-center rounded-lg border border-[#cfe4d5] bg-white px-3.5 py-2 text-sm font-bold text-[#006b3f] hover:bg-[#effaf2]"
             >
               Register another
             </Link>

@@ -31,23 +31,21 @@ export default async function DashboardLayout({
     isPlatformAdmin ? await getAvailableSchools() : [];
 
   return (
-    <div className="min-h-screen bg-[#f5faf7] text-[#183126]">
-      <div className="flex min-h-screen">
-        {/* Fixed navigation */}
-        <SchoolSidebar isPlatformAdmin={isPlatformAdmin} />
+    <div className="min-h-screen bg-[radial-gradient(circle_at_top_left,_rgba(37,99,235,0.12),transparent_20%),radial-gradient(circle_at_bottom_right,_rgba(14,165,233,0.10),transparent_22%),#f3f7fb] text-slate-900">
+      <div className="mx-auto flex min-h-screen max-w-[1800px] gap-5 px-3 py-3 lg:px-4">
+        <div className="hidden lg:block">
+          <SchoolSidebar isPlatformAdmin={isPlatformAdmin} />
+        </div>
 
-        {/* Application workspace */}
-        <div className="min-w-0 flex-1 bg-[#f5faf7]">
+        <div className="min-w-0 flex-1 rounded-[28px] border border-slate-200 bg-white/90 shadow-[0_18px_60px_rgba(15,23,42,0.06)] backdrop-blur-xl">
           <SchoolTopbar
             school={school}
             availableSchools={availableSchools}
             isPlatformAdmin={isPlatformAdmin}
           />
 
-          <main className="min-h-[calc(100vh-4rem)] px-4 py-6 sm:px-8 lg:px-10">
-            <div className="mx-auto w-full max-w-[1600px]">
-              {children}
-            </div>
+          <main className="min-h-[calc(100vh-5rem)] px-4 py-5 sm:px-6 lg:px-8">
+            <div className="mx-auto w-full max-w-[1600px]">{children}</div>
           </main>
         </div>
       </div>

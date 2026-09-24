@@ -4,7 +4,7 @@
 /* =========================================================
    HEISEN SCHOOL OS
    Institutional Design System
-   Ghanaian red / gold / green / black
+   Cleaner modern slate / navy / teal palette
    ========================================================= */
 
 :root {
@@ -12,8 +12,8 @@
      CORE
      ======================================================= */
 
-  --background: #f6faf7;
-  --foreground: #183126;
+  --background: #f3f7fb;
+  --foreground: #0f172a;
 
   --card: #ffffff;
   --card-foreground: #0f172a;
@@ -22,36 +22,36 @@
      PRIMARY BRAND
      ======================================================= */
 
-  --primary: #006b3f;
+  --primary: #0f172a;
   --primary-foreground: #ffffff;
 
-  --primary-hover: #005530;
-  --primary-active: #003d22;
+  --primary-hover: #1e293b;
+  --primary-active: #020617;
 
-  --primary-soft: #e8f3ed;
-  --primary-soft-foreground: #006b3f;
+  --primary-soft: #e8f1ff;
+  --primary-soft-foreground: #0f172a;
 
   /* =======================================================
      BRAND SCALE
      ======================================================= */
 
-  --brand-950: #111111;
-  --brand-900: #003d22;
-  --brand-800: #005530;
-  --brand-700: #006b3f;
-  --brand-600: #00874f;
-  --brand-500: #fcd116;
-  --brand-400: #ffe36e;
-  --brand-300: #fbe89b;
-  --brand-200: #f9efc0;
-  --brand-100: #fff8d9;
-  --brand-50: #fffdf0;
+  --brand-950: #020817;
+  --brand-900: #0f172a;
+  --brand-800: #172554;
+  --brand-700: #1d4ed8;
+  --brand-600: #2563eb;
+  --brand-500: #7dd3fc;
+  --brand-400: #bae6fd;
+  --brand-300: #dbeafe;
+  --brand-200: #e0f2fe;
+  --brand-100: #f0f9ff;
+  --brand-50: #f8fbff;
 
   /* =======================================================
      SECONDARY
      ======================================================= */
 
-  --secondary: #006b3f;
+  --secondary: #2563eb;
   --secondary-foreground: #ffffff;
 
   --secondary-hover: #1e293b;
@@ -61,46 +61,46 @@
      MUTED / NEUTRAL
      ======================================================= */
 
-  --muted: #f1f5f0;
-  --muted-foreground: #5b665f;
+  --muted: #edf3fb;
+  --muted-foreground: #526074;
 
-  --accent: #fff8d9;
-  --accent-foreground: #111111;
+  --accent: #dbeafe;
+  --accent-foreground: #0f172a;
 
   /* =======================================================
      BORDERS
      ======================================================= */
 
-  --border: #dfe7df;
-  --border-strong: #bdccbe;
+  --border: #dfe8f3;
+  --border-strong: #bfd4ee;
 
-  --input: #bdccbe;
+  --input: #bfd4ee;
 
-  --ring: #006b3f;
+  --ring: #2563eb;
 
   /* =======================================================
      SEMANTIC COLOURS
      ======================================================= */
 
-  --success: #006b3f;
-  --success-hover: #005530;
-  --success-soft: #e8f3ed;
-  --success-border: #84c9a4;
+  --success: #0f766e;
+  --success-hover: #115e59;
+  --success-soft: #dff7f5;
+  --success-border: #99f6e4;
 
-  --warning: #b88600;
-  --warning-hover: #8c6900;
-  --warning-soft: #fff8d9;
-  --warning-border: #fcd116;
+  --warning: #b45309;
+  --warning-hover: #92400e;
+  --warning-soft: #fff7ed;
+  --warning-border: #fdba74;
 
   --danger: #ce1126;
   --danger-hover: #a50d1e;
   --danger-soft: #fff0f1;
   --danger-border: #ef9aa5;
 
-  --info: #006b3f;
-  --info-hover: #005530;
-  --info-soft: #e8f3ed;
-  --info-border: #84c9a4;
+  --info: #2563eb;
+  --info-hover: #1d4ed8;
+  --info-soft: #eff6ff;
+  --info-border: #93c5fd;
 
   /* =======================================================
      TEXT
@@ -132,10 +132,10 @@
      ======================================================= */
 
   --sidebar: #ffffff;
-  --sidebar-hover: #f0f8f3;
-  --sidebar-active: #e4f3e9;
-  --sidebar-text: #183126;
-  --sidebar-muted: #718077;
+  --sidebar-hover: #eef4ff;
+  --sidebar-active: #dfeeff;
+  --sidebar-text: #0f172a;
+  --sidebar-muted: #526074;
 
   /* =======================================================
      SHADOWS
@@ -445,11 +445,8 @@ body {
   margin: 0;
 
   background:
-    radial-gradient(
-      circle at 100% 0%,
-      rgb(0 107 63 / 0.035),
-      transparent 28rem
-    ),
+    radial-gradient(circle at top left, rgb(252 209 22 / 0.18), transparent 23rem),
+    radial-gradient(circle at bottom right, rgb(0 107 63 / 0.10), transparent 24rem),
     var(--background);
 
   color: var(--foreground);
@@ -466,6 +463,12 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
+}
+
+body * {
+  transition-property: background-color, border-color, color, box-shadow, transform;
+  transition-duration: 150ms;
+  transition-timing-function: ease;
 }
 
 /* =========================================================
