@@ -7,16 +7,19 @@ import {
   deleteAnnouncement,
   publishAnnouncement,
   unpublishAnnouncement,
+  retryAnnouncementSms,
 } from "../actions";
 
 type AnnouncementActionsProps = {
   id: string;
   published: boolean;
+  smsFailed: boolean;
 };
 
 export default function AnnouncementActions({
   id,
   published,
+  smsFailed,
 }: AnnouncementActionsProps) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
@@ -74,6 +77,17 @@ export default function AnnouncementActions({
           className="inline-flex h-10 items-center justify-center rounded-lg bg-slate-950 px-4 text-sm font-medium text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-50"
         >
           {isPending ? "Publishing..." : "Publish"}
+        </button>
+      )}
+
+      {published && smsFailed && (
+        <button
+          type="button"
+          disabled={isPending}
+          onClick={() => run(() => retryAnnouncementSms(id))}
+          className="inline-flex h-10 items-center justify-center rounded-lg border border-blue-200 bg-blue-50 px-4 text-sm font-medium text-blue-700 transition hover:bg-blue-100 disabled:cursor-not-allowed disabled:opacity-50"
+        >
+          {isPending ? "Retrying..." : "Retry SMS"}
         </button>
       )}
 

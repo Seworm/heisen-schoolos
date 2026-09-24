@@ -7,6 +7,7 @@ import { redirect } from "next/navigation";
 import { db } from "@/db";
 import {
   announcements,
+  announcementSmsDeliveries,
   classLevels,
   guardians,
   students,
@@ -239,13 +240,50 @@ async function sendAnnouncementSms(input: {
     .where(and(eq(guardians.id, input.targetId), eq(guardians.schoolId, input.schoolId)))
     .limit(1);
   if (!guardian?.phone) throw new Error("The selected parent/guardian has no phone number.");
-  await sendTransactionalSms({
-    recipient: guardian.phone,
-    content: `${input.title}: ${input.body}`,
+  const attemptedAt = new Date();
+  try {
+    const delivery = await sendTransactionalSms({
+      recipient: guardian.phone,
+      content: `${input.title}: ${input.body}`,
+    });
+    await db.insert(announcementSmsDeliveries).values({
+      schoolId: input.schoolId,
+      announcementId: input.announcementId,
+      guardianId: input.targetId,
+      recipient: delivery.recipient,
+      status: "sent",
+      providerMessageId: delivery.messageId == null ? null : String(delivery.messageId),
+      attemptedAt,
+    });
+    await db.update(announcements)
+      .set({ smsSentAt: attemptedAt, updatedAt: new Date() })
+      .where(and(eq(announcements.id, input.announcementId), eq(announcements.schoolId, input.schoolId)));
+  } catch (error) {
+    await db.insert(announcementSmsDeliveries).values({
+      schoolId: input.schoolId,
+      announcementId: input.announcementId,
+      guardianId: input.targetId,
+      recipient: guardian.phone,
+      status: "failed",
+      errorMessage: error instanceof Error ? error.message : "SMS delivery failed.",
+      attemptedAt,
+    });
+    throw error;
+  }
+}
+
+export async function retryAnnouncementSms(id: string) {
+  const { school } = await getContext();
+  const [announcement] = await db.select().from(announcements).where(and(eq(announcements.id, id), eq(announcements.schoolId, school.id))).limit(1);
+  if (!announcement?.publishedAt) throw new Error("Only published announcements can send SMS.");
+  await sendAnnouncementSms({
+    schoolId: school.id,
+    announcementId: announcement.id,
+    audience: announcement.audience,
+    targetId: announcement.targetId,
+    title: announcement.title,
+    body: announcement.body,
   });
-  await db.update(announcements)
-    .set({ smsSentAt: new Date(), updatedAt: new Date() })
-    .where(and(eq(announcements.id, input.announcementId), eq(announcements.schoolId, input.schoolId)));
 }
 
 export async function createAnnouncement(

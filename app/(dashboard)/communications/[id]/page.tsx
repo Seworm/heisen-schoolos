@@ -2,7 +2,7 @@ import Link from "next/link";
 import { and, eq } from "drizzle-orm";
 
 import { db } from "@/db";
-import { announcements } from "@/db/schema";
+import { announcementSmsDeliveries, announcements } from "@/db/schema";
 import { requireCurrentSchool } from "@/lib/current-school";
 
 import AnnouncementActions from "./AnnouncementActions";
@@ -59,6 +59,17 @@ export default async function AnnouncementDetailsPage({
     announcement.publishedAt &&
     announcement.expiresAt &&
     announcement.expiresAt <= new Date();
+
+  const smsDeliveries = await db
+    .select()
+    .from(announcementSmsDeliveries)
+    .where(
+      and(
+        eq(announcementSmsDeliveries.announcementId, announcement.id),
+        eq(announcementSmsDeliveries.schoolId, school.id),
+      ),
+    )
+    .orderBy(announcementSmsDeliveries.attemptedAt);
 
   const status = !announcement.publishedAt
     ? "Draft"
@@ -119,12 +130,28 @@ export default async function AnnouncementDetailsPage({
               </p>
             )}
           </div>
+
+          {smsDeliveries.length > 0 && (
+            <div className="mt-8 border-t border-slate-200 pt-6">
+              <h2 className="text-sm font-semibold text-slate-900">SMS delivery history</h2>
+              <div className="mt-3 space-y-2">
+                {smsDeliveries.map((delivery) => (
+                  <div key={delivery.id} className="flex flex-wrap justify-between gap-2 rounded-lg bg-slate-50 px-3 py-2 text-xs">
+                    <span>{delivery.status === "sent" ? "Delivered to" : "Failed for"} {delivery.recipient}</span>
+                    <span>{new Date(delivery.attemptedAt).toLocaleString()}</span>
+                    {delivery.errorMessage && <span className="basis-full text-red-600">{delivery.errorMessage}</span>}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       </article>
 
       <AnnouncementActions
         id={announcement.id}
         published={Boolean(announcement.publishedAt)}
+        smsFailed={smsDeliveries.some((delivery) => delivery.status === "failed")}
       />
     </main>
   );

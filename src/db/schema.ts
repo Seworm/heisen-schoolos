@@ -3880,6 +3880,21 @@ export const announcements = pgTable("announcements", {
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
 }, (table) => [index("announcements_school_idx").on(table.schoolId), index("announcements_published_idx").on(table.publishedAt)]);
 
+export const announcementSmsDeliveries = pgTable("announcement_sms_deliveries", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  schoolId: uuid("school_id").notNull().references(() => schools.id, { onDelete: "cascade" }),
+  announcementId: uuid("announcement_id").notNull().references(() => announcements.id, { onDelete: "cascade" }),
+  guardianId: uuid("guardian_id").notNull().references(() => guardians.id, { onDelete: "restrict" }),
+  recipient: varchar("recipient", { length: 30 }).notNull(),
+  status: varchar("status", { length: 20 }).notNull(),
+  providerMessageId: varchar("provider_message_id", { length: 150 }),
+  errorMessage: text("error_message"),
+  attemptedAt: timestamp("attempted_at", { withTimezone: true }).notNull().defaultNow(),
+}, (table) => [
+  index("announcement_sms_deliveries_school_idx").on(table.schoolId),
+  index("announcement_sms_deliveries_announcement_idx").on(table.announcementId),
+]);
+
 export const notifications = pgTable("notifications", {
   id: uuid("id").defaultRandom().primaryKey(),
   schoolId: uuid("school_id").notNull().references(() => schools.id, { onDelete: "cascade" }),
