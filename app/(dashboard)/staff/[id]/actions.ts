@@ -1,13 +1,13 @@
 "use server";
 
 import { and, desc, eq, isNull } from "drizzle-orm";
-import { revalidatePath } from "next/cache";
 import { db } from "@/db";
 import { schoolMemberships, staff, staffInvitations, users } from "@/db/schema";
 import { requireCurrentSchool } from "@/lib/current-school";
 import { requireRole } from "@/lib/authorization";
 import { writeAuditLog } from "@/lib/audit";
 import { createStaffInvitation } from "@/../app/(dashboard)/admin/actions";
+import { revalidatePath } from "next/cache";
 
 export async function archiveStaff(formData: FormData) {
   const school = await requireCurrentSchool();
@@ -19,6 +19,7 @@ export async function archiveStaff(formData: FormData) {
     const [matchingUser] = await db.select({ id: users.id }).from(users).where(eq(users.email, member.email.toLowerCase())).limit(1);
     if (matchingUser) await db.update(schoolMemberships).set({ isActive: false, updatedAt: new Date() }).where(and(eq(schoolMemberships.userId, matchingUser.id), eq(schoolMemberships.schoolId, school.id)));
   }
+
   await writeAuditLog({
     schoolId: school.id,
     actorAuthUserId: actor.authUserId ?? actor.id,
@@ -28,6 +29,30 @@ export async function archiveStaff(formData: FormData) {
   });
   revalidatePath(`/staff/${staffId}`);
   revalidatePath("/staff");
+}
+
+export async function deleteStaff(formData: FormData) {
+  const school = await requireCurrentSchool();
+  const actor = await requireRole(["school_owner", "school_admin", "principal"], school.id);
+  const staffId = String(formData.get("staffId") ?? "");
+  try {
+    const [deleted] = await db
+      .delete(staff)
+      .where(and(eq(staff.id, staffId), eq(staff.schoolId, school.id)))
+      .returning({ id: staff.id });
+    if (!deleted) throw new Error("Staff record not found.");
+    await writeAuditLog({
+      schoolId: school.id,
+      actorAuthUserId: actor.authUserId ?? actor.id,
+      action: "staff_deleted",
+      entity: "staff",
+      entityId: staffId,
+    });
+    revalidatePath("/staff");
+  } catch (error) {
+    if (error instanceof Error && error.message === "Staff record not found.") throw error;
+    throw new Error("This staff member has linked operational records and cannot be permanently deleted. Deactivate the record instead.");
+  }
 }
 
 export async function getStaffAccountStatus(staffId: string) {

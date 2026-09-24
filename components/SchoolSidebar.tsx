@@ -160,9 +160,9 @@ export function SchoolSidebar() {
   }
 
   return (
-    <aside className="sticky top-0 hidden h-screen w-[270px] shrink-0 border-r border-slate-800 bg-[#111111] text-white lg:flex lg:flex-col">
+    <aside className="sticky top-0 hidden h-screen w-[284px] shrink-0 border-r border-[#173b2a] bg-[#0d2118] text-white lg:flex lg:flex-col">
       {/* Brand */}
-      <div className="flex h-20 shrink-0 items-center border-b border-slate-800 px-5">
+      <div className="flex h-20 shrink-0 items-center border-b border-[#173b2a] px-5">
         <Link
           href="/dashboard"
           className="flex min-w-0 items-center gap-3 rounded-lg outline-none transition-opacity hover:opacity-90 focus-visible:ring-2 focus-visible:ring-[#fcd116]"
@@ -175,8 +175,8 @@ export function SchoolSidebar() {
             <p className="truncate text-[15px] font-bold tracking-tight text-white">
               Heisen SchoolOS
             </p>
-            <p className="mt-0.5 truncate text-[11px] font-medium text-slate-400">
-              School Management
+            <p className="mt-0.5 truncate text-[11px] font-medium text-emerald-200/60">
+              Your school, connected
             </p>
           </div>
         </Link>
@@ -218,8 +218,8 @@ export function SchoolSidebar() {
                             "group flex items-center gap-3 rounded-lg px-3 py-2.5 text-[13px] font-medium transition-all",
                             "outline-none focus-visible:ring-2 focus-visible:ring-[#fcd116]",
                             active
-                              ? "bg-[#006b3f] text-white shadow-md shadow-black/30"
-                              : "text-slate-300 hover:bg-slate-800 hover:text-white",
+                              ? "bg-[#087443] text-white shadow-md shadow-black/30"
+                              : "text-emerald-50/70 hover:bg-[#173b2a] hover:text-white",
                           ].join(" ")}
                         >
                           <span
@@ -227,7 +227,7 @@ export function SchoolSidebar() {
                               "flex h-8 w-8 shrink-0 items-center justify-center rounded-md transition-colors",
                               active
                                 ? "bg-white/15 text-white"
-                                : "bg-slate-800 text-slate-400 group-hover:bg-slate-700 group-hover:text-slate-200",
+                                : "bg-[#173b2a] text-emerald-100/60 group-hover:bg-[#225239] group-hover:text-white",
                             ].join(" ")}
                           >
                             <Icon
@@ -253,8 +253,8 @@ export function SchoolSidebar() {
       </nav>
 
       {/* Bottom status */}
-      <div className="shrink-0 border-t border-slate-800 p-3">
-        <div className="rounded-xl border border-slate-800 bg-slate-900/70 p-3">
+      <div className="shrink-0 border-t border-[#173b2a] p-3">
+        <div className="rounded-xl border border-[#225239] bg-[#102c20] p-3">
           <div className="flex items-center gap-3">
             <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-emerald-500/10 text-emerald-400">
               <ShieldCheck className="h-4.5 w-4.5" strokeWidth={2} />

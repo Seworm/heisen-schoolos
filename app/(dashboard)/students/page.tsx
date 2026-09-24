@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { count, eq } from "drizzle-orm";
+import { and, count, eq } from "drizzle-orm";
 import { db } from "@/db";
 import { students } from "@/db/schema";
 import { requireCurrentSchool } from "@/lib/current-school";
@@ -13,7 +13,7 @@ export default async function StudentsPage() {
     db
       .select({ value: count() })
       .from(students)
-      .where(eq(students.schoolId, school.id)),
+      .where(and(eq(students.schoolId, school.id), eq(students.status, "active"))),
 
     db
       .select({
@@ -25,9 +25,10 @@ export default async function StudentsPage() {
         gender: students.gender,
         dateOfBirth: students.dateOfBirth,
         admissionDate: students.admissionDate,
+        status: students.status,
       })
       .from(students)
-      .where(eq(students.schoolId, school.id))
+      .where(and(eq(students.schoolId, school.id), eq(students.status, "active")))
       .orderBy(students.lastName, students.firstName),
   ]);
 

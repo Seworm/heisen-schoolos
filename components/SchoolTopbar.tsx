@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import {
   Bell,
   ChevronDown,
@@ -22,16 +23,18 @@ type SchoolTopbarProps = {
 
 export function SchoolTopbar({ school }: SchoolTopbarProps) {
   const [profileOpen, setProfileOpen] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
 
   const schoolName = school?.name?.trim() || "School";
 
   return (
-    <header className="sticky top-0 z-30 flex h-20 items-center border-b border-slate-200 bg-white/95 px-4 backdrop-blur sm:px-6 lg:px-8">
+    <header className="sticky top-0 z-30 flex h-20 items-center border-b border-[#dcefe2] bg-white/95 px-4 backdrop-blur sm:px-6 lg:px-8">
       <div className="flex min-w-0 flex-1 items-center gap-4">
         {/* Mobile menu */}
         <button
           type="button"
           aria-label="Open navigation"
+          onClick={() => setMobileOpen((open) => !open)}
           className="flex h-10 w-10 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-600 transition-colors hover:bg-slate-50 hover:text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#006b3f] lg:hidden"
         >
           <Menu className="h-5 w-5" />
@@ -40,13 +43,38 @@ export function SchoolTopbar({ school }: SchoolTopbarProps) {
         {/* School identity */}
         <div className="min-w-0">
           <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-slate-400">
-            School Management System
+            SchoolOS workspace
           </p>
 
           <h1 className="mt-0.5 truncate text-base font-bold tracking-tight text-slate-900 sm:text-lg">
             {schoolName}
           </h1>
         </div>
+        {mobileOpen && (
+          <div className="absolute left-0 right-0 top-20 border-b border-[#dcefe2] bg-white p-4 shadow-xl lg:hidden">
+            <nav className="grid gap-1 sm:grid-cols-2">
+              {[
+                ["Dashboard", "/dashboard"],
+                ["Students", "/students"],
+                ["Staff", "/staff"],
+                ["Academics", "/academics/classes"],
+                ["Finance", "/finance"],
+                ["Reports", "/reports"],
+                ["Communications", "/communications"],
+                ["Settings", "/settings"],
+              ].map(([label, href]) => (
+                <Link key={href} href={href} onClick={() => setMobileOpen(false)} className="rounded-xl px-4 py-3 text-sm font-semibold text-slate-700 hover:bg-[#effaf2] hover:text-[#006b3f]">
+                  {label}
+                </Link>
+              ))}
+            </nav>
+          </div>
+        )}
+      </div>
+
+      <div className="hidden items-center gap-2 rounded-xl bg-[#effaf2] px-3 py-2 text-xs font-semibold text-[#006b3f] xl:flex">
+        <span className="h-2 w-2 rounded-full bg-emerald-500" />
+        Operations running normally
       </div>
 
       {/* Right controls */}
@@ -128,30 +156,22 @@ export function SchoolTopbar({ school }: SchoolTopbarProps) {
               </div>
 
               <div className="p-1.5">
-                <button
-                  type="button"
-                  className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm font-medium text-slate-700 transition-colors hover:bg-slate-50 hover:text-slate-900"
-                >
-                  <User className="h-4 w-4 text-slate-400" />
-                  Profile
-                </button>
-
-                <button
-                  type="button"
+                <Link
+                  href="/settings"
                   className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm font-medium text-slate-700 transition-colors hover:bg-slate-50 hover:text-slate-900"
                 >
                   <Settings className="h-4 w-4 text-slate-400" />
                   Settings
-                </button>
+                </Link>
               </div>
 
               <div className="border-t border-slate-100 p-1.5">
-                <button
-                  type="button"
+                <Link
+                  href="/login"
                   className="flex w-full items-center rounded-lg px-3 py-2.5 text-left text-sm font-semibold text-red-600 transition-colors hover:bg-red-50"
                 >
                   Sign out
-                </button>
+                </Link>
               </div>
             </div>
           )}

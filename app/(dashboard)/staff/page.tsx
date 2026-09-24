@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { asc, count, eq } from "drizzle-orm";
+import { and, asc, count, eq } from "drizzle-orm";
 
 import { db } from "@/db";
 import { staff } from "@/db/schema";
@@ -15,7 +15,12 @@ export default async function StaffPage() {
       count: count(),
     })
     .from(staff)
-    .where(eq(staff.schoolId, school.id));
+    .where(and(eq(staff.schoolId, school.id), eq(staff.status, "active")));
+
+  const [inactiveStaffCount] = await db
+    .select({ count: count() })
+    .from(staff)
+    .where(and(eq(staff.schoolId, school.id), eq(staff.status, "inactive")));
 
   const staffMembers = await db
     .select({
@@ -31,7 +36,7 @@ export default async function StaffPage() {
       status: staff.status,
     })
     .from(staff)
-    .where(eq(staff.schoolId, school.id))
+    .where(and(eq(staff.schoolId, school.id), eq(staff.status, "active")))
     .orderBy(
       asc(staff.lastName),
       asc(staff.firstName),
@@ -41,9 +46,7 @@ export default async function StaffPage() {
     (member) => member.status === "active",
   ).length;
 
-  const inactiveCount = staffMembers.filter(
-    (member) => member.status === "inactive",
-  ).length;
+  const inactiveCount = Number(inactiveStaffCount?.count ?? 0);
 
   return (
     <main className="min-h-screen bg-slate-50 px-6 py-8 lg:px-8">
@@ -250,5 +253,3 @@ export default async function StaffPage() {
     </main>
   );
 }
-
-
