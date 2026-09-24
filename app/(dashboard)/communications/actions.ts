@@ -233,6 +233,7 @@ async function sendAnnouncementSms(input: {
   targetId: string | null;
   title: string;
   body: string;
+  guardianIds?: string[];
 }) {
   if (
     !["parents", "class", "stream"].includes(input.audience) ||
@@ -241,7 +242,7 @@ async function sendAnnouncementSms(input: {
     throw new Error("SMS announcements require a selected parent, class, or stream target.");
   }
 
-  const guardianTargets = input.audience === "parents"
+  const allGuardianTargets = input.audience === "parents"
     ? await db
         .select({ id: guardians.id, phone: guardians.phone })
         .from(guardians)
@@ -263,6 +264,11 @@ async function sendAnnouncementSms(input: {
             ? eq(streams.classLevelId, input.targetId!)
             : eq(streams.id, input.targetId!),
         ));
+  const guardianTargets = input.guardianIds
+    ? allGuardianTargets.filter((guardian) =>
+        input.guardianIds?.includes(guardian.id),
+      )
+    : allGuardianTargets;
 
   if (guardianTargets.length === 0) {
     throw new Error("No guardians with phone numbers were found for this announcement target.");
@@ -320,6 +326,30 @@ export async function retryAnnouncementSms(id: string) {
   const { school } = await getContext();
   const [announcement] = await db.select().from(announcements).where(and(eq(announcements.id, id), eq(announcements.schoolId, school.id))).limit(1);
   if (!announcement?.publishedAt) throw new Error("Only published announcements can send SMS.");
+  const attempts = await db
+    .select({
+      guardianId: announcementSmsDeliveries.guardianId,
+      status: announcementSmsDeliveries.status,
+      attemptedAt: announcementSmsDeliveries.attemptedAt,
+    })
+    .from(announcementSmsDeliveries)
+    .where(
+      and(
+        eq(announcementSmsDeliveries.announcementId, announcement.id),
+        eq(announcementSmsDeliveries.schoolId, school.id),
+      ),
+    )
+    .orderBy(announcementSmsDeliveries.attemptedAt);
+  const latestByGuardian = new Map<string, string>();
+  for (const attempt of attempts) {
+    latestByGuardian.set(attempt.guardianId, attempt.status);
+  }
+  const failedGuardianIds = [...latestByGuardian.entries()]
+    .filter(([, status]) => status === "failed")
+    .map(([guardianId]) => guardianId);
+  if (failedGuardianIds.length === 0) {
+    throw new Error("There are no failed SMS deliveries to retry.");
+  }
   await sendAnnouncementSms({
     schoolId: school.id,
     announcementId: announcement.id,
@@ -327,6 +357,7 @@ export async function retryAnnouncementSms(id: string) {
     targetId: announcement.targetId,
     title: announcement.title,
     body: announcement.body,
+    guardianIds: failedGuardianIds,
   });
 }
 

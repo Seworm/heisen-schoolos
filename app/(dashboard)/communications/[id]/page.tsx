@@ -134,6 +134,20 @@ export default async function AnnouncementDetailsPage({
           {smsDeliveries.length > 0 && (
             <div className="mt-8 border-t border-slate-200 pt-6">
               <h2 className="text-sm font-semibold text-slate-900">SMS delivery history</h2>
+              <div className="mt-3 grid gap-2 sm:grid-cols-3">
+                <div className="rounded-lg border border-slate-200 bg-white px-3 py-2">
+                  <p className="text-xs text-slate-500">Attempts</p>
+                  <p className="mt-1 text-lg font-semibold text-slate-900">{smsDeliveries.length}</p>
+                </div>
+                <div className="rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2">
+                  <p className="text-xs text-emerald-700">Sent</p>
+                  <p className="mt-1 text-lg font-semibold text-emerald-800">{smsDeliveries.filter((delivery) => delivery.status === "sent").length}</p>
+                </div>
+                <div className="rounded-lg border border-red-200 bg-red-50 px-3 py-2">
+                  <p className="text-xs text-red-700">Failed</p>
+                  <p className="mt-1 text-lg font-semibold text-red-800">{smsDeliveries.filter((delivery) => delivery.status === "failed").length}</p>
+                </div>
+              </div>
               <div className="mt-3 space-y-2">
                 {smsDeliveries.map((delivery) => (
                   <div key={delivery.id} className="flex flex-wrap justify-between gap-2 rounded-lg bg-slate-50 px-3 py-2 text-xs">

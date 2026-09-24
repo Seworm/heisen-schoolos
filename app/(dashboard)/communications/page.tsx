@@ -1,8 +1,8 @@
 import Link from "next/link";
-import { desc, eq } from "drizzle-orm";
+import { desc, eq, inArray } from "drizzle-orm";
 
 import { db } from "@/db";
-import { announcements } from "@/db/schema";
+import { announcementSmsDeliveries, announcements } from "@/db/schema";
 import { requireCurrentSchool } from "@/lib/current-school";
 
 export const dynamic = "force-dynamic";
@@ -50,6 +50,36 @@ export default async function CommunicationsPage() {
     .where(eq(announcements.schoolId, school.id))
     .orderBy(desc(announcements.createdAt))
     .limit(100);
+  const deliveryRows = rows.length
+    ? await db
+        .select({
+          announcementId: announcementSmsDeliveries.announcementId,
+          status: announcementSmsDeliveries.status,
+        })
+        .from(announcementSmsDeliveries)
+        .where(
+          inArray(
+            announcementSmsDeliveries.announcementId,
+            rows.map((row) => row.id),
+          ),
+        )
+    : [];
+  const deliverySummary = new Map<
+    string,
+    { sent: number; failed: number }
+  >();
+  for (const delivery of deliveryRows) {
+    const summary = deliverySummary.get(delivery.announcementId) ?? {
+      sent: 0,
+      failed: 0,
+    };
+    if (delivery.status === "sent") {
+      summary.sent += 1;
+    } else if (delivery.status === "failed") {
+      summary.failed += 1;
+    }
+    deliverySummary.set(delivery.announcementId, summary);
+  }
 
   return (
     <main className="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8">
@@ -80,6 +110,7 @@ export default async function CommunicationsPage() {
       <div className="mt-8 space-y-4">
         {rows.map((row) => {
           const status = getStatus(row.publishedAt, row.expiresAt);
+          const sms = deliverySummary.get(row.id);
 
           return (
             <Link
@@ -103,6 +134,18 @@ export default async function CommunicationsPage() {
                     >
                       {status.label}
                     </span>
+                    {sms && (
+                      <span
+                        className={`rounded-full px-2.5 py-1 text-xs font-medium ${
+                          sms.failed > 0
+                            ? "bg-red-100 text-red-800"
+                            : "bg-blue-100 text-blue-800"
+                        }`}
+                      >
+                        SMS: {sms.sent} sent
+                        {sms.failed > 0 ? ` · ${sms.failed} failed` : ""}
+                      </span>
+                    )}
                   </div>
                 </div>
 
