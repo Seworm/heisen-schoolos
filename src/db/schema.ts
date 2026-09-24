@@ -3215,6 +3215,36 @@ export const payments = pgTable(
     index("payments_status_idx").on(table.status),
   ],
 );
+
+export const cashbookEntries = pgTable(
+  "cashbook_entries",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    schoolId: uuid("school_id").notNull().references(() => schools.id, { onDelete: "cascade" }),
+    entryDate: date("entry_date").notNull(),
+    entryType: varchar("entry_type", { length: 20 }).notNull(),
+    category: varchar("category", { length: 100 }).notNull(),
+    description: varchar("description", { length: 255 }).notNull(),
+    amount: numeric("amount", { precision: 12, scale: 2 }).notNull(),
+    method: paymentMethodEnum("method").notNull().default("cash"),
+    reference: varchar("reference", { length: 150 }),
+    sourcePaymentId: uuid("source_payment_id").references(() => payments.id, { onDelete: "set null" }),
+    sourceFeedingCollectionId: uuid("source_feeding_collection_id"),
+    reversalOfId: uuid("reversal_of_id"),
+    reversalReason: varchar("reversal_reason", { length: 255 }),
+    createdBy: text("created_by").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    index("cashbook_entries_school_date_idx").on(table.schoolId, table.entryDate),
+    index("cashbook_entries_type_idx").on(table.entryType),
+    index("cashbook_entries_category_idx").on(table.category),
+    unique("cashbook_entries_source_payment_unique").on(table.sourcePaymentId),
+    unique("cashbook_entries_source_feeding_unique").on(table.sourceFeedingCollectionId),
+    unique("cashbook_entries_reversal_of_unique").on(table.reversalOfId),
+  ],
+);
 export const paymentAllocations = pgTable(
   "payment_allocations",
   {

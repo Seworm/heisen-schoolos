@@ -1,9 +1,11 @@
 import Link from "next/link";
-import { asc, desc, eq } from "drizzle-orm";
+import { asc, desc, eq, sql } from "drizzle-orm";
 
 import { db } from "@/db";
 import {
   academicYears,
+  attendanceRecords,
+  attendanceSessions,
   classLevels,
   streams,
 } from "@/db/schema";
@@ -43,6 +45,18 @@ export default async function AttendancePage() {
       desc(academicYears.startDate),
     )
     .limit(1);
+
+  const [attendanceSummary] = await db
+    .select({
+      sessions: sql<number>`count(distinct ${attendanceSessions.id})`,
+      present: sql<number>`count(*) filter (where ${attendanceRecords.status} = 'present')`,
+      absent: sql<number>`count(*) filter (where ${attendanceRecords.status} = 'absent')`,
+      late: sql<number>`count(*) filter (where ${attendanceRecords.status} = 'late')`,
+      excused: sql<number>`count(*) filter (where ${attendanceRecords.status} = 'excused')`,
+    })
+    .from(attendanceSessions)
+    .leftJoin(attendanceRecords, eq(attendanceRecords.attendanceSessionId, attendanceSessions.id))
+    .where(eq(attendanceSessions.schoolId, school.id));
 
   const classRows = await db
     .select({
@@ -121,6 +135,14 @@ export default async function AttendancePage() {
               daily student attendance.
             </p>
           </div>
+
+          <section className="mb-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
+            <AttendanceMetric label="Sessions" value={Number(attendanceSummary?.sessions ?? 0)} />
+            <AttendanceMetric label="Present" value={Number(attendanceSummary?.present ?? 0)} tone="text-emerald-700" />
+            <AttendanceMetric label="Absent" value={Number(attendanceSummary?.absent ?? 0)} tone="text-rose-700" />
+            <AttendanceMetric label="Late" value={Number(attendanceSummary?.late ?? 0)} tone="text-amber-700" />
+            <AttendanceMetric label="Excused" value={Number(attendanceSummary?.excused ?? 0)} tone="text-sky-700" />
+          </section>
 
           {academicYear ? (
             <div className="rounded-lg border border-slate-200 bg-white px-4 py-3 shadow-sm">
@@ -267,4 +289,8 @@ export default async function AttendancePage() {
       )}
     </div>
   );
+}
+
+function AttendanceMetric({ label, value, tone = "text-slate-950" }: { label: string; value: number; tone?: string }) {
+  return <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm"><p className="text-xs font-medium uppercase tracking-wide text-slate-400">{label}</p><p className={`mt-2 text-2xl font-semibold ${tone}`}>{value.toLocaleString()}</p></div>;
 }

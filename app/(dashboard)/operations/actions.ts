@@ -90,7 +90,7 @@ export async function createInventoryItemAction(formData: FormData): Promise<voi
   const { user, school } = await context();
   await requireRole([...SCHOOL_ADMIN_ROLES, "librarian"], school.id);
   const { createInventoryItem } = await import("@/lib/inventory");
-  const item = await createInventoryItem({ schoolId: school.id, sku: required(formData, "sku"), name: required(formData, "name"), unit: String(formData.get("unit") || "unit"), reorderLevel: Number(formData.get("reorderLevel") || 0) });
+  const item = await createInventoryItem({ schoolId: school.id, sku: required(formData, "sku"), name: required(formData, "name"), category: String(formData.get("category") || "").trim() || undefined, unit: String(formData.get("unit") || "unit"), reorderLevel: Number(formData.get("reorderLevel") || 0) });
   revalidatePath("/operations/inventory");
   void item; void user;
 }
@@ -99,7 +99,7 @@ export async function recordInventoryTransactionAction(formData: FormData): Prom
   const { user, school } = await context();
   await requireRole([...SCHOOL_ADMIN_ROLES, "librarian"], school.id);
   const { recordInventoryTransaction } = await import("@/lib/inventory");
-  const transaction = await recordInventoryTransaction({ schoolId: school.id, itemId: required(formData, "itemId"), type: String(formData.get("type") || "receipt") as "receipt" | "issue" | "adjustment", quantity: Number(formData.get("quantity") || 0), actorId: user.id });
+  const transaction = await recordInventoryTransaction({ schoolId: school.id, itemId: required(formData, "itemId"), type: String(formData.get("type") || "receipt") as "receipt" | "issue" | "adjustment", quantity: Number(formData.get("quantity") || 0), actorId: user.id, reference: String(formData.get("reference") || "").trim() || undefined, notes: String(formData.get("notes") || "").trim() || undefined });
   revalidatePath("/operations/inventory");
   void transaction; void user;
 }

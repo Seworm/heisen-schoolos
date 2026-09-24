@@ -223,6 +223,13 @@ const overdueAmount = activeInvoices.reduce(
         "Set daily class rates and record daily student collections.",
     },
     {
+      href: "/finance/cashbook",
+      icon: WalletCards,
+      title: "Cashbook",
+      description:
+        "Track school income, expenses and net cash position.",
+    },
+    {
       href: "/finance/reports",
       icon: BarChart3,
       title: "Financial Reports",

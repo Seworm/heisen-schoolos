@@ -4,6 +4,7 @@ import { db } from "@/db";
 import {
   paymentAllocations,
   payments,
+  cashbookEntries,
   studentInvoices,
   students,
 } from "@/db/schema";
@@ -35,6 +36,7 @@ export async function recordPayment(input: {
     invoiceId: string;
     amount: string | number;
   }>;
+  actorId?: string;
 }) {
   const schoolId = requireUuid(input.schoolId, "School");
   const studentId = requireUuid(input.studentId, "Student");
@@ -207,6 +209,19 @@ export async function recordPayment(input: {
         "Failed to record payment.",
       );
     }
+
+    await tx.insert(cashbookEntries).values({
+      schoolId,
+      entryDate: payment.paymentDate,
+      entryType: "income",
+      category: "Student payments",
+      description: `Student payment ${payment.receiptNumber}`,
+      amount: payment.amount,
+      method: payment.method,
+      reference: payment.reference,
+      sourcePaymentId: payment.id,
+      createdBy: input.actorId ?? "system",
+    });
 
     await tx
       .insert(paymentAllocations)

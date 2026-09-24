@@ -36,10 +36,29 @@ export async function issueLibraryBook(form: FormData) {
   const school = await requireCurrentSchool(); const actor = await requireRole(LIBRARY_ROLES, school.id);
   const bookId = value(form, "bookId"); const studentId = value(form, "studentId"); await studentInSchool(studentId, school.id);
   const dueAt = value(form, "dueAt");
-  const [book] = await db.update(libraryBooks).set({ copiesAvailable: sql`${libraryBooks.copiesAvailable} - 1`, updatedAt: new Date() }).where(and(eq(libraryBooks.id, bookId), eq(libraryBooks.schoolId, school.id), sql`${libraryBooks.copiesAvailable} > 0`)).returning({ id: libraryBooks.id });
-  if (!book) throw new Error("Book is unavailable.");
-  const [loan] = await db.insert(libraryLoans).values({ schoolId: school.id, bookId, studentId, issuedBy: actor.id, dueAt }).returning({ id: libraryLoans.id });
+  const loan = await db.transaction(async (tx) => {
+    const [book] = await tx.update(libraryBooks).set({ copiesAvailable: sql`${libraryBooks.copiesAvailable} - 1`, updatedAt: new Date() }).where(and(eq(libraryBooks.id, bookId), eq(libraryBooks.schoolId, school.id), sql`${libraryBooks.copiesAvailable} > 0`)).returning({ id: libraryBooks.id });
+    if (!book) throw new Error("Book is unavailable.");
+    const [createdLoan] = await tx.insert(libraryLoans).values({ schoolId: school.id, bookId, studentId, issuedBy: actor.id, dueAt }).returning({ id: libraryLoans.id });
+    if (!createdLoan) throw new Error("Could not issue book.");
+    return createdLoan;
+  });
   await writeAuditLog({ schoolId: school.id, actorAuthUserId: actor.id, action: "issue", entity: "library_loan", entityId: loan.id });
+  revalidatePath("/student-services");
+}
+
+export async function returnLibraryBook(form: FormData) {
+  const school = await requireCurrentSchool(); const actor = await requireRole(LIBRARY_ROLES, school.id);
+  const loanId = value(form, "loanId");
+  const loan = await db.transaction(async (tx) => {
+    const [current] = await tx.select({ id: libraryLoans.id, bookId: libraryLoans.bookId }).from(libraryLoans).where(and(eq(libraryLoans.id, loanId), eq(libraryLoans.schoolId, school.id), eq(libraryLoans.status, "borrowed"))).limit(1);
+    if (!current) throw new Error("Active library loan not found.");
+    const [updated] = await tx.update(libraryLoans).set({ status: "returned", returnedAt: new Date() }).where(and(eq(libraryLoans.id, current.id), eq(libraryLoans.schoolId, school.id), eq(libraryLoans.status, "borrowed"))).returning({ id: libraryLoans.id });
+    if (!updated) throw new Error("Library loan was already returned.");
+    await tx.update(libraryBooks).set({ copiesAvailable: sql`${libraryBooks.copiesAvailable} + 1`, updatedAt: new Date() }).where(and(eq(libraryBooks.id, current.bookId), eq(libraryBooks.schoolId, school.id)));
+    return updated;
+  });
+  await writeAuditLog({ schoolId: school.id, actorAuthUserId: actor.id, action: "return", entity: "library_loan", entityId: loan.id });
   revalidatePath("/student-services");
 }
 
@@ -79,5 +98,20 @@ export async function addDisciplineIncident(form: FormData) {
   const studentId = value(form, "studentId"); await studentInSchool(studentId, school.id);
   const [record] = await db.insert(disciplineIncidents).values({ schoolId: school.id, studentId, reportedBy: actor.id, incidentDate: value(form, "incidentDate"), category: value(form, "category"), description: value(form, "description"), actionTaken: String(form.get("actionTaken") || "").trim() || null }).returning({ id: disciplineIncidents.id });
   await writeAuditLog({ schoolId: school.id, actorAuthUserId: actor.id, action: "create", entity: "discipline_incident", entityId: record.id });
+  revalidatePath("/student-services");
+}
+
+export async function updateDisciplineIncidentStatus(form: FormData) {
+  const school = await requireCurrentSchool(); const actor = await requireRole([...SCHOOL_ADMIN_ROLES, "head_of_year"], school.id);
+  const incidentId = value(form, "incidentId");
+  const status = String(form.get("status") || "");
+  if (!["reported", "investigating", "resolved", "dismissed"].includes(status)) throw new Error("Invalid discipline status.");
+  const [record] = await db.update(disciplineIncidents).set({
+    status: status as "reported" | "investigating" | "resolved" | "dismissed",
+    actionTaken: String(form.get("actionTaken") || "").trim() || null,
+    updatedAt: new Date(),
+  }).where(and(eq(disciplineIncidents.id, incidentId), eq(disciplineIncidents.schoolId, school.id))).returning({ id: disciplineIncidents.id });
+  if (!record) throw new Error("Discipline incident not found.");
+  await writeAuditLog({ schoolId: school.id, actorAuthUserId: actor.id, action: "update_status", entity: "discipline_incident", entityId: record.id, metadata: { status } });
   revalidatePath("/student-services");
 }

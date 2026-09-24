@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { getCurrentSchool } from "@/lib/current-school";
+import { getCurrentSchool, resolveSchoolContext } from "@/lib/current-school";
 import {
   createFeeCategory,
   updateFeeCategory,
@@ -285,7 +285,7 @@ export async function cancelInvoiceAction(
 export async function recordPaymentAction(
   formData: FormData,
 ) {
-  const school = await getCurrentSchool();
+  const { school, user } = await resolveSchoolContext();
 
   const rawAllocations = String(
     formData.get("allocations") ?? "[]",
@@ -321,6 +321,7 @@ export async function recordPaymentAction(
       String(formData.get("notes") ?? "") ||
       undefined,
     allocations,
+    actorId: user.id,
   });
 
   revalidatePath(financePath());

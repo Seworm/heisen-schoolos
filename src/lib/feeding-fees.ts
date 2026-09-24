@@ -2,6 +2,7 @@ import { and, eq } from "drizzle-orm";
 import { db } from "@/db";
 import {
   academicYears,
+  cashbookEntries,
   classLevels,
   feeAssignments,
   feedingFeeCollections,
@@ -112,11 +113,27 @@ export async function collectDailyFeedingFee(input: {
   if (!setting || Number(amount) !== Number(setting.dailyAmount)) throw new Error("The collected amount must match the configured daily feeding fee.");
   const [existing] = await db.select({ id: feedingFeeCollections.id }).from(feedingFeeCollections).where(and(eq(feedingFeeCollections.schoolId, schoolId), eq(feedingFeeCollections.studentId, studentId), eq(feedingFeeCollections.collectionDate, collectionDate))).limit(1);
   if (existing) throw new Error("A feeding fee has already been recorded for this student and date.");
-  return db.insert(feedingFeeCollections).values({
-    schoolId, studentId, classLevelId: enrollment.classLevelId, streamId: enrollment.streamId,
-    academicYearId, collectionDate, amount, method: input.method, receiptNumber,
-    collectedBy: user.id, notes: input.notes?.trim() || null,
-  }).returning();
+  return db.transaction(async (tx) => {
+    const [collection] = await tx.insert(feedingFeeCollections).values({
+      schoolId, studentId, classLevelId: enrollment.classLevelId, streamId: enrollment.streamId,
+      academicYearId, collectionDate, amount, method: input.method, receiptNumber,
+      collectedBy: user.id, notes: input.notes?.trim() || null,
+    }).returning();
+    if (!collection) throw new Error("Failed to record feeding fee collection.");
+    await tx.insert(cashbookEntries).values({
+      schoolId,
+      entryDate: collection.collectionDate,
+      entryType: "income",
+      category: "Daily feeding fees",
+      description: `Daily feeding fee ${collection.receiptNumber}`,
+      amount: collection.amount,
+      method: collection.method,
+      reference: collection.receiptNumber,
+      sourceFeedingCollectionId: collection.id,
+      createdBy: user.id,
+    });
+    return collection;
+  });
 }
 
 export async function setStudentFeedingPaymentMode(input: {
