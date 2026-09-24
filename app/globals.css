@@ -316,20 +316,20 @@ body {
 
 /* Ghana flag palette bridge for legacy utility classes. */
 ::selection {
-  background: #fcd116;
-  color: #111111;
+  background: #bfdbfe;
+  color: #0f172a;
 }
 
 .bg-blue-50,
 .bg-indigo-50,
 .bg-cyan-50 {
-  background-color: #fff8d9 !important;
+  background-color: #eff6ff !important;
 }
 
 .bg-blue-100,
 .bg-indigo-100,
 .bg-cyan-100 {
-  background-color: #f9efc0 !important;
+  background-color: #dbeafe !important;
 }
 
 .bg-blue-500,
@@ -342,19 +342,19 @@ body {
 .bg-indigo-600,
 .bg-cyan-500,
 .bg-cyan-600 {
-  background-color: #006b3f !important;
+  background-color: #2563eb !important;
 }
 
 .hover\:bg-blue-700:hover,
 .hover\:bg-blue-800:hover,
 .hover\:bg-emerald-700:hover,
 .hover\:bg-emerald-800:hover {
-  background-color: #005530 !important;
+  background-color: #1d4ed8 !important;
 }
 
 .bg-violet-500,
 .bg-violet-600 {
-  background-color: #fcd116 !important;
+  background-color: #60a5fa !important;
 }
 
 .text-blue-600,
@@ -363,12 +363,12 @@ body {
 .text-indigo-600,
 .text-indigo-700,
 .text-cyan-600 {
-  color: #006b3f !important;
+  color: #1d4ed8 !important;
 }
 
 .text-violet-600,
 .text-violet-700 {
-  color: #006b3f !important;
+  color: #1d4ed8 !important;
 }
 
 .text-amber-500,
@@ -376,14 +376,14 @@ body {
 .text-amber-700,
 .text-yellow-600,
 .text-yellow-700 {
-  color: #8c6900 !important;
+  color: #b45309 !important;
 }
 
 .text-emerald-500,
 .text-emerald-600,
 .text-emerald-700,
 .text-emerald-800 {
-  color: #006b3f !important;
+  color: #0f766e !important;
 }
 
 /* Keep dark utility buttons readable even when legacy text utilities conflict. */
@@ -445,8 +445,8 @@ body {
   margin: 0;
 
   background:
-    radial-gradient(circle at top left, rgb(252 209 22 / 0.18), transparent 23rem),
-    radial-gradient(circle at bottom right, rgb(0 107 63 / 0.10), transparent 24rem),
+    radial-gradient(circle at top left, rgb(96 165 250 / 0.18), transparent 23rem),
+    radial-gradient(circle at bottom right, rgb(14 165 233 / 0.10), transparent 24rem),
     var(--background);
 
   color: var(--foreground);
