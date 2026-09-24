@@ -3,9 +3,14 @@ import { and, eq, inArray } from "drizzle-orm";
 import { db } from "@/db";
 import {
   guardians,
+  classLevels,
   notifications,
   profiles,
   schoolMemberships,
+  streams,
+  studentEnrollments,
+  studentGuardians,
+  studentPlacements,
   studentUserAccounts,
   students,
   users,
@@ -98,6 +103,74 @@ async function getAllStudentRecipients(schoolId: string) {
   return rows;
 }
 
+async function getPlacedStudentIds(
+  schoolId: string,
+  audience: "class" | "stream",
+  targetId: string,
+) {
+  const rows = await db
+    .select({ studentId: studentEnrollments.studentId })
+    .from(studentEnrollments)
+    .innerJoin(
+      students,
+      eq(students.id, studentEnrollments.studentId),
+    )
+    .innerJoin(
+      studentPlacements,
+      eq(studentPlacements.studentEnrollmentId, studentEnrollments.id),
+    )
+    .innerJoin(
+      streams,
+      eq(streams.id, studentPlacements.streamId),
+    )
+    .innerJoin(
+      classLevels,
+      eq(classLevels.id, streams.classLevelId),
+    )
+    .where(
+      and(
+        eq(students.schoolId, schoolId),
+        eq(studentEnrollments.status, "active"),
+        eq(studentPlacements.status, "active"),
+        audience === "class"
+          ? eq(classLevels.id, targetId)
+          : eq(streams.id, targetId),
+      ),
+    );
+
+  return [...new Set(rows.map((row) => row.studentId))];
+}
+
+async function getGuardianRecipientsForStudents(
+  schoolId: string,
+  studentIds: string[],
+) {
+  if (studentIds.length === 0) {
+    return [];
+  }
+
+  return db
+    .select({
+      authUserId: profiles.authUserId,
+      email: profiles.email,
+    })
+    .from(studentGuardians)
+    .innerJoin(
+      guardians,
+      eq(guardians.id, studentGuardians.guardianId),
+    )
+    .innerJoin(
+      profiles,
+      eq(profiles.email, guardians.email),
+    )
+    .where(
+      and(
+        eq(guardians.schoolId, schoolId),
+        inArray(studentGuardians.studentId, studentIds),
+      ),
+    );
+}
+
 async function getStaffRecipients(schoolId: string) {
   const rows = await db
     .select({
@@ -174,16 +247,24 @@ export async function resolveAnnouncementRecipients({
     }
 
     case "class":
-    case "stream":
-      /*
-       * These require the authoritative student-placement model
-       * to determine current membership. The notification layer
-       * should not guess using the legacy enrollment relationship.
-       *
-       * Return an empty recipient set until the placement query
-       * is wired to the exact schema used by this project.
-       */
-      return [];
+    case "stream": {
+      if (!targetId) return [];
+
+      const studentIds = await getPlacedStudentIds(
+        schoolId,
+        audience,
+        targetId,
+      );
+      const [studentRecipients, guardianRecipients] = await Promise.all([
+        getStudentRecipients(schoolId, studentIds),
+        getGuardianRecipientsForStudents(schoolId, studentIds),
+      ]);
+
+      return uniqueRecipients([
+        ...studentRecipients,
+        ...guardianRecipients,
+      ]);
+    }
 
     default:
       return [];
