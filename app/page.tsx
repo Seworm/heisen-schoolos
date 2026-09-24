@@ -66,9 +66,9 @@ export default function Home() {
             </h1>
 
             <p className="mx-auto mt-8 max-w-5xl text-lg leading-8 text-slate-300 lg:text-[1.8rem] lg:leading-[1.5]">
-              ADESUAPA seeks to empower learners, educators and parents, our cutting-edge website and
-              mobile application delivers unparalleled access to quality education, personalized learning
-              experiences, and innovative teaching tools.
+              Heisen SchoolOS helps schools manage students, staff, academics, finance and daily
+              operations with one connected platform built for efficient school leadership and better
+              learning outcomes.
             </p>
           </div>
 
