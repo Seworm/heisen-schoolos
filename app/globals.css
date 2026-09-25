@@ -426,6 +426,94 @@ a[class*="bg-slate-100"] {
   color: var(--text-primary) !important;
 }
 
+/* Lighten dark green accent surfaces so the text stays readable and the UI reads as a premium light admin dashboard. */
+button[class*="bg-[#006b3f]"],
+a[class*="bg-[#006b3f]"],
+[class*="bg-[#006b3f]"]:not(button):not(a),
+button[class*="bg-[#005530]"],
+a[class*="bg-[#005530]"],
+[class*="bg-[#005530]"]:not(button):not(a),
+button[class*="bg-[#087443]"],
+a[class*="bg-[#087443]"],
+[class*="bg-[#087443]"]:not(button):not(a),
+button[class*="bg-[#00874f]"],
+a[class*="bg-[#00874f]"],
+[class*="bg-[#00874f]"]:not(button):not(a),
+button[class*="bg-[#111111]"],
+a[class*="bg-[#111111]"],
+[class*="bg-[#111111]"]:not(button):not(a),
+button[class*="bg-[#0d2139]"],
+a[class*="bg-[#0d2139]"],
+[class*="bg-[#0d2139]"]:not(button):not(a),
+button[class*="bg-[#0f213c]"],
+a[class*="bg-[#0f213c]"],
+[class*="bg-[#0f213c]"]:not(button):not(a),
+button[class*="bg-[#0c2139]"],
+a[class*="bg-[#0c2139]"],
+[class*="bg-[#0c2139]"]:not(button):not(a),
+button[class*="bg-[#16314d]"],
+a[class*="bg-[#16314d]"],
+[class*="bg-[#16314d]"]:not(button):not(a),
+button[class*="bg-[#173d4f]"],
+a[class*="bg-[#173d4f]"],
+[class*="bg-[#173d4f]"]:not(button):not(a),
+button[class*="bg-[#081c35]"],
+a[class*="bg-[#081c35]"],
+[class*="bg-[#081c35]"]:not(button):not(a) {
+  border-color: #cfe4d5 !important;
+  background-color: #edf7f0 !important;
+  color: #0a5d3a !important;
+}
+
+button[class*="bg-[#006b3f]"]:hover:not(:disabled),
+button[class*="bg-[#005530]"]:hover:not(:disabled),
+button[class*="bg-[#087443]"]:hover:not(:disabled),
+button[class*="bg-[#00874f]"]:hover:not(:disabled),
+a[class*="bg-[#006b3f]"]:hover,
+a[class*="bg-[#005530]"]:hover,
+a[class*="bg-[#087443]"]:hover,
+a[class*="bg-[#00874f]"]:hover,
+button[class*="bg-[#111111]"]:hover:not(:disabled),
+a[class*="bg-[#111111]"]:hover,
+button[class*="bg-[#0d2139]"]:hover:not(:disabled),
+a[class*="bg-[#0d2139]"]:hover,
+button[class*="bg-[#0f213c]"]:hover:not(:disabled),
+a[class*="bg-[#0f213c]"]:hover,
+button[class*="bg-[#0c2139]"]:hover:not(:disabled),
+a[class*="bg-[#0c2139]"]:hover,
+button[class*="bg-[#16314d]"]:hover:not(:disabled),
+a[class*="bg-[#16314d]"]:hover,
+button[class*="bg-[#173d4f]"]:hover:not(:disabled),
+a[class*="bg-[#173d4f]"]:hover,
+button[class*="bg-[#081c35]"]:hover:not(:disabled),
+a[class*="bg-[#081c35]"]:hover {
+  background-color: #e2f2e7 !important;
+  color: #005530 !important;
+}
+
+[class*="bg-[#111111]"]:not(button):not(a) h1,
+[class*="bg-[#111111]"]:not(button):not(a) h2,
+[class*="bg-[#111111]"]:not(button):not(a) h3,
+[class*="bg-[#111111]"]:not(button):not(a) p,
+[class*="bg-[#111111]"]:not(button):not(a) span,
+[class*="bg-[#0d2139]"]:not(button):not(a) h1,
+[class*="bg-[#0d2139]"]:not(button):not(a) h2,
+[class*="bg-[#0d2139]"]:not(button):not(a) h3,
+[class*="bg-[#0d2139]"]:not(button):not(a) p,
+[class*="bg-[#0d2139]"]:not(button):not(a) span,
+[class*="bg-[#0f213c]"]:not(button):not(a) h1,
+[class*="bg-[#0f213c]"]:not(button):not(a) h2,
+[class*="bg-[#0f213c]"]:not(button):not(a) h3,
+[class*="bg-[#0f213c]"]:not(button):not(a) p,
+[class*="bg-[#0f213c]"]:not(button):not(a) span,
+[class*="bg-[#081c35]"]:not(button):not(a) h1,
+[class*="bg-[#081c35]"]:not(button):not(a) h2,
+[class*="bg-[#081c35]"]:not(button):not(a) h3,
+[class*="bg-[#081c35]"]:not(button):not(a) p,
+[class*="bg-[#081c35]"]:not(button):not(a) span {
+  color: #0f172a !important;
+}
+
 .border-blue-200,
 .border-blue-300,
 .border-blue-500,

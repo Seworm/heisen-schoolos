@@ -28,7 +28,7 @@ export function SchoolTopbar({ school }: SchoolTopbarProps) {
   const schoolName = school?.name?.trim() || "School";
 
   return (
-    <header className="sticky top-0 z-30 flex h-20 items-center border-b border-[#dfe7e0] bg-[#f5f7f6] px-4 text-slate-900 backdrop-blur sm:px-6 lg:px-8">
+    <header className="sticky top-0 z-30 flex h-20 items-center border-b border-[#dfe7e0] bg-white px-4 text-slate-900 backdrop-blur sm:px-6 lg:px-8">
       <div className="flex min-w-0 flex-1 items-center gap-4">
         <button
           type="button"
