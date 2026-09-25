@@ -14,11 +14,12 @@ import {
   students,
   streams,
   subjects,
-  staff,
-  teacherAssignments,
   terms,
 } from "@/db/schema";
-import { requireTeacherScope } from "@/lib/authorization";
+import {
+  requireTeacherScope,
+  requireTeacherSubjectAccess,
+} from "@/lib/authorization";
 import { requireCurrentSchool } from "@/lib/current-school";
 import {
   calculateAssessmentResult,
@@ -41,8 +42,7 @@ export default async function AssessmentPage({
 }: Props) {
   const { id } = await params;
 
-  const school =
-    await requireCurrentSchool();
+  const school = await requireCurrentSchool();
   const currentUser = await requireTeacherScope(school.id);
 
   const [assessment] = await db
@@ -50,46 +50,32 @@ export default async function AssessmentPage({
       id: assessments.id,
       name: assessments.name,
       maxScore: assessments.maxScore,
-      assessmentDate:
-        assessments.assessmentDate,
+      assessmentDate: assessments.assessmentDate,
       status: assessments.status,
-      instructions:
-        assessments.instructions,
+      instructions: assessments.instructions,
 
-      academicYearId:
-        assessments.academicYearId,
-      academicYearName:
-        academicYears.name,
+      academicYearId: assessments.academicYearId,
+      academicYearName: academicYears.name,
 
       termId: assessments.termId,
       termName: terms.name,
 
-      assessmentPeriodId:
-        assessments.assessmentPeriodId,
-      periodName:
-        assessmentPeriods.name,
+      assessmentPeriodId: assessments.assessmentPeriodId,
+      periodName: assessmentPeriods.name,
 
-      assessmentTypeId:
-        assessments.assessmentTypeId,
-      typeName:
-        assessmentTypes.name,
-      typeCategory:
-        assessmentTypes.category,
+      assessmentTypeId: assessments.assessmentTypeId,
+      typeName: assessmentTypes.name,
+      typeCategory: assessmentTypes.category,
 
-      subjectId:
-        assessments.subjectId,
-      subjectName:
-        subjects.name,
+      subjectId: assessments.subjectId,
+      subjectName: subjects.name,
 
       streamId: streams.id,
       streamName: streams.name,
 
-      classLevelId:
-        classLevels.id,
-      className:
-        classLevels.name,
-      classCategory:
-        classLevels.category,
+      classLevelId: classLevels.id,
+      className: classLevels.name,
+      classCategory: classLevels.category,
     })
     .from(assessments)
     .innerJoin(
@@ -180,28 +166,12 @@ export default async function AssessmentPage({
   }
 
   if (currentUser.role === "teacher") {
-    const [teacher] = await db
-      .select({ id: staff.id })
-      .from(staff)
-      .where(and(eq(staff.schoolId, school.id), eq(staff.email, currentUser.email)))
-      .limit(1);
-    const [assignment] = teacher
-      ? await db
-          .select({ id: teacherAssignments.id })
-          .from(teacherAssignments)
-          .where(
-            and(
-              eq(teacherAssignments.staffId, teacher.id),
-              eq(teacherAssignments.streamId, assessment.streamId),
-              eq(teacherAssignments.subjectId, assessment.subjectId),
-              eq(teacherAssignments.academicYearId, assessment.academicYearId),
-            ),
-          )
-          .limit(1)
-      : [];
-    if (!assignment) {
-      throw new Error("You are not assigned to this class and subject.");
-    }
+    await requireTeacherSubjectAccess(
+      assessment.streamId,
+      assessment.subjectId,
+      assessment.academicYearId,
+      school.id,
+    );
   }
 
   const studentsInStream =
@@ -282,7 +252,6 @@ export default async function AssessmentPage({
   const maximumScore = Number(
     assessment.maxScore,
   );
-
 
   const results = scores
     .map((score) => {

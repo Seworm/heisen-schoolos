@@ -1,7 +1,12 @@
-import { and, eq, ne } from "drizzle-orm";
+import { and, eq, ne, or } from "drizzle-orm";
 import { auth } from "@/../auth";
 import { db } from "@/db";
-import { schoolMemberships, schools } from "@/db/schema";
+import {
+  schoolMemberships,
+  schools,
+  staff,
+  teacherAssignments,
+} from "@/db/schema";
 import { hasPermission, type Permission } from "@/lib/permissions";
 
 export const PLATFORM_ROLES = [
@@ -58,6 +63,13 @@ export function isPlatformUser(user: {
   );
 }
 
+export function isSchoolAdminRole(role?: string | null) {
+  return Boolean(
+    role &&
+      (SCHOOL_ADMIN_ROLES as readonly string[]).includes(role),
+  );
+}
+
 export async function requireSchoolMembership(schoolId?: string) {
   const user = await requireAuth();
 
@@ -111,7 +123,9 @@ export async function requireSchoolMembership(schoolId?: string) {
         .limit(1);
 
       if (!school) {
-        throw new Error("The requested school is not available.");
+        throw new Error(
+          "The requested school is not available.",
+        );
       }
 
       const [membership] = await db
@@ -155,7 +169,10 @@ export async function requireSchoolMembership(schoolId?: string) {
   }
 
   const [school] = await db
-    .select({ id: schools.id, status: schools.status })
+    .select({
+      id: schools.id,
+      status: schools.status,
+    })
     .from(schools)
     .where(eq(schools.id, activeSchoolId))
     .limit(1);
@@ -260,8 +277,166 @@ export async function requireSuperAdmin() {
   return user;
 }
 
+/**
+ * Verifies that the current user is:
+ * - a platform administrator,
+ * - a school administrator, or
+ * - an active teacher linked to a staff record.
+ *
+ * This function establishes teacher identity.
+ * Resource-level authorization is handled by the
+ * teacher stream/subject access helpers below.
+ */
 export async function requireTeacherScope(
   schoolId?: string,
 ) {
-  return requireRole(TEACHER_ROLES, schoolId);
+  const user = await requireRole(TEACHER_ROLES, schoolId);
+
+  // Platform and school administrators have unrestricted school-wide access.
+  if (
+    isPlatformUser(user) ||
+    (user.role && isSchoolAdminRole(user.role))
+  ) {
+    return user;
+  }
+
+  if (user.role !== "teacher") {
+    throw new Error("Teacher permission required.");
+  }
+
+  if (!user.email || !user.schoolId) {
+    throw new Error(
+      "Teacher account is not linked to a school staff record.",
+    );
+  }
+
+  const [teacher] = await db
+    .select({
+      id: staff.id,
+      email: staff.email,
+    })
+    .from(staff)
+    .where(
+      and(
+        eq(staff.schoolId, user.schoolId),
+        eq(staff.email, user.email),
+        eq(staff.status, "active"),
+      ),
+    )
+    .limit(1);
+
+  if (!teacher) {
+    throw new Error("Teacher staff record not found.");
+  }
+
+  return {
+    ...user,
+    staffId: teacher.id,
+  };
+}
+
+/**
+ * Whole-stream access.
+ *
+ * Ordinary teachers must be explicitly assigned as the class teacher
+ * for the requested stream and academic year.
+ *
+ * Platform and school administrators remain unrestricted.
+ */
+export async function requireTeacherStreamAccess(
+  streamId: string,
+  academicYearId: string,
+  schoolId?: string,
+) {
+  const user = await requireTeacherScope(schoolId);
+
+  if (
+    isPlatformUser(user) ||
+    (user.role && isSchoolAdminRole(user.role))
+  ) {
+    return user;
+  }
+
+  const [assignment] = await db
+    .select({
+      id: teacherAssignments.id,
+    })
+    .from(teacherAssignments)
+    .where(
+      and(
+        eq(
+          teacherAssignments.staffId,
+          (user as typeof user & { staffId: string }).staffId,
+        ),
+        eq(teacherAssignments.streamId, streamId),
+        eq(teacherAssignments.academicYearId, academicYearId),
+        eq(teacherAssignments.isClassTeacher, true),
+      ),
+    )
+    .limit(1);
+
+  if (!assignment) {
+    throw new Error(
+      "You are not the class teacher for this class or stream.",
+    );
+  }
+
+  return user;
+}
+
+/**
+ * Subject-level access.
+ *
+ * A subject teacher must have an explicit assignment for the
+ * requested subject, stream, and academic year.
+ *
+ * A class teacher has whole-stream authority, so their
+ * class-teacher assignment also grants access to subjects
+ * within that stream for the same academic year.
+ *
+ * Platform and school administrators remain unrestricted.
+ */
+export async function requireTeacherSubjectAccess(
+  streamId: string,
+  subjectId: string,
+  academicYearId: string,
+  schoolId?: string,
+) {
+  const user = await requireTeacherScope(schoolId);
+
+  if (
+    isPlatformUser(user) ||
+    (user.role && isSchoolAdminRole(user.role))
+  ) {
+    return user;
+  }
+
+  const [assignment] = await db
+    .select({
+      id: teacherAssignments.id,
+    })
+    .from(teacherAssignments)
+    .where(
+      and(
+        eq(
+          teacherAssignments.staffId,
+          (user as typeof user & { staffId: string }).staffId,
+        ),
+        eq(teacherAssignments.streamId, streamId),
+        eq(teacherAssignments.academicYearId, academicYearId),
+        or(
+          eq(teacherAssignments.subjectId, subjectId),
+          eq(teacherAssignments.isClassTeacher, true),
+        ),
+      ),
+    )
+    .limit(1);
+
+  if (!assignment) {
+    throw new Error(
+      "You are not assigned to this subject in this class or stream.",
+    );
+  }
+
+  return user;
 }

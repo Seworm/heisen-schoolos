@@ -16,7 +16,12 @@ import {
   studentPlacements,
   students,
 } from "@/db/schema";
-import { requireCurrentSchool } from "@/lib/current-school";
+import {
+  requireCurrentSchool,
+} from "@/lib/current-school";
+import {
+  requireTeacherSubjectAccess,
+} from "@/lib/authorization";
 
 type ActionState = {
   error?: string;
@@ -60,22 +65,19 @@ export async function saveAssessmentScores(
     };
   }
 
-  const school =
-    await requireCurrentSchool();
+  const school = await requireCurrentSchool();
 
+  /*
+   * Load the assessment first because the teacher authorization
+   * check needs its stream, subject and academic year.
+   */
   const [assessment] = await db
     .select()
     .from(assessments)
     .where(
       and(
-        eq(
-          assessments.id,
-          assessmentId,
-        ),
-        eq(
-          assessments.schoolId,
-          school.id,
-        ),
+        eq(assessments.id, assessmentId),
+        eq(assessments.schoolId, school.id),
       ),
     )
     .limit(1);
@@ -83,6 +85,31 @@ export async function saveAssessmentScores(
   if (!assessment) {
     return {
       error: "Assessment not found.",
+    };
+  }
+
+  /*
+   * SECURITY BOUNDARY
+   *
+   * Platform administrators and school administrators are allowed
+   * through by requireTeacherSubjectAccess().
+   *
+   * Ordinary teachers must have either:
+   *
+   * 1. an explicit subject + stream + academic-year assignment, or
+   * 2. a class-teacher assignment for that stream + academic year.
+   */
+  try {
+    await requireTeacherSubjectAccess(
+      assessment.streamId,
+      assessment.subjectId,
+      assessment.academicYearId,
+      school.id,
+    );
+  } catch {
+    return {
+      error:
+        "You are not authorized to enter scores for this assessment.",
     };
   }
 
@@ -394,6 +421,62 @@ export async function transitionAssessment(
   const school =
     await requireCurrentSchool();
 
+  /*
+   * Fetch the assessment before opening the transaction so that
+   * authorization can be checked against its actual resource scope.
+   */
+  const [authorizationAssessment] =
+    await db
+      .select({
+        id: assessments.id,
+        streamId:
+          assessments.streamId,
+        subjectId:
+          assessments.subjectId,
+        academicYearId:
+          assessments.academicYearId,
+      })
+      .from(assessments)
+      .where(
+        and(
+          eq(
+            assessments.id,
+            assessmentId,
+          ),
+          eq(
+            assessments.schoolId,
+            school.id,
+          ),
+        ),
+      )
+      .limit(1);
+
+  if (!authorizationAssessment) {
+    return {
+      error: "Assessment not found.",
+    };
+  }
+
+  /*
+   * SECURITY BOUNDARY
+   *
+   * The lifecycle operation is restricted to the same teacher
+   * scope as score entry.
+   */
+  try {
+    await requireTeacherSubjectAccess(
+      authorizationAssessment.streamId,
+      authorizationAssessment.subjectId,
+      authorizationAssessment.academicYearId,
+      school.id,
+    );
+  } catch {
+    return {
+      error:
+        "You are not authorized to change the lifecycle of this assessment.",
+    };
+  }
+
   try {
     await db.transaction(
       async (tx) => {
@@ -409,6 +492,10 @@ export async function transitionAssessment(
               id: assessments.id,
               status:
                 assessments.status,
+              streamId:
+                assessments.streamId,
+              academicYearId:
+                assessments.academicYearId,
             })
             .from(assessments)
             .where(
@@ -450,8 +537,8 @@ export async function transitionAssessment(
         }
 
         /*
-         * Publishing requires every student
-         * in the assessment stream to have a score.
+         * Publishing requires every active student in the
+         * assessment stream/year to have a score.
          */
         if (
           targetStatus ===
@@ -484,24 +571,7 @@ export async function transitionAssessment(
                 and(
                   eq(
                     studentPlacements.streamId,
-                    (
-                      await tx
-                        .select({
-                          streamId:
-                            assessments.streamId,
-                        })
-                        .from(
-                          assessments,
-                        )
-                        .where(
-                          eq(
-                            assessments.id,
-                            assessment.id,
-                          ),
-                        )
-                        .limit(1)
-                    )[0]?.streamId ??
-                      "",
+                    assessment.streamId,
                   ),
                   eq(
                     studentPlacements.status,
@@ -509,25 +579,7 @@ export async function transitionAssessment(
                   ),
                   eq(
                     studentEnrollments.academicYearId,
-                    (
-                      await tx
-                        .select({
-                          academicYearId:
-                            assessments.academicYearId,
-                        })
-                        .from(
-                          assessments,
-                        )
-                        .where(
-                          eq(
-                            assessments.id,
-                            assessment.id,
-                          ),
-                        )
-                        .limit(1)
-                    )[0]
-                      ?.academicYearId ??
-                      "",
+                    assessment.academicYearId,
                   ),
                   eq(
                     studentEnrollments.status,
