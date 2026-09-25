@@ -160,7 +160,7 @@ export function SchoolSidebar() {
   }
 
   return (
-    <aside className="sticky top-0 hidden h-screen w-[284px] shrink-0 border-r border-[#19324d] bg-[#0f213c] text-slate-50 lg:flex lg:flex-col">
+    <aside className="sticky top-0 hidden h-screen w-[284px] shrink-0 border-r border-[#173d4f] bg-[#0c2139] text-slate-50 lg:flex lg:flex-col">
       <div className="flex h-20 shrink-0 items-center border-b border-white/10 px-5">
         <Link
           href="/dashboard"
@@ -216,7 +216,7 @@ export function SchoolSidebar() {
                             "group flex items-center gap-3 rounded-lg px-3 py-2.5 text-[13px] font-medium transition-all",
                             "outline-none focus-visible:ring-2 focus-visible:ring-[#a6e4b2]",
                             active
-                              ? "bg-[#183d3b] text-white shadow-md shadow-black/10"
+                              ? "bg-[#dff5e3] text-[#0d2139] shadow-md shadow-black/10"
                               : "text-slate-300 hover:bg-white/5 hover:text-white",
                           ].join(" ")}
                         >
@@ -224,7 +224,7 @@ export function SchoolSidebar() {
                             className={[
                               "flex h-8 w-8 shrink-0 items-center justify-center rounded-md transition-colors",
                               active
-                                ? "bg-[#224d49] text-white"
+                                ? "bg-[#cfead2] text-[#0d2139]"
                                 : "bg-white/5 text-slate-300 group-hover:bg-white/10 group-hover:text-white",
                             ].join(" ")}
                           >
@@ -237,7 +237,7 @@ export function SchoolSidebar() {
                           <span className="truncate">{item.label}</span>
 
                           {active && (
-                            <span className="ml-auto h-1.5 w-1.5 rounded-full bg-white" />
+                            <span className="ml-auto h-1.5 w-1.5 rounded-full bg-[#0d2139]" />
                           )}
                         </Link>
                       );
