@@ -1,4 +1,4 @@
-export const dynamic = "force-dynamic";
+﻿export const dynamic = "force-dynamic";
 
 import {
   ArrowLeft,
@@ -28,6 +28,7 @@ import {
 } from "@/lib/finance/finance-utils";
 
 import PrintReceiptButton from "./PrintReceiptButton";
+import PaymentReceiptPrint from "./PaymentReceiptPrint";
 
 
 type StudentRow = {
@@ -49,13 +50,13 @@ function formatMoney(value: string | number) {
 
 function formatDate(value: string | Date | null) {
   if (!value) {
-    return "—";
+    return "â€”";
   }
 
   const date = new Date(value);
 
   if (Number.isNaN(date.getTime())) {
-    return "—";
+    return "â€”";
   }
 
   return new Intl.DateTimeFormat("en-GH", {
