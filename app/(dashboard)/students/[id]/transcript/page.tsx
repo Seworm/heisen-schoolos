@@ -35,7 +35,7 @@ export default async function StudentTranscriptPage({
         <div className="h-2 bg-gradient-to-r from-[#ce1126] via-[#fcd116] to-[#006b3f]" />
         <div className="flex flex-wrap items-center justify-between gap-6 px-6 py-7 sm:px-8">
           <div className="flex items-center gap-4">
-            <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-[#111111] text-xl font-bold text-white">{transcript.student.firstName[0]}{transcript.student.lastName[0]}</div>
+            <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-[#edf7f0] text-xl font-bold text-[#005530] ring-1 ring-[#cfe4d5]">{transcript.student.firstName[0]}{transcript.student.lastName[0]}</div>
             <div><p className="text-xs font-bold uppercase tracking-[0.14em] text-slate-400">Student</p><h2 className="mt-1 text-2xl font-bold text-slate-950">{fullName}</h2><p className="mt-1 text-sm text-slate-500">{transcript.student.studentNumber} · {transcript.school.name}</p></div>
           </div>
           <div className="grid grid-cols-2 gap-6 sm:grid-cols-3">

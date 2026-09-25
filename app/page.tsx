@@ -45,27 +45,27 @@ const modules = [
 
 export default function Home() {
   return (
-    <main className="min-h-screen bg-[#071c34] text-white">
+    <main className="min-h-screen bg-[#f5faf6] text-slate-900">
       <PublicNav />
 
-      <section className="relative overflow-hidden border-y border-white/10 bg-[#081c35]">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(246,165,58,0.18),transparent_22%),radial-gradient(circle_at_bottom_right,_rgba(255,255,255,0.04),transparent_18%)]" />
+      <section className="relative overflow-hidden border-y border-[#e3efe7] bg-[#f5faf6]">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(46,125,90,0.10),transparent_22%),radial-gradient(circle_at_bottom_right,_rgba(20,84,63,0.04),transparent_18%)]" />
 
         <div className="relative mx-auto max-w-7xl px-6 pb-16 pt-10 lg:px-8 lg:pb-24 lg:pt-16">
           <div className="mx-auto flex max-w-[1080px] justify-center">
-            <div className="inline-flex items-center gap-3 rounded-full border border-[#f6a53a]/30 bg-[#f6a53a]/10 px-5 py-2.5 text-sm font-bold text-[#f8d79b] shadow-[0_0_20px_rgba(246,165,58,0.08)]">
-              <span className="inline-flex h-2.5 w-2.5 rounded-full bg-[#f6a53a]" />
+            <div className="inline-flex items-center gap-3 rounded-full border border-[#cfe4d5] bg-[#edf7f0] px-5 py-2.5 text-sm font-bold text-[#005530] shadow-sm">
+              <span className="inline-flex h-2.5 w-2.5 rounded-full bg-[#0a5d3a]" />
               12,000+ Users already On-Board
             </div>
           </div>
 
           <div className="mt-10 text-center">
-            <h1 className="mx-auto max-w-6xl text-5xl font-black leading-[0.95] tracking-[-0.06em] text-white sm:text-6xl lg:text-[7rem]">
+            <h1 className="mx-auto max-w-6xl text-5xl font-black leading-[0.95] tracking-[-0.06em] text-slate-950 sm:text-6xl lg:text-[7rem]">
               Welcome To The World&apos;s
               <span className="block">Leading EdTech Platform</span>
             </h1>
 
-            <p className="mx-auto mt-8 max-w-5xl text-lg leading-8 text-slate-300 lg:text-[1.8rem] lg:leading-[1.5]">
+            <p className="mx-auto mt-8 max-w-5xl text-lg leading-8 text-slate-600 lg:text-[1.8rem] lg:leading-[1.5]">
               Heisen SchoolOS helps schools manage students, staff, academics, finance and daily
               operations with one connected platform built for efficient school leadership and better
               learning outcomes.
@@ -163,11 +163,11 @@ export default function Home() {
 
       <section className="mx-auto max-w-7xl px-6 py-16 lg:px-8">
         <div className="max-w-3xl">
-          <p className="text-sm font-bold uppercase tracking-[0.18em] text-[#f6a53a]">One connected platform</p>
-          <h2 className="mt-3 text-3xl font-extrabold tracking-tight text-white sm:text-4xl">
+          <p className="text-sm font-bold uppercase tracking-[0.18em] text-[#0a5d3a]">One connected platform</p>
+          <h2 className="mt-3 text-3xl font-extrabold tracking-tight text-slate-950 sm:text-4xl">
             From first admission to final report card.
           </h2>
-          <p className="mt-4 text-lg text-slate-300">
+          <p className="mt-4 text-lg text-slate-600">
             Replace disconnected spreadsheets and manual follow-up with workflows your whole school can use.
           </p>
         </div>
@@ -176,27 +176,27 @@ export default function Home() {
           {modules.map(({ icon: Icon, title, text }) => (
             <div
               key={title}
-              className="rounded-2xl border border-white/10 bg-[#0d2346] p-6 shadow-[0_10px_30px_rgba(0,0,0,0.18)] transition hover:-translate-y-1 hover:border-[#f6a53a]/40"
+              className="rounded-2xl border border-[#e3efe7] bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:border-[#cfe4d5]"
             >
-              <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-[#f6a53a]/10 text-[#f6a53a]">
+              <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-[#edf7f0] text-[#005530]">
                 <Icon className="h-5 w-5" />
               </div>
-              <h3 className="mt-5 text-xl font-bold text-white">{title}</h3>
-              <p className="mt-2 text-sm leading-6 text-slate-300">{text}</p>
+              <h3 className="mt-5 text-xl font-bold text-slate-950">{title}</h3>
+              <p className="mt-2 text-sm leading-6 text-slate-600">{text}</p>
             </div>
           ))}
         </div>
       </section>
 
-      <section className="bg-[#0a1e37] text-white">
+      <section className="bg-[#edf7f0] text-slate-900">
         <div className="mx-auto flex max-w-7xl flex-col gap-6 px-6 py-14 sm:flex-row sm:items-center sm:justify-between lg:px-8">
           <div>
-            <p className="text-2xl font-extrabold">Ready to run a better school?</p>
-            <p className="mt-2 text-sm text-slate-300">Set up your workspace and bring your team together.</p>
+            <p className="text-2xl font-extrabold text-slate-950">Ready to run a better school?</p>
+            <p className="mt-2 text-sm text-slate-600">Set up your workspace and bring your team together.</p>
           </div>
           <Link
             href="/register"
-            className="inline-flex items-center gap-2 rounded-xl bg-[#f6a53a] px-5 py-3 font-bold text-[#0b1730] hover:bg-[#f9ba67]"
+            className="inline-flex items-center gap-2 rounded-xl bg-[#0a5d3a] px-5 py-3 font-bold text-white hover:bg-[#005530]"
           >
             Create your school
             <ArrowRight className="h-4 w-4" />
