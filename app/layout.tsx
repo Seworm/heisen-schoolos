@@ -1,54 +1,46 @@
-import type { ReactNode } from "react";
-import { cookies } from "next/headers";
-import { requireCurrentSchool } from "@/lib/current-school";
-import { SchoolSidebar } from "@/components/SchoolSidebar";
-import { SchoolTopbar } from "@/components/SchoolTopbar";
-import { getApplicationSession } from "@/lib/auth/compat";
-import { getAvailableSchools } from "@/lib/school-workspace";
-import { ACTIVE_SCHOOL_COOKIE_NAME } from "@/lib/current-school";
-import { isPlatformUser } from "@/lib/authorization";
-import SchoolSelection from "./SchoolSelection";
+import type { Metadata } from "next";
+import { Geist, Geist_Mono } from "next/font/google";
+import { Providers } from "./providers";
+import "./globals.css";
 
-export const dynamic = "force-dynamic";
+const geistSans = Geist({
+  variable: "--font-geist-sans",
+  subsets: ["latin"],
+});
 
-export default async function DashboardLayout({
+const geistMono = Geist_Mono({
+  variable: "--font-geist-mono",
+  subsets: ["latin"],
+});
+
+export const metadata: Metadata = {
+  title: {
+    default: "Heisen SchoolOS",
+    template: "%s | Heisen SchoolOS",
+  },
+  description: "Heisen School Management System",
+  icons: {
+    icon: "/heisen-logo.png",
+    shortcut: "/heisen-logo.png",
+    apple: "/heisen-logo.png",
+  },
+};
+
+export default function RootLayout({
   children,
 }: {
-  children: ReactNode;
+  children: React.ReactNode;
 }) {
-  const session = await getApplicationSession();
-  const activeSchoolId = (await cookies()).get(ACTIVE_SCHOOL_COOKIE_NAME)?.value;
-  const isPlatformAdmin = session ? isPlatformUser(session.user) : false;
-
-  if (isPlatformAdmin && !session?.user.schoolId && !activeSchoolId) {
-    const availableSchools = await getAvailableSchools();
-
-    return <SchoolSelection schools={availableSchools} />;
-  }
-
-  const school = await requireCurrentSchool();
-  const availableSchools =
-    isPlatformAdmin ? await getAvailableSchools() : [];
-
   return (
-    <div className="min-h-screen bg-[#071d33] text-slate-900">
-      <div className="mx-auto flex min-h-screen max-w-[1800px] gap-4 px-3 py-3 lg:px-4">
-        <SchoolSidebar isPlatformAdmin={isPlatformAdmin} />
-
-        <div className="min-w-0 flex-1 overflow-hidden rounded-[26px] border border-[#dbe7e2] bg-[#edf2ef] shadow-[0_18px_60px_rgba(10,18,30,0.18)]">
-          <SchoolTopbar
-            school={school}
-            availableSchools={availableSchools}
-            isPlatformAdmin={isPlatformAdmin}
-          />
-
-          <main className="min-h-[calc(100vh-5rem)] bg-[#edf2ef] px-4 py-5 sm:px-6 lg:px-8">
-            <div className="mx-auto w-full max-w-[1600px]">
-              {children}
-            </div>
-          </main>
-        </div>
-      </div>
-    </div>
+    <html
+      lang="en"
+      suppressHydrationWarning
+      data-scroll-behavior="smooth"
+      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+    >
+      <body className="min-h-full flex flex-col">
+        <Providers>{children}</Providers>
+      </body>
+    </html>
   );
 }
