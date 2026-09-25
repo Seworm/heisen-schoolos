@@ -20,7 +20,8 @@ import {
   staff,
 } from "@/db/schema";
 import { requireCurrentSchool } from "@/lib/current-school";
-import PrintPayrollButton from "./PrintPayrollButton";`r`nimport PayrollPrint from "./PayrollPrint";
+import PrintPayrollButton from "./PrintPayrollButton";
+import PayrollPrint from "./PayrollPrint";
 import { deletePayrollEntry, markPayrollAsPaid } from "./actions";
 
 export const dynamic = "force-dynamic";
@@ -512,5 +513,6 @@ export default async function PayrollRunPage({
     </>
   );
 }
+
 
 
