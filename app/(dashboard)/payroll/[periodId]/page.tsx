@@ -1,4 +1,4 @@
-import { and, asc, eq } from "drizzle-orm";
+﻿import { and, asc, eq } from "drizzle-orm";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import {
@@ -20,7 +20,7 @@ import {
   staff,
 } from "@/db/schema";
 import { requireCurrentSchool } from "@/lib/current-school";
-import PrintPayrollButton from "./PrintPayrollButton";
+import PrintPayrollButton from "./PrintPayrollButton";`r`nimport PayrollPrint from "./PayrollPrint";
 import { deletePayrollEntry, markPayrollAsPaid } from "./actions";
 
 export const dynamic = "force-dynamic";
@@ -33,9 +33,9 @@ const money = (value: string | number) =>
   }).format(Number(value));
 
 function formatDate(value: string | Date | null) {
-  if (!value) return "—";
+  if (!value) return "â€”";
   const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return "—";
+  if (Number.isNaN(date.getTime())) return "â€”";
   return new Intl.DateTimeFormat("en-GH", {
     day: "2-digit",
     month: "short",
@@ -221,7 +221,7 @@ export default async function PayrollRunPage({
         </div>
 
         {/* Payroll document */}
-        <article className="payroll-paper overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+        <article className="payroll-paper print:hidden overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
           {/* Header */}
           <header className="border-b border-slate-200 px-6 py-7 sm:px-10 sm:py-8">
             <div className="flex flex-col gap-6 sm:flex-row sm:items-start sm:justify-between">
@@ -488,7 +488,29 @@ export default async function PayrollRunPage({
             </div>
           </footer>
         </article>
+      {run && (
+        <PayrollPrint
+          data={{
+            schoolName: school.name,
+            periodName: period.name,
+            status: period.status,
+            periodStart: period.periodStart,
+            periodEnd: period.periodEnd,
+            payDate: period.payDate,
+            run: {
+              grossTotal: run.grossTotal,
+              deductionsTotal: run.deductionsTotal,
+              netTotal: run.netTotal,
+              processedBy: run.processedBy,
+              processedAt: run.processedAt,
+            },
+            staffItems,
+          }}
+        />
+      )}
       </div>
     </>
   );
 }
+
+
