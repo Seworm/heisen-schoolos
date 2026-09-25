@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import type { CSSProperties } from "react";
 
@@ -64,7 +64,7 @@ export type ReportCardData = {
 };
 
 function formatDate(value: Date | null | undefined) {
-  if (!value) return "—";
+  if (!value) return "Not recorded";
 
   return new Intl.DateTimeFormat("en-GB", {
     day: "2-digit",
@@ -77,27 +77,12 @@ function formatPercent(value: number) {
   return `${Number(value || 0).toFixed(2)}%`;
 }
 
-function gradeTone(grade: string | null) {
-  switch (grade) {
-    case "A":
-      return "Excellent";
-    case "B":
-      return "Very Good";
-    case "C":
-      return "Good";
-    case "D":
-      return "Credit";
-    case "E":
-      return "Pass";
-    case "F":
-      return "Needs Improvement";
-    default:
-      return "—";
-  }
+function formatScore(value: number) {
+  return Number(value || 0).toFixed(2);
 }
 
 function ordinal(value: number) {
-  if (value <= 0) return "—";
+  if (value <= 0) return "Not ranked";
 
   const remainder10 = value % 10;
   const remainder100 = value % 100;
@@ -109,9 +94,28 @@ function ordinal(value: number) {
   return `${value}th`;
 }
 
+function initials(name: string) {
+  return name
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((word) => word.charAt(0))
+    .join("")
+    .toUpperCase();
+}
+
+function subjectRemark(subject: ReportCardSubject) {
+  return subject.remark || subject.label || "—";
+}
+
+const borderStyle: CSSProperties = {
+  border: "1px solid #cbd5e1",
+};
+
 const cellStyle: CSSProperties = {
   border: "1px solid #cbd5e1",
-  padding: "7px 8px",
+  padding: "6px 7px",
+  verticalAlign: "middle",
 };
 
 export default function ReportCard({
@@ -131,11 +135,45 @@ export default function ReportCard({
   } = data;
 
   return (
-    <article className="report-card-print mx-auto w-full max-w-[794px] bg-white text-slate-950">
+    <article className="report-card-document mx-auto w-full max-w-[794px] bg-white text-slate-950">
       <style jsx global>{`
         @page {
           size: A4 portrait;
-          margin: 10mm;
+          margin: 9mm;
+        }
+
+        .report-card-document {
+          font-family:
+            Arial,
+            Helvetica,
+            sans-serif;
+          color: #0f172a;
+          background: #ffffff;
+        }
+
+        .report-card-document * {
+          box-sizing: border-box;
+        }
+
+        .report-card-document table {
+          border-collapse: collapse;
+        }
+
+        .report-card-document .section-title {
+          letter-spacing: 0.12em;
+        }
+
+        .report-card-document .signature-line {
+          border-bottom: 1px solid #0f172a;
+        }
+
+        @media screen {
+          .report-card-document {
+            margin-bottom: 32px;
+            box-shadow:
+              0 18px 45px rgba(15, 23, 42, 0.10),
+              0 2px 8px rgba(15, 23, 42, 0.06);
+          }
         }
 
         @media print {
@@ -143,19 +181,15 @@ export default function ReportCard({
           body {
             margin: 0 !important;
             padding: 0 !important;
-            background: #fff !important;
+            background: #ffffff !important;
           }
 
           body {
-            -webkit-print-color-adjust: exact;
-            print-color-adjust: exact;
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
           }
 
-          .print-hidden {
-            display: none !important;
-          }
-
-          .report-card-print {
+          .report-card-document {
             width: 100% !important;
             max-width: none !important;
             margin: 0 !important;
@@ -163,129 +197,164 @@ export default function ReportCard({
             box-shadow: none !important;
           }
 
-          .report-card-page {
-            page-break-after: always;
-            break-after: page;
-          }
-
-          .report-card-page:last-child {
-            page-break-after: auto;
-            break-after: auto;
-          }
-
-          .avoid-break {
-            page-break-inside: avoid;
+          .report-card-section {
             break-inside: avoid;
+            page-break-inside: avoid;
           }
 
-          table {
+          .report-card-table {
             page-break-inside: auto;
           }
 
-          tr {
-            page-break-inside: avoid;
+          .report-card-table thead {
+            display: table-header-group;
+          }
+
+          .report-card-table tr {
             break-inside: avoid;
+            page-break-inside: avoid;
+          }
+
+          .report-card-footer {
+            break-inside: avoid;
+            page-break-inside: avoid;
           }
         }
       `}</style>
 
-      <div className="report-card-page overflow-hidden rounded-2xl border border-slate-300 shadow-sm print:rounded-none print:border-0 print:shadow-none">
-        {/* HEADER */}
-        <header className="border-b-2 border-slate-950 px-8 py-6">
-          <div className="flex items-start justify-between gap-6">
-            <div className="flex items-center gap-4">
-              <div className="flex h-20 w-20 shrink-0 items-center justify-center rounded-xl border-2 border-slate-900 bg-slate-50 text-center text-xl font-black">
-                {school.name
-                  .split(/\s+/)
-                  .filter(Boolean)
-                  .slice(0, 2)
-                  .map((word) => word[0])
-                  .join("")
-                  .toUpperCase()}
-              </div>
+      <div className="overflow-hidden border border-slate-400 bg-white">
+        {/* ============================================================
+            OFFICIAL SCHOOL HEADER
+            ============================================================ */}
 
-              <div>
-                <h1 className="text-2xl font-black uppercase tracking-tight">
-                  {school.name}
-                </h1>
-
-                <p className="mt-1 text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
-                  Official Academic Report
-                </p>
-
-                <p className="mt-2 text-sm font-semibold">
-                  Student Report Card
-                </p>
-              </div>
+        <header className="border-b-[3px] border-slate-900 px-7 pb-4 pt-5">
+          <div className="flex items-center gap-4">
+            <div
+              className="flex h-[72px] w-[72px] shrink-0 items-center justify-center border-2 border-slate-900 bg-slate-50 text-lg font-black tracking-tight"
+              aria-label="School logo placeholder"
+            >
+              {initials(school.name)}
             </div>
 
-            <div className="text-right text-xs leading-5">
-              <p className="font-bold uppercase">
+            <div className="min-w-0 flex-1 text-center">
+              <p className="text-[9px] font-bold uppercase tracking-[0.22em] text-slate-600">
+                Official Academic Record
+              </p>
+
+              <h1 className="mt-1 text-[22px] font-black uppercase leading-tight tracking-tight">
+                {school.name}
+              </h1>
+
+              <div className="mx-auto mt-2 h-px w-24 bg-slate-900" />
+
+              <h2 className="mt-2 text-[14px] font-black uppercase tracking-[0.14em]">
+                Student Report Card
+              </h2>
+            </div>
+
+            <div className="w-[72px] shrink-0 text-center">
+              <div className="flex h-[72px] items-center justify-center border border-dashed border-slate-400 text-[8px] font-bold uppercase leading-3 text-slate-500">
+                Student
+                <br />
+                Photo
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-4 grid grid-cols-3 border border-slate-300 bg-slate-50 text-center">
+            <div className="border-r border-slate-300 px-3 py-2">
+              <p className="text-[8px] font-bold uppercase tracking-[0.14em] text-slate-500">
+                Academic Year
+              </p>
+              <p className="mt-1 text-[11px] font-black">
                 {publication.academicYearName}
               </p>
-              <p>{publication.termName}</p>
-              <p>
+            </div>
+
+            <div className="border-r border-slate-300 px-3 py-2">
+              <p className="text-[8px] font-bold uppercase tracking-[0.14em] text-slate-500">
+                Term
+              </p>
+              <p className="mt-1 text-[11px] font-black">
+                {publication.termName}
+              </p>
+            </div>
+
+            <div className="px-3 py-2">
+              <p className="text-[8px] font-bold uppercase tracking-[0.14em] text-slate-500">
+                Class / Stream
+              </p>
+              <p className="mt-1 text-[11px] font-black">
                 {publication.className}
                 {publication.streamName
-                  ? ` • ${publication.streamName}`
+                  ? ` / ${publication.streamName}`
                   : ""}
               </p>
             </div>
           </div>
         </header>
 
-        {/* STUDENT INFORMATION */}
-        <section className="px-8 py-5">
-          <div className="mb-3 flex items-center justify-between">
-            <h2 className="text-sm font-black uppercase tracking-wider">
-              Student Information
-            </h2>
+        {/* ============================================================
+            STUDENT PARTICULARS
+            ============================================================ */}
 
-            <span className="rounded-full border border-slate-300 px-3 py-1 text-[10px] font-bold uppercase tracking-wider">
+        <section className="report-card-section px-7 pt-4">
+          <div className="mb-2 flex items-center justify-between">
+            <h3 className="section-title text-[10px] font-black uppercase">
+              Student Particulars
+            </h3>
+
+            <span className="border border-slate-400 px-2 py-1 text-[8px] font-bold uppercase tracking-wider">
               {publication.classCategory}
             </span>
           </div>
 
-          <div className="grid grid-cols-2 overflow-hidden rounded-lg border border-slate-300 text-sm">
-            <div className="border-b border-r border-slate-300 p-3">
-              <p className="text-[10px] font-bold uppercase text-slate-500">
+          <div
+            className="grid grid-cols-4 text-[10px]"
+            style={borderStyle}
+          >
+            <div className="border-r border-slate-300 px-3 py-2">
+              <p className="text-[8px] font-bold uppercase text-slate-500">
                 Student Name
               </p>
-              <p className="mt-1 font-bold">{student.name}</p>
+              <p className="mt-1 font-black">{student.name}</p>
             </div>
 
-            <div className="border-b border-slate-300 p-3">
-              <p className="text-[10px] font-bold uppercase text-slate-500">
+            <div className="border-r border-slate-300 px-3 py-2">
+              <p className="text-[8px] font-bold uppercase text-slate-500">
                 Student Number
               </p>
-              <p className="mt-1 font-bold">{student.studentNumber}</p>
+              <p className="mt-1 font-black">{student.studentNumber}</p>
             </div>
 
-            <div className="border-r border-slate-300 p-3">
-              <p className="text-[10px] font-bold uppercase text-slate-500">
+            <div className="border-r border-slate-300 px-3 py-2">
+              <p className="text-[8px] font-bold uppercase text-slate-500">
                 Class
               </p>
-              <p className="mt-1 font-bold">{publication.className}</p>
+              <p className="mt-1 font-black">{publication.className}</p>
             </div>
 
-            <div className="p-3">
-              <p className="text-[10px] font-bold uppercase text-slate-500">
+            <div className="px-3 py-2">
+              <p className="text-[8px] font-bold uppercase text-slate-500">
                 Stream
               </p>
-              <p className="mt-1 font-bold">
+              <p className="mt-1 font-black">
                 {publication.streamName || "—"}
               </p>
             </div>
           </div>
         </section>
 
-        {/* ATTENDANCE */}
-        <section className="px-8 pb-5">
-          <h2 className="mb-3 text-sm font-black uppercase tracking-wider">
-            Attendance
-          </h2>
+        {/* ============================================================
+            ATTENDANCE
+            ============================================================ */}
 
-          <div className="grid grid-cols-6 overflow-hidden rounded-lg border border-slate-300 text-center">
+        <section className="report-card-section px-7 pt-4">
+          <h3 className="section-title mb-2 text-[10px] font-black uppercase">
+            Attendance Record
+          </h3>
+
+          <div className="grid grid-cols-6 border border-slate-300 text-center">
             {[
               ["School Days", attendance.schoolDays],
               ["Present", attendance.present],
@@ -296,15 +365,16 @@ export default function ReportCard({
             ].map(([label, value], index) => (
               <div
                 key={String(label)}
-                className={`p-3 ${
-                  index !== 5 ? "border-r border-slate-300" : ""
-                }`}
+                className={
+                  index < 5
+                    ? "border-r border-slate-300 px-2 py-2"
+                    : "px-2 py-2"
+                }
               >
-                <p className="text-[9px] font-bold uppercase text-slate-500">
+                <p className="text-[7px] font-bold uppercase tracking-wide text-slate-500">
                   {label}
                 </p>
-
-                <p className="mt-1 text-sm font-black">
+                <p className="mt-1 text-[11px] font-black">
                   {value}
                 </p>
               </div>
@@ -312,72 +382,113 @@ export default function ReportCard({
           </div>
         </section>
 
-        {/* ACADEMIC PERFORMANCE */}
-        <section className="px-8 pb-5">
-          <div className="mb-3 flex items-end justify-between">
-            <h2 className="text-sm font-black uppercase tracking-wider">
-              Academic Performance
-            </h2>
+        {/* ============================================================
+            ACADEMIC PERFORMANCE
+            ============================================================ */}
 
-            <p className="text-[10px] font-semibold text-slate-500">
+        <section className="report-card-section px-7 pt-4">
+          <div className="mb-2 flex items-end justify-between">
+            <h3 className="section-title text-[10px] font-black uppercase">
+              Academic Performance
+            </h3>
+
+            <p className="text-[8px] text-slate-500">
               Published result snapshot
             </p>
           </div>
 
-          <div className="overflow-hidden rounded-lg border border-slate-300">
+          <div className="overflow-hidden border border-slate-300">
             <table
-              className="w-full border-collapse text-xs"
+              className="report-card-table w-full text-[9px]"
               style={{ tableLayout: "fixed" }}
             >
               <thead>
-                <tr className="bg-slate-100 text-[10px] uppercase tracking-wide">
-                  <th style={{ ...cellStyle, width: "28%" }} className="text-left">
+                <tr className="bg-slate-900 text-white">
+                  <th
+                    style={{ ...cellStyle, width: "25%" }}
+                    className="text-left font-bold uppercase"
+                  >
                     Subject
                   </th>
 
-                  <th style={cellStyle} className="text-center">
-                    Class /50
+                  <th
+                    style={{ ...cellStyle, width: "10%" }}
+                    className="text-center font-bold uppercase"
+                  >
+                    Class
                   </th>
 
-                  <th style={cellStyle} className="text-center">
-                    Exam /50
+                  <th
+                    style={{ ...cellStyle, width: "10%" }}
+                    className="text-center font-bold uppercase"
+                  >
+                    Exam
                   </th>
 
-                  <th style={cellStyle} className="text-center">
-                    Final /100
+                  <th
+                    style={{ ...cellStyle, width: "12%" }}
+                    className="text-center font-bold uppercase"
+                  >
+                    Final
                   </th>
 
-                  <th style={cellStyle} className="text-center">
+                  <th
+                    style={{ ...cellStyle, width: "9%" }}
+                    className="text-center font-bold uppercase"
+                  >
                     Grade
                   </th>
 
-                  <th style={cellStyle} className="text-center">
-                    Pos.
+                  <th
+                    style={{ ...cellStyle, width: "22%" }}
+                    className="text-left font-bold uppercase"
+                  >
+                    Remark
+                  </th>
+
+                  <th
+                    style={{ ...cellStyle, width: "12%" }}
+                    className="text-center font-bold uppercase"
+                  >
+                    Position
                   </th>
                 </tr>
               </thead>
 
               <tbody>
-                {subjects.map((subject) => (
-                  <tr key={subject.id} className="avoid-break">
-                    <td style={cellStyle} className="font-semibold">
+                {subjects.map((subject, index) => (
+                  <tr
+                    key={subject.id}
+                    className={index % 2 === 0 ? "bg-white" : "bg-slate-50"}
+                  >
+                    <td style={cellStyle} className="font-bold">
                       {subject.subjectName}
                     </td>
 
                     <td style={cellStyle} className="text-center">
-                      {subject.classScore.toFixed(2)}
+                      {formatScore(subject.classScore)}
                     </td>
 
                     <td style={cellStyle} className="text-center">
-                      {subject.examinationScore.toFixed(2)}
+                      {formatScore(subject.examinationScore)}
                     </td>
 
-                    <td style={cellStyle} className="text-center font-bold">
-                      {subject.finalPercentage.toFixed(2)}
+                    <td
+                      style={cellStyle}
+                      className="text-center font-black"
+                    >
+                      {formatScore(subject.finalPercentage)}
                     </td>
 
-                    <td style={cellStyle} className="text-center font-black">
+                    <td
+                      style={cellStyle}
+                      className="text-center font-black"
+                    >
                       {subject.grade || "—"}
+                    </td>
+
+                    <td style={cellStyle}>
+                      {subjectRemark(subject)}
                     </td>
 
                     <td style={cellStyle} className="text-center">
@@ -389,9 +500,9 @@ export default function ReportCard({
                 {subjects.length === 0 && (
                   <tr>
                     <td
-                      colSpan={6}
+                      colSpan={7}
                       style={cellStyle}
-                      className="py-8 text-center text-slate-500"
+                      className="py-7 text-center text-slate-500"
                     >
                       No published subject results available.
                     </td>
@@ -402,142 +513,155 @@ export default function ReportCard({
           </div>
         </section>
 
-        {/* OVERALL */}
-        <section className="px-8 pb-5">
-          <div className="grid grid-cols-3 gap-3">
-            <div className="rounded-lg border border-slate-300 p-4">
-              <p className="text-[9px] font-bold uppercase tracking-wider text-slate-500">
+        {/* ============================================================
+            OVERALL RESULT SUMMARY
+            ============================================================ */}
+
+        <section className="report-card-section px-7 pt-4">
+          <h3 className="section-title mb-2 text-[10px] font-black uppercase">
+            Overall Result
+          </h3>
+
+          <div className="grid grid-cols-3 border-2 border-slate-900">
+            <div className="border-r border-slate-900 px-4 py-3 text-center">
+              <p className="text-[8px] font-bold uppercase tracking-wider text-slate-500">
                 Overall Percentage
               </p>
-
-              <p className="mt-2 text-2xl font-black">
+              <p className="mt-1 text-[20px] font-black">
                 {formatPercent(student.overallPercentage)}
               </p>
             </div>
 
-            <div className="rounded-lg border border-slate-300 p-4">
-              <p className="text-[9px] font-bold uppercase tracking-wider text-slate-500">
+            <div className="border-r border-slate-900 px-4 py-3 text-center">
+              <p className="text-[8px] font-bold uppercase tracking-wider text-slate-500">
                 Overall Position
               </p>
-
-              <p className="mt-2 text-2xl font-black">
+              <p className="mt-1 text-[20px] font-black">
                 {ordinal(student.position)}
               </p>
             </div>
 
-            <div className="rounded-lg border border-slate-300 p-4">
-              <p className="text-[9px] font-bold uppercase tracking-wider text-slate-500">
-                Overall Grade
+            <div className="px-4 py-3 text-center">
+              <p className="text-[8px] font-bold uppercase tracking-wider text-slate-500">
+                Subjects Assessed
               </p>
-
-              <p className="mt-2 text-2xl font-black">
-                {subjects.length
-                  ? gradeTone(
-                      subjects
-                        .slice()
-                        .sort(
-                          (a, b) =>
-                            b.finalPercentage - a.finalPercentage,
-                        )[0]?.grade ?? null,
-                    )
-                  : "—"}
+              <p className="mt-1 text-[20px] font-black">
+                {subjects.length}
               </p>
             </div>
           </div>
         </section>
 
-        {/* REMARKS */}
-        <section className="px-8 pb-5">
-          <h2 className="mb-3 text-sm font-black uppercase tracking-wider">
-            Remarks
-          </h2>
+        {/* ============================================================
+            REMARKS
+            ============================================================ */}
 
-          <div className="grid grid-cols-2 gap-4">
-            <div className="avoid-break rounded-lg border border-slate-300 p-4">
-              <p className="text-[9px] font-bold uppercase tracking-wider text-slate-500">
+        <section className="report-card-section px-7 pt-4">
+          <h3 className="section-title mb-2 text-[10px] font-black uppercase">
+            Official Remarks
+          </h3>
+
+          <div className="grid grid-cols-2 gap-3">
+            <div
+              className="min-h-[88px] p-3"
+              style={borderStyle}
+            >
+              <p className="text-[8px] font-bold uppercase tracking-wider text-slate-500">
                 Class Teacher&apos;s Remark
               </p>
 
-              <p className="mt-3 min-h-[58px] whitespace-pre-wrap text-sm leading-6">
+              <p className="mt-3 whitespace-pre-wrap text-[10px] leading-5">
                 {remarks.classTeacher || "No remark entered."}
               </p>
             </div>
 
-            <div className="avoid-break rounded-lg border border-slate-300 p-4">
-              <p className="text-[9px] font-bold uppercase tracking-wider text-slate-500">
+            <div
+              className="min-h-[88px] p-3"
+              style={borderStyle}
+            >
+              <p className="text-[8px] font-bold uppercase tracking-wider text-slate-500">
                 Headteacher&apos;s Remark
               </p>
 
-              <p className="mt-3 min-h-[58px] whitespace-pre-wrap text-sm leading-6">
+              <p className="mt-3 whitespace-pre-wrap text-[10px] leading-5">
                 {remarks.headteacher || "No remark entered."}
               </p>
             </div>
           </div>
         </section>
 
-        {/* PROMOTION */}
-        <section className="px-8 pb-6">
-          <div className="flex items-center justify-between rounded-lg border-2 border-slate-900 px-5 py-4">
-            <div>
-              <p className="text-[9px] font-bold uppercase tracking-wider text-slate-500">
-                Promotion Status
+        {/* ============================================================
+            PROMOTION
+            ============================================================ */}
+
+        <section className="report-card-section px-7 pt-4">
+          <div className="grid grid-cols-[1fr_auto] border-2 border-slate-900">
+            <div className="px-4 py-3">
+              <p className="text-[8px] font-bold uppercase tracking-[0.14em] text-slate-500">
+                Promotion / Progression Status
               </p>
 
-              <p className="mt-1 text-sm font-black uppercase">
+              <p className="mt-1 text-[12px] font-black uppercase">
                 {promotionStatus || "Pending school decision"}
               </p>
             </div>
 
-            <div className="text-right">
-              <p className="text-[9px] font-bold uppercase tracking-wider text-slate-500">
+            <div className="border-l border-slate-900 px-4 py-3 text-right">
+              <p className="text-[8px] font-bold uppercase tracking-[0.14em] text-slate-500">
                 Result Published
               </p>
 
-              <p className="mt-1 text-xs font-semibold">
+              <p className="mt-1 text-[10px] font-bold">
                 {formatDate(publication.publishedAt)}
               </p>
             </div>
           </div>
         </section>
 
-        {/* SIGNATURES */}
-        <section className="px-8 pb-6">
-          <div className="grid grid-cols-2 gap-12">
-            <div className="avoid-break">
-              <div className="h-10 border-b border-slate-900" />
+        {/* ============================================================
+            SIGNATURES
+            ============================================================ */}
 
-              <p className="mt-2 text-xs font-bold">
+        <section className="report-card-section px-7 pb-4 pt-5">
+          <div className="grid grid-cols-2 gap-16">
+            <div>
+              <div className="signature-line h-8" />
+
+              <p className="mt-1 text-[9px] font-black uppercase">
                 Class Teacher
               </p>
 
-              <p className="mt-1 text-[10px] text-slate-500">
-                {formatDate(signatures?.classTeacherSignedAt)}
+              <p className="mt-1 text-[8px] text-slate-500">
+                Date: {formatDate(signatures?.classTeacherSignedAt)}
               </p>
             </div>
 
-            <div className="avoid-break">
-              <div className="h-10 border-b border-slate-900" />
+            <div>
+              <div className="signature-line h-8" />
 
-              <p className="mt-2 text-xs font-bold">
+              <p className="mt-1 text-[9px] font-black uppercase">
                 Headteacher
               </p>
 
-              <p className="mt-1 text-[10px] text-slate-500">
-                {formatDate(signatures?.headteacherSignedAt)}
+              <p className="mt-1 text-[8px] text-slate-500">
+                Date: {formatDate(signatures?.headteacherSignedAt)}
               </p>
             </div>
           </div>
         </section>
 
-        {/* FOOTER */}
-        <footer className="border-t border-slate-300 bg-slate-50 px-8 py-3 text-center text-[9px] text-slate-500">
-          <p>
-            This report card represents the official published academic
-            record for the stated academic period.
+        {/* ============================================================
+            OFFICIAL FOOTER
+            ============================================================ */}
+
+        <footer className="report-card-footer border-t-2 border-slate-900 bg-slate-50 px-7 py-3 text-center">
+          <p className="text-[8px] leading-4 text-slate-600">
+            This report card is an official academic record for the
+            academic period stated above.
           </p>
 
-          <p className="mt-1 font-semibold">
-            Generated from Heisen SchoolOS
+          <p className="mt-1 text-[7px] font-bold uppercase tracking-[0.16em] text-slate-500">
+            Generated by Heisen SchoolOS
           </p>
         </footer>
       </div>
