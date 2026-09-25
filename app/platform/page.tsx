@@ -38,25 +38,25 @@ export default async function PlatformPage() {
 
   return (
     <main className="mx-auto max-w-7xl px-4 py-7 sm:px-6 lg:px-8">
-      <section className="relative overflow-hidden rounded-3xl bg-[#111111] px-6 py-8 text-white shadow-2xl shadow-slate-300/40 sm:px-8">
-        <div className="absolute -right-16 -top-24 h-64 w-64 rounded-full bg-violet-500/20 blur-3xl" />
-        <div className="absolute bottom-[-5rem] right-1/3 h-48 w-48 rounded-full bg-cyan-400/10 blur-3xl" />
+      <section className="relative overflow-hidden rounded-3xl border border-[#dfe8e2] bg-[#f3faf5] px-6 py-8 text-slate-900 shadow-sm sm:px-8">
+        <div className="absolute -right-16 -top-24 h-64 w-64 rounded-full bg-[#dff5e3] blur-3xl" />
+        <div className="absolute bottom-[-5rem] right-1/3 h-48 w-48 rounded-full bg-[#edf7f0] blur-3xl" />
         <div className="relative flex flex-wrap items-end justify-between gap-6">
           <div>
-            <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.08] px-3 py-1.5 text-xs font-semibold text-cyan-200">
+            <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-[#cfe4d5] bg-[#edf7f0] px-3 py-1.5 text-xs font-semibold text-[#005530]">
               <Sparkles className="h-3.5 w-3.5" /> Platform command center
             </div>
-            <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">Every school. One clear view.</h1>
-            <p className="mt-3 max-w-xl text-sm leading-6 text-slate-300">Operate your education network with secure tenant isolation, live school switching and platform-wide oversight.</p>
+            <h1 className="text-3xl font-bold tracking-tight text-slate-950 sm:text-4xl">Every school. One clear view.</h1>
+            <p className="mt-3 max-w-xl text-sm leading-6 text-slate-600">Operate your education network with secure tenant isolation, live school switching and platform-wide oversight.</p>
           </div>
           <div className="flex flex-wrap gap-2">
-            <Link href="/platform/reports" className="inline-flex items-center gap-2 rounded-xl border border-white/20 px-4 py-2.5 text-sm font-bold text-white transition hover:bg-white/10">
+            <Link href="/platform/reports" className="inline-flex items-center gap-2 rounded-xl border border-[#dfe8e2] bg-white px-4 py-2.5 text-sm font-bold text-slate-800 transition hover:bg-[#edf7f0]">
               <Activity className="h-4 w-4" /> Reports
             </Link>
-            <Link href="/platform/memberships" className="inline-flex items-center gap-2 rounded-xl border border-white/20 px-4 py-2.5 text-sm font-bold text-white transition hover:bg-white/10">
+            <Link href="/platform/memberships" className="inline-flex items-center gap-2 rounded-xl border border-[#dfe8e2] bg-white px-4 py-2.5 text-sm font-bold text-slate-800 transition hover:bg-[#edf7f0]">
               Manage access
             </Link>
-            <Link href="/platform/schools/new" className="inline-flex items-center gap-2 rounded-xl bg-white px-4 py-2.5 text-sm font-bold text-slate-950 shadow-lg transition hover:bg-cyan-50">
+            <Link href="/platform/schools/new" className="inline-flex items-center gap-2 rounded-xl bg-[#0a5d3a] px-4 py-2.5 text-sm font-bold text-white shadow-sm transition hover:bg-[#005530]">
               <Building2 className="h-4 w-4" /> Add school <ArrowUpRight className="h-4 w-4" />
             </Link>
           </div>
